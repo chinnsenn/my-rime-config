@@ -99,11 +99,11 @@ engine:
     - lua_translator@*moran_pin*panacea_translator
     - history_translator@quick_repeat
   filters:
+    - lua_filter@*moran_ja_filter  # 日語智能排序 + 假名預覽（前置以減少無效遍歷）
     - lua_filter@*moran_charset_filter
     - lua_filter@*moran_pin*pin_filter
     - lua_filter@*moran_reorder_filter
     - lua_filter@*moran_ijrq_filter
-    - lua_filter@*moran_ja_filter  # 日語智能排序 + 假名預覽
     - lua_filter@*moran_hint_filter
     - simplifier@emoji
     - simplifier@chaifen

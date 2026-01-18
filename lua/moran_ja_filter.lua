@@ -5,6 +5,9 @@
 -- [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
 -- ===================================================================
 
+-- ===============================================
+-- 罗马字 → 假名 映射表
+-- ===============================================
 local romaji_to_kana = {
     ["a"] = "あ", ["i"] = "い", ["u"] = "う", ["e"] = "え", ["o"] = "お",
     ["ka"] = "か", ["ki"] = "き", ["ku"] = "く", ["ke"] = "け", ["ko"] = "こ",
@@ -41,16 +44,19 @@ local romaji_to_kana = {
     ["fa"] = "ふぁ", ["fi"] = "ふぃ", ["fe"] = "ふぇ", ["fo"] = "ふぉ",
 }
 
-local ja_patterns = {
-    "shi", "chi", "tsu", "fu",
-    "kya", "kyu", "kyo", "sha", "shu", "sho",
-    "cha", "chu", "cho", "nya", "nyu", "nyo",
-    "hya", "hyu", "hyo", "mya", "myu", "myo",
-    "rya", "ryu", "ryo", "gya", "gyu", "gyo",
-    "jya", "jyu", "jyo", "bya", "byu", "byo",
-    "pya", "pyu", "pyo",
-    "nn", "xtsu", "xtu",
+-- ===============================================
+-- 缓存结构：避免相同输入重复计算
+-- ===============================================
+local cache = {
+    input = "",
+    is_romaji = false,
+    kana_preview = "",
 }
+
+-- ===============================================
+-- 日语模式检测：合并 pattern 减少循环
+-- ===============================================
+local JA_PATTERN = "shi|chi|tsu|fu|[kstnhmyrwgzjdbp]y[auo]|nn|xtsu|xtu|ltu"
 
 local function is_japanese_text(text)
     if not text or #text == 0 then return false end
@@ -62,8 +68,33 @@ local function is_japanese_text(text)
     return false
 end
 
+local function is_romaji_pattern(input)
+    if not input or #input < 3 then return false end
+    if input == cache.input then return cache.is_romaji end
+
+    local lower = input:lower()
+
+    for pattern in JA_PATTERN:gmatch("[^|]+") do
+        if lower:find(pattern, 1, true) then
+            return true
+        end
+    end
+
+    local cv_count = 0
+    for _ in lower:gmatch("[kstcnhmyrwgzjdbp][aiueo]") do
+        cv_count = cv_count + 1
+    end
+
+    return cv_count >= 3
+end
+
+-- ===============================================
+-- 罗马字 → 假名预览（带缓存）
+-- ===============================================
 local function romaji_to_kana_preview(input)
     if not input or #input == 0 then return "" end
+    if input == cache.input then return cache.kana_preview end
+
     local result = ""
     local i = 1
     local len = #input
@@ -97,24 +128,20 @@ local function romaji_to_kana_preview(input)
     return result
 end
 
-local function is_romaji_pattern(input)
-    if not input or #input < 3 then return false end
-    local lower = input:lower()
-
-    for _, p in ipairs(ja_patterns) do
-        if lower:find(p, 1, true) then
-            return true
-        end
+-- ===============================================
+-- 更新缓存
+-- ===============================================
+local function update_cache(input)
+    if input ~= cache.input then
+        cache.input = input
+        cache.is_romaji = is_romaji_pattern(input)
+        cache.kana_preview = romaji_to_kana_preview(input)
     end
-
-    local cv_count = 0
-    for _ in lower:gmatch("[kstcnhmyrwgzjdbp][aiueo]") do
-        cv_count = cv_count + 1
-    end
-
-    return cv_count >= 3
 end
 
+-- ===============================================
+-- Filter 生命周期
+-- ===============================================
 local function init(env)
     env.default_position = 2
     local config = env.engine.schema.config
@@ -127,13 +154,22 @@ local function init(env)
 end
 
 local function fini(env)
+    cache.input = ""
+    cache.is_romaji = false
+    cache.kana_preview = ""
 end
 
+-- ===============================================
+-- 核心过滤逻辑
+-- ===============================================
 local function filter(input, env)
     local context = env.engine.context
     local input_text = context.input or ""
-    local is_romaji = is_romaji_pattern(input_text)
-    local kana_preview = romaji_to_kana_preview(input_text)
+
+    update_cache(input_text)
+
+    local is_romaji = cache.is_romaji
+    local kana_preview = cache.kana_preview
 
     local chinese_candidates = {}
     local japanese_candidates = {}
