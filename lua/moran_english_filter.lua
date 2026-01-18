@@ -105,27 +105,36 @@ function Module.func(t_input, env)
       return
    end
 
-   -- If input is non-proper, do nothing.
    local input = segmentation.input:sub(seg._start + 1, seg._end + 1)
-   if not str_is_proper(input) then
-      moran.yield_all(iter)
-      return
-   end
-
-   -- Proper (non-trivial) input means we need to fix non-proper candidates.
+   local input_is_proper = str_is_proper(input)
+   
+   local chinese_cands = {}
+   local english_cands = {}
+   
    for c in iter do
-      if not_filterable(c.text) or not str_is_english_word(c.text) then
-         yield(c)
-      elseif not str_is_proper(c.text) then
-         -- c is fixable.
-         local fixed_text = fix_case(c.text, input)
-         yield(ShadowCandidate(c, "english", fixed_text, "", true))
-      else
-         -- c is proper. It cannot be changed.
-         if match_case(c.text, input) then
-            yield(c)
+      if not_filterable(c.text) then
+         table.insert(chinese_cands, c)
+      elseif str_is_english_word(c.text) then
+         if input_is_proper and not str_is_proper(c.text) then
+            local fixed_text = fix_case(c.text, input)
+            table.insert(english_cands, ShadowCandidate(c, "english", fixed_text, "", true))
+         elseif input_is_proper and str_is_proper(c.text) then
+            if match_case(c.text, input) then
+               table.insert(english_cands, c)
+            end
+         else
+            table.insert(english_cands, c)
          end
+      else
+         table.insert(chinese_cands, c)
       end
+   end
+   
+   for _, c in ipairs(chinese_cands) do
+      yield(c)
+   end
+   for _, c in ipairs(english_cands) do
+      yield(c)
    end
 end
 
