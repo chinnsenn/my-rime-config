@@ -166,6 +166,14 @@ local function filter(input, env)
     local context = env.engine.context
     local input_text = context.input or ""
 
+    -- 早期退出：输入过短，不可能产生日语候选
+    if #input_text < 2 then
+        for cand in input:iter() do
+            yield(cand)
+        end
+        return
+    end
+
     update_cache(input_text)
 
     local is_romaji = cache.is_romaji
@@ -173,11 +181,13 @@ local function filter(input, env)
 
     local chinese_candidates = {}
     local japanese_candidates = {}
+    local has_japanese = false
 
     for cand in input:iter() do
         local dominated_by_ja = is_japanese_text(cand.text)
 
         if dominated_by_ja then
+            has_japanese = true
             local new_comment = cand.comment or ""
             if kana_preview ~= "" and kana_preview ~= cand.text then
                 new_comment = "[" .. kana_preview .. "]"
@@ -189,6 +199,14 @@ local function filter(input, env)
         else
             table.insert(chinese_candidates, cand)
         end
+    end
+
+    -- 早期退出：无日语候选，直接输出中文
+    if not has_japanese then
+        for _, cand in ipairs(chinese_candidates) do
+            yield(cand)
+        end
+        return
     end
 
     if is_romaji then
