@@ -23,6 +23,8 @@ patch:
       - { when: always, accept: Control+Shift+grave, select: .prev }
       - { when: always, accept: Control+Shift+4, toggle: traditionalization }
       - { when: always, accept: Shift+space, toggle: full_shape }
+      - { when: has_menu, accept: comma, send: Page_Up }
+      - { when: has_menu, accept: period, send: Page_Down }
 
   # ===============================================
   # Switcher 方案切换器设置
