@@ -1,0 +1,375 @@
+# Rime schema
+# encoding: utf-8
+# ===================================================================
+# [INPUT]:  依赖 moran.schema.yaml, jaroomaji 词典, moran Lua 模块
+# [OUTPUT]: 对外提供 魔然+日语 混合输入方案
+# [POS]:    独立方案文件，与 moran/jaroomaji 并列
+# [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
+# ===================================================================
+
+schema:
+  schema_id: moran_ja_hybrid
+  name: 魔然·日混
+  version: "1.0"
+  author:
+    - 自然碼發明人：周志農
+    - 魔然方案製作：ksqsf
+    - 日語混合：Antigravity
+  description: |
+    魔然 + jaroomaji 混合輸入方案
+    中日文候選同時顯示，智能排序
+    - 輸入時同時獲得中文和日語候選
+    - 日語候選顯示假名預覽 [にほん]
+    - 智能檢測日語模式，自動調整優先級
+  dependencies:
+    - moran_fixed
+    - moran_sentence
+    - moran_reverse
+    - moran_charset
+    - moran_english
+    - jaroomaji
+    - stroke
+    - tiger
+    - cangjie5
+    - bopomofo
+    - zrlf
+
+switches:
+  - name: ascii_mode
+    states: [中文, 西文]
+  - name: full_shape
+    states: [半角, 全角]
+  - name: traditionalization
+    states: [汉字, 漢字]
+  - name: ascii_punct
+    states: [。，, ．，]
+  - name: extended_charset
+    states: [通用, 增廣]
+  - name: inflexible
+    states: [動詞, 固詞]
+  - name: emoji
+    states: [ 🈚, 🈶 ]
+  - name: chaifen
+    states: [ 不拆, 扌斥 ]
+  - name: pinyinhint
+    states: [ 🔇, 🔊 ]
+  - name: unicode_comment
+    states: [ U關, U開 ]
+  - options: [ std_opencc, std_tw, std_hk, std_dzing ]
+    reset: 0
+    states: [ 通, 臺, 港, 寍 ]
+
+engine:
+  processors:
+    - key_binder
+    - lua_processor@*moran_pin*pin_processor
+    - lua_processor@*moran_processor
+    - ascii_composer
+    - recognizer
+    - speller
+    - punctuator
+    - selector
+    - navigator
+    - express_editor
+  segmentors:
+    - ascii_segmentor
+    - matcher
+    - matcher@recognizer_emoji
+    - matcher@recognizer_secondary
+    - affix_segmentor@japanese_o
+    - abc_segmentor
+    - punct_segmentor
+    - fallback_segmentor
+  translators:
+    - punct_translator
+    - reverse_lookup_translator@reverse_tick
+    - reverse_lookup_translator@reverse_universal
+    - reverse_lookup_translator@reverse_tiger
+    - reverse_lookup_translator@reverse_stroke
+    - reverse_lookup_translator@reverse_cangjie5
+    - reverse_lookup_translator@reverse_zrlf
+    - reverse_lookup_translator@reverse_bopomofo
+    - table_translator@custom_phrase
+    - table_translator@english
+    - script_translator@jaroomaji_translator  # 日語混輸
+    - lua_translator@*moran_express_translator@with_reorder
+    - lua_translator@*moran_shijian
+    - lua_translator@*moran_number
+    - lua_translator@*moran_unicode
+    - lua_translator@*moran_pin*panacea_translator
+    - history_translator@quick_repeat
+  filters:
+    - lua_filter@*moran_charset_filter
+    - lua_filter@*moran_pin*pin_filter
+    - lua_filter@*moran_reorder_filter
+    - lua_filter@*moran_ijrq_filter
+    - lua_filter@*moran_ja_filter  # 日語智能排序 + 假名預覽
+    - lua_filter@*moran_hint_filter
+    - simplifier@emoji
+    - simplifier@chaifen
+    - simplifier@pinyinhint
+    - simplifier@std_hk
+    - simplifier@std_tw
+    - simplifier@std_dzing
+    - simplifier@simplifier
+    - lua_filter@*moran_charset_comment_filter
+    - lua_filter@*moran_unicode_display_filter
+    - lua_filter@*moran_english_filter
+    - uniquifier
+
+speller:
+  alphabet: abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ/;-
+  delimiter: " '"
+  auto_select: true
+  auto_select_pattern: ^;(\w+|;)
+  algebra:
+    __patch:
+      - moran:/algebra/user_force_top?
+      - moran:/algebra/user_sentence_top?
+      - moran:/algebra/generate_code
+      - moran:/algebra/user_sentence_bottom?
+      - moran:/algebra/user_force_bottom?
+
+smart:
+  dictionary: moran.extended
+  prism: moran
+  initial_quality: 5
+  max_homophones: 7
+  spelling_hints: 3
+  contextual_suggestions: true
+  preedit_format:
+    - xform/([a-z][a-z][a-z][a-z])o/$1°/
+  core_word_length: 4
+  max_word_length: 10
+
+fixed:
+  dictionary: moran_fixed_simp
+  initial_quality: 100
+  enable_completion: false
+  enable_sentence: false
+  enable_user_dict: false
+  enable_encoder: false
+  encode_commit_history: true
+
+custom_phrase:
+  dictionary: ""
+  user_dict: moran_custom_phrases
+  db_class: stabledb
+  enable_completion: false
+  enable_sentence: false
+  initial_quality: 1000
+
+english:
+  tag: english
+  dictionary: moran_english
+  prism: moran_english
+  enable_completion: true
+  enable_sentence: false
+  enable_user_dict: true
+  initial_quality: 1
+  enable_encoder: false
+  encode_commit_history: false
+  comment_format:
+    - xform/.*//
+
+# 日語翻譯器配置
+jaroomaji_translator:
+  dictionary: jaroomaji
+  enable_completion: true
+  enable_sentence: true
+  enable_user_dict: true
+  initial_quality: 0.3
+  enable_encoder: false
+  encode_commit_history: false
+
+quick_repeat:
+  input: ";d"
+  size: 1
+  initial_quality: 0
+
+simplifier:
+  option_name: traditionalization
+  opencc_config: s2t.json
+  tags: [abc, number]
+
+chaifen:
+  option_name: chaifen
+  opencc_config: moran_chaifen.json
+  tips: char
+  show_in_comment: true
+  comment_format:
+    - "xform/-/ /"
+    - "xform/〕〔/｜/"
+
+pinyinhint:
+  option_name: pinyinhint
+  opencc_config: moran_pinyinhint.json
+  tips: char
+  show_in_comment: true
+  comment_format:
+    __include: :/chaifen/comment_format
+
+emoji:
+  opencc_config: moran_emoji.json
+  option_name: emoji
+  tips: none
+  tags: [has_emoji]
+
+std_hk:
+  opencc_config: t2hk.json
+  option_name: std_hk
+  tags: [abc]
+
+std_tw:
+  opencc_config: t2tw.json
+  option_name: std_tw
+  tags: [abc]
+
+std_dzing:
+  opencc_config: moran_dzing.json
+  option_name: std_dzing
+  tips: all
+  tags: [abc]
+
+reverse_format:
+  target: smart
+  comment_format:
+    - xform/(\w\w);(\w\w)/$1[$2]/
+  preedit_format:
+    - xform/^o(lf|bh|cj|vy|hm)//
+
+reverse_tiger:
+  tag: reverse_tiger
+  dictionary: tiger
+  enable_completion: true
+  prefix: "ohm"
+  tips: 〔虎碼〕
+  __include: reverse_format
+
+reverse_universal:
+  tag: reverse_universal
+  dictionary: moran.chars
+  tips: 〔通配〕
+  __include: reverse_format
+
+reverse_stroke:
+  tag: reverse_stroke
+  dictionary: stroke
+  prefix: "obh"
+  enable_completion: true
+  tips: 〔橫h豎s撇p捺n折z〕
+  __include: reverse_format
+
+reverse_cangjie5:
+  tag: reverse_cangjie5
+  dictionary: cangjie5
+  prefix: "ocj"
+  enable_completion: true
+  tips: 〔倉頡五代〕
+  __include: reverse_format
+
+reverse_zrlf:
+  tag: reverse_zrlf
+  dictionary: zrlf
+  prefix: "olf"
+  enable_completion: true
+  tips: 〔兩分〕
+  __include: reverse_format
+
+reverse_bopomofo:
+  tag: reverse_bopomofo
+  dictionary: terra_pinyin
+  prism: bopomofo
+  prefix: "ovy"
+  enable_completion: true
+  tips: 〔注音符號〕
+  comment_format:
+    - xform/(\w\w);(\w\w)/$1[$2]/
+  preedit_format:
+    - xform/^o(lf|bh|cj|vy)//
+    - "xlit|1qaz2wsxedcrfv5tgbyhnujm8ik,9ol.0p;/- 6347'|ㄅㄆㄇㄈㄉㄊㄋㄌㄍㄎㄏㄐㄑㄒㄓㄔㄕㄖㄗㄘㄙㄧㄨㄩㄚㄛㄜㄝㄞㄟㄠㄡㄢㄣㄤㄥㄦˉˊˇˋ˙ |"
+  __include: reverse_format
+
+reverse_tick:
+  __include: reverse_zrlf
+  tag: reverse_tick
+  prefix: "`"
+
+punctuator:
+  import_preset: symbols
+
+key_binder:
+  import_preset: default
+  custom_bindings:
+    __append: []
+  bindings:
+    __patch:
+      - :/key_binder/custom_bindings?
+      - moran:/key_bindings/moran_tab
+      - moran:/key_bindings/moran_switches
+      - moran:/key_bindings/moran_keypad
+      - moran:/key_bindings/moran_toggle_inflexible
+
+recognizer:
+  import_preset: default
+  patterns:
+    unicode: "^U[a-fA-F0-9]+"
+    number: "^S[0-9\\.]+"
+    shijian: "^N[0-9]+"
+    uppercase: "[A-Z][-_+.'A-Za-z]*$"
+    punct: "^/([0-9]0?|[A-Za-z]+)$"
+    reverse_universal: "(^(`[a-z`]+))|(^([a-z]{2}(`[a-z`]?|[a-z`]`))|^([a-z]{4}`))"
+    reverse_tick: "(^`$)|(^`[a-zA-Z]+$)"
+    reverse_tiger: "^ohm[a-z]+$"
+    reverse_stroke: "^obh[A-Za-z]*$"
+    reverse_cangjie5: "^ocj[A-Za-z]*$"
+    reverse_zrlf: "^olf[A-Za-z]*$"
+    reverse_bopomofo: '^ovy[A-Za-z0-9,.;/\-]*$'
+    japanese_o: "(^ojp[a-z]*$)"
+
+recognizer_emoji:
+  patterns:
+    has_emoji: "(^[a-np-z][a-z/]*$)|(^[a-z]$)|(^ou[a-z/]*$)"
+
+recognizer_secondary:
+  patterns:
+    english: "(^[A-Za-z]{4}[A-Za-z]*)|(^[A-Z][A-Za-z]*)|(^[a-z][A-Z][a-zA-Z]*)|(^[a-z][a-z][A-Z][a-zA-Z]*)"
+
+moran:
+  quick_code_indicator: "⚡️"
+  quick_code_in_sentence_making: true
+  enable_word_filter: false
+  word_filter_match_indicator: {}
+  ijrq:
+    enable: true
+    show_hint: true
+    enable_word: false
+    enable_word_defer: 1
+    enable_word_delay: 0
+  enable_aux_hint: false
+  enable_quick_code_hint: false
+  quick_code_hint_indicator: null
+  quick_code_hint_skip_chars: false
+  inject_fixed_chars: false
+  inject_fixed_words: true
+  inject_prioritize: "any"
+  pin:
+    enable: true
+    indicator: "📌"
+    panacea:
+      prompt: "〔加詞〕"
+      infix: "//"
+      freestyle: false
+  charset: both
+  shorthands: false
+
+# 日語混輸配置
+moran_ja:
+  # 日語候選在普通模式下的位置（第2位起）
+  default_position: 2
+  # 日語模式指示符
+  indicator: "🇯🇵"
+
+__include: moran:/octagram/enable_for_sentence
+
+__patch: moran.custom:/patch?

@@ -1,0 +1,62 @@
+# ===================================================================
+# [INPUT]:  依赖 Rime 核心的 default.yaml 默认配置
+# [OUTPUT]: 对外提供全局按键绑定、方案列表、热键定义
+# [POS]:    Rime 用户目录的全局配置覆盖层，被所有输入方案共享
+# [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
+# ===================================================================
+
+patch:
+  # ===============================================
+  # 方案列表 - F4 切换输入方案选单
+  # ===============================================
+  schema_list:
+    - schema: moran # 魔然·整句模式
+    - schema: moran_ja_hybrid # 魔然+日语混合输入
+    - schema: jaroomaji # 日本語ローマ字入力
+
+  # ===============================================
+  # 全局快捷键绑定
+  # ===============================================
+  key_binder:
+    bindings:
+      - { when: always, accept: Control+grave, select: .next }
+      - { when: always, accept: Control+Shift+grave, select: .prev }
+      - { when: always, accept: Control+Shift+4, toggle: traditionalization }
+      - { when: always, accept: Shift+space, toggle: full_shape }
+
+  # ===============================================
+  # Switcher 方案切换器设置
+  # ===============================================
+  switcher:
+    caption: 「方案選單」
+    hotkeys:
+      - F4 # F4 键唤起方案选单
+      - Control+grave # Control+` 切换到下一个方案
+      - Control+Shift+grave # Control+Shift+` 切换到上一个方案
+    save_options:
+      - full_shape
+      - ascii_punct
+      - traditionalization
+      - emoji
+    fold_options: true # 折叠选项到二级菜单
+    abbreviate_options: false # 不缩写选项名称
+    option_list_separator: "／" # 选项列表分隔符
+
+  # ===============================================
+  # ASCII 模式切换设置
+  # ===============================================
+  ascii_composer:
+    good_old_caps_lock: true
+    switch_key:
+      Shift_L: inline_ascii # 左 Shift: 临时输入英文
+      Shift_R: commit_text # 右 Shift: 提交并切换英文模式
+      Control_L: noop
+      Control_R: noop
+      Caps_Lock: clear
+      Eisu_toggle: clear
+
+  # ===============================================
+  # 菜单设置
+  # ===============================================
+  menu:
+    page_size: 10 # 每页候选数
