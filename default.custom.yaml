@@ -21,8 +21,8 @@ patch:
     bindings:
       - { when: always, accept: Control+grave, select: .next }
       - { when: always, accept: Control+Shift+grave, select: .prev }
+      - { when: always, accept: Control+Shift+3, toggle: full_shape }
       - { when: always, accept: Control+Shift+4, toggle: traditionalization }
-      - { when: always, accept: Shift+space, toggle: full_shape }
       - { when: has_menu, accept: comma, send: Page_Up }
       - { when: has_menu, accept: period, send: Page_Down }
       - { when: composing, accept: Return, send: Shift+Return }
