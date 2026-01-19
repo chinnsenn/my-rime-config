@@ -48,16 +48,16 @@ switches:
   - name: inflexible
     states: [動詞, 固詞]
   - name: emoji
-    states: [ 🈚, 🈶 ]
+    states: [🈚, 🈶]
   - name: chaifen
-    states: [ 不拆, 扌斥 ]
+    states: [不拆, 扌斥]
   - name: pinyinhint
-    states: [ 🔇, 🔊 ]
+    states: [🔇, 🔊]
   - name: unicode_comment
-    states: [ U關, U開 ]
-  - options: [ std_opencc, std_tw, std_hk, std_dzing ]
+    states: [U關, U開]
+  - options: [std_opencc, std_tw, std_hk, std_dzing]
     reset: 0
-    states: [ 通, 臺, 港, 寍 ]
+    states: [通, 臺, 港, 寍]
 
 engine:
   processors:
@@ -92,7 +92,7 @@ engine:
     - reverse_lookup_translator@reverse_bopomofo
     - table_translator@custom_phrase
     - table_translator@english
-    - script_translator@jaroomaji_translator  # 日語混輸
+    - script_translator@jaroomaji_translator # 日語混輸
     - lua_translator@*moran_express_translator@with_reorder
     - lua_translator@*moran_shijian
     - lua_translator@*moran_number
@@ -100,7 +100,7 @@ engine:
     - lua_translator@*moran_pin*panacea_translator
     - history_translator@quick_repeat
   filters:
-    - lua_filter@*moran_ja_filter  # 日語智能排序 + 假名預覽（前置以減少無效遍歷）
+    - lua_filter@*moran_ja_filter # 日語智能排序 + 假名預覽（前置以減少無效遍歷）
     - lua_filter@*moran_charset_filter
     - lua_filter@*moran_pin*pin_filter
     - lua_filter@*moran_reorder_filter
@@ -588,6 +588,12 @@ reverse_tick:
 
 punctuator:
   import_preset: symbols
+  half_shape:
+    ",": ["，", "、"]
+    ".": { commit: "。" }
+    "/": ["/", "・", "…", "／"]
+    "?": { commit: "？" }
+    "!": { commit: "！" }
 
 key_binder:
   import_preset: default
