@@ -177,6 +177,7 @@ english:
 jaroomaji_translator:
   dictionary: jaroomaji
   enable_completion: true
+  prism: jaroomaji
   enable_sentence: true
   enable_user_dict: true
   initial_quality: 1.0

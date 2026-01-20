@@ -58,14 +58,34 @@ local cache = {
 -- ===============================================
 local JA_PATTERN = "shi|chi|tsu|fu|[kstnhmyrwgzjdbp]y[auo]|nn|xtsu|xtu|ltu"
 
-local function is_japanese_text(text)
+-- ===============================================
+-- 日语候选判定：优先检测来源，其次检测假名
+-- ===============================================
+local function has_kana(text)
     if not text or #text == 0 then return false end
     for _, codepoint in utf8.codes(text) do
+        -- 平假名 (U+3040-U+309F) 或 片假名 (U+30A0-U+30FF)
         if (codepoint >= 0x3040 and codepoint <= 0x30FF) then
             return true
         end
     end
     return false
+end
+
+local function is_from_jaroomaji(cand)
+    -- jaroomaji_translator 的 preedit_format 会将罗马字转为假名
+    -- 检测 preedit 中是否包含假名来判断来源
+    local preedit = cand.preedit or ""
+    return has_kana(preedit)
+end
+
+local function is_japanese_candidate(cand)
+    -- 1. 来源检测：来自 jaroomaji 翻译器
+    if is_from_jaroomaji(cand) then
+        return true
+    end
+    -- 2. 内容检测：包含假名字符
+    return has_kana(cand.text)
 end
 
 local function is_romaji_pattern(input)
@@ -184,9 +204,9 @@ local function filter(input, env)
     local has_japanese = false
 
     for cand in input:iter() do
-        local dominated_by_ja = is_japanese_text(cand.text)
+        local is_ja = is_japanese_candidate(cand)
 
-        if dominated_by_ja then
+        if is_ja then
             has_japanese = true
             local new_comment = cand.comment or ""
             if kana_preview ~= "" and kana_preview ~= cand.text then
