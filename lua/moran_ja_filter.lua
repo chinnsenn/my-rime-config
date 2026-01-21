@@ -6,6 +6,17 @@
 -- ===================================================================
 
 -- ===============================================
+-- 性能优化：缓存全局函数引用
+-- ===============================================
+local utf8_codes = utf8.codes
+local string_sub = string.sub
+local string_lower = string.lower
+local string_find = string.find
+local string_match = string.match
+local table_concat = table.concat
+local ipairs = ipairs
+
+-- ===============================================
 -- 罗马字 → 假名 映射表
 -- ===============================================
 local romaji_to_kana = {
@@ -151,16 +162,23 @@ local cache = {
 }
 
 -- ===============================================
--- 日语模式检测：合并 pattern 减少循环
+-- 日语模式检测：预编译模式数组（避免每次 gmatch）
 -- ===============================================
-local JA_PATTERN = "shi|chi|tsu|fu|[kstnhmyrwgzjdbp]y[auo]|nn|xtsu|xtu|ltu"
+local JA_PATTERNS = {
+    "shi", "chi", "tsu", "fu", "nn", "xtsu", "xtu", "ltu",
+}
+-- 拗音模式：辅音 + y + 元音
+local YOUON_CONSONANTS = "kstcnhmyrwgzjdbp"
+local CV_PATTERN = "[kstcnhmyrwgzjdbp][aiueo]"
+-- 促音检测模式
+local SOKUON_PATTERN = "[kstcgzjdbp]"
 
 -- ===============================================
 -- 日语候选判定：优先检测来源，其次检测假名
 -- ===============================================
 local function has_kana(text)
     if not text or #text == 0 then return false end
-    for _, codepoint in utf8.codes(text) do
+    for _, codepoint in utf8_codes(text) do
         -- 平假名 (U+3040-U+309F) 或 片假名 (U+30A0-U+30FF)
         if (codepoint >= 0x3040 and codepoint <= 0x30FF) then
             return true
@@ -190,16 +208,30 @@ local function is_romaji_pattern(input)
     if not input or #input < 3 then return false end
     if input == cache.input then return cache.is_romaji end
 
-    local lower = input:lower()
+    local lower = string_lower(input)
 
-    for pattern in JA_PATTERN:gmatch("[^|]+") do
-        if lower:find(pattern, 1, true) then
+    -- 检查预编译的固定模式
+    for _, pattern in ipairs(JA_PATTERNS) do
+        if string_find(lower, pattern, 1, true) then
             return true
         end
     end
 
+    -- 检查拗音模式：辅音 + y + 元音
+    for i = 1, #lower - 2 do
+        local c1 = string_sub(lower, i, i)
+        local c2 = string_sub(lower, i + 1, i + 1)
+        local c3 = string_sub(lower, i + 2, i + 2)
+        if string_find(YOUON_CONSONANTS, c1, 1, true)
+           and c2 == "y"
+           and (c3 == "a" or c3 == "u" or c3 == "o") then
+            return true
+        end
+    end
+
+    -- CV 计数（辅音+元音组合）
     local cv_count = 0
-    for _ in lower:gmatch("[kstcnhmyrwgzjdbp][aiueo]") do
+    for _ in lower:gmatch(CV_PATTERN) do
         cv_count = cv_count + 1
     end
 
@@ -207,24 +239,27 @@ local function is_romaji_pattern(input)
 end
 
 -- ===============================================
--- 罗马字 → 假名预览（带缓存）
+-- 罗马字 → 假名预览（优化：O(n) 字符串拼接）
 -- ===============================================
 local function romaji_to_kana_preview(input)
     if not input or #input == 0 then return "" end
     if input == cache.input then return cache.kana_preview end
 
-    local result = ""
+    local parts = {}
+    local n = 0
     local i = 1
     local len = #input
-    local lower = input:lower()
+    local lower = string_lower(input)
 
     while i <= len do
         local matched = false
         for l = 4, 1, -1 do
             if i + l - 1 <= len then
-                local substr = lower:sub(i, i + l - 1)
-                if romaji_to_kana[substr] then
-                    result = result .. romaji_to_kana[substr]
+                local substr = string_sub(lower, i, i + l - 1)
+                local kana = romaji_to_kana[substr]
+                if kana then
+                    n = n + 1
+                    parts[n] = kana
                     i = i + l
                     matched = true
                     break
@@ -232,18 +267,21 @@ local function romaji_to_kana_preview(input)
             end
         end
         if not matched then
-            local char = lower:sub(i, i)
-            local next_char = lower:sub(i + 1, i + 1)
-            if i < len and char:match("[kstcgzjdbp]") and next_char == char then
-                result = result .. "っ"
+            local char = string_sub(lower, i, i)
+            local next_char = string_sub(lower, i + 1, i + 1)
+            -- 促音检测：连续相同辅音
+            if i < len and string_match(char, SOKUON_PATTERN) and next_char == char then
+                n = n + 1
+                parts[n] = "っ"
             else
-                result = result .. char
+                n = n + 1
+                parts[n] = char
             end
             i = i + 1
         end
     end
 
-    return result
+    return table_concat(parts)
 end
 
 -- ===============================================
@@ -300,9 +338,9 @@ local function filter(input, env)
     local ja_only_mode = false
     local real_input = input_text
 
-    if #input_text > #ja_only_suffix and input_text:sub(- #ja_only_suffix) == ja_only_suffix then
+    if #input_text > #ja_only_suffix and string_sub(input_text, -#ja_only_suffix) == ja_only_suffix then
         ja_only_mode = true
-        real_input = input_text:sub(1, - #ja_only_suffix - 1)
+        real_input = string_sub(input_text, 1, -#ja_only_suffix - 1)
     end
 
     update_cache(real_input)
@@ -312,6 +350,8 @@ local function filter(input, env)
 
     local chinese_candidates = {}
     local japanese_candidates = {}
+    local cn_n = 0
+    local ja_n = 0
     local has_japanese = false
 
     for cand in input:iter() do
@@ -326,15 +366,18 @@ local function filter(input, env)
 
             local new_cand = Candidate(cand.type, cand.start, cand._end, cand.text, new_comment)
             new_cand.quality = cand.quality
-            table.insert(japanese_candidates, new_cand)
+            ja_n = ja_n + 1
+            japanese_candidates[ja_n] = new_cand
         else
-            table.insert(chinese_candidates, cand)
+            cn_n = cn_n + 1
+            chinese_candidates[cn_n] = cand
         end
     end
 
     if ja_only_mode then
         local suffix_len = #ja_only_suffix
-        for _, cand in ipairs(japanese_candidates) do
+        for i = 1, ja_n do
+            local cand = japanese_candidates[i]
             local extended_cand = Candidate(cand.type, cand.start, cand._end + suffix_len, cand.text, cand.comment)
             extended_cand.quality = cand.quality
             yield(extended_cand)
@@ -343,8 +386,8 @@ local function filter(input, env)
     end
 
     if not has_japanese then
-        for _, cand in ipairs(chinese_candidates) do
-            yield(cand)
+        for i = 1, cn_n do
+            yield(chinese_candidates[i])
         end
         return
     end
@@ -354,11 +397,11 @@ local function filter(input, env)
             yield(chinese_candidates[1])
         end
 
-        for _, cand in ipairs(japanese_candidates) do
-            yield(cand)
+        for i = 1, ja_n do
+            yield(japanese_candidates[i])
         end
 
-        for i = 2, #chinese_candidates do
+        for i = 2, cn_n do
             yield(chinese_candidates[i])
         end
     else
@@ -367,14 +410,14 @@ local function filter(input, env)
         local output_idx = 1
         local default_pos = env.default_position or 2
 
-        while cn_idx <= #chinese_candidates or ja_idx <= #japanese_candidates do
-            if output_idx == default_pos and ja_idx <= #japanese_candidates then
+        while cn_idx <= cn_n or ja_idx <= ja_n do
+            if output_idx == default_pos and ja_idx <= ja_n then
                 yield(japanese_candidates[ja_idx])
                 ja_idx = ja_idx + 1
-            elseif cn_idx <= #chinese_candidates then
+            elseif cn_idx <= cn_n then
                 yield(chinese_candidates[cn_idx])
                 cn_idx = cn_idx + 1
-            elseif ja_idx <= #japanese_candidates then
+            elseif ja_idx <= ja_n then
                 yield(japanese_candidates[ja_idx])
                 ja_idx = ja_idx + 1
             end
