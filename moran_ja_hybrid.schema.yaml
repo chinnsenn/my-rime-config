@@ -92,7 +92,7 @@ engine:
     - reverse_lookup_translator@reverse_bopomofo
     - table_translator@custom_phrase
     - table_translator@english
-    - script_translator@jaroomaji_translator # 日語混輸
+    - lua_translator@*moran_ja_translator # 日語混輸 (包装 jaroomaji, type="jaroomaji")
     - lua_translator@*moran_express_translator@with_reorder
     - lua_translator@*moran_shijian
     - lua_translator@*moran_number

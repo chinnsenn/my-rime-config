@@ -73,10 +73,11 @@ local function has_kana(text)
 end
 
 local function is_from_jaroomaji(cand)
-    -- jaroomaji_translator 的 preedit_format 会将罗马字转为假名
-    -- 检测 preedit 中是否包含假名来判断来源
-    local preedit = cand.preedit or ""
-    return has_kana(preedit)
+    if cand.type == "jaroomaji" then
+        return true
+    end
+    local genuine = cand:get_genuine()
+    return genuine and genuine.type == "jaroomaji"
 end
 
 local function is_japanese_candidate(cand)
