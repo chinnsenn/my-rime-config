@@ -9,39 +9,136 @@
 -- 罗马字 → 假名 映射表
 -- ===============================================
 local romaji_to_kana = {
-    ["a"] = "あ", ["i"] = "い", ["u"] = "う", ["e"] = "え", ["o"] = "お",
-    ["ka"] = "か", ["ki"] = "き", ["ku"] = "く", ["ke"] = "け", ["ko"] = "こ",
-    ["sa"] = "さ", ["shi"] = "し", ["si"] = "し", ["su"] = "す", ["se"] = "せ", ["so"] = "そ",
-    ["ta"] = "た", ["chi"] = "ち", ["ti"] = "ち", ["tsu"] = "つ", ["tu"] = "つ", ["te"] = "て", ["to"] = "と",
-    ["na"] = "な", ["ni"] = "に", ["nu"] = "ぬ", ["ne"] = "ね", ["no"] = "の",
-    ["ha"] = "は", ["hi"] = "ひ", ["fu"] = "ふ", ["hu"] = "ふ", ["he"] = "へ", ["ho"] = "ほ",
-    ["ma"] = "ま", ["mi"] = "み", ["mu"] = "む", ["me"] = "め", ["mo"] = "も",
-    ["ya"] = "や", ["yu"] = "ゆ", ["yo"] = "よ",
-    ["ra"] = "ら", ["ri"] = "り", ["ru"] = "る", ["re"] = "れ", ["ro"] = "ろ",
-    ["wa"] = "わ", ["wo"] = "を", ["n"] = "ん", ["nn"] = "ん",
-    ["ga"] = "が", ["gi"] = "ぎ", ["gu"] = "ぐ", ["ge"] = "げ", ["go"] = "ご",
-    ["za"] = "ざ", ["ji"] = "じ", ["zi"] = "じ", ["zu"] = "ず", ["ze"] = "ぜ", ["zo"] = "ぞ",
-    ["da"] = "だ", ["di"] = "ぢ", ["du"] = "づ", ["de"] = "で", ["do"] = "ど",
-    ["ba"] = "ば", ["bi"] = "び", ["bu"] = "ぶ", ["be"] = "べ", ["bo"] = "ぼ",
-    ["pa"] = "ぱ", ["pi"] = "ぴ", ["pu"] = "ぷ", ["pe"] = "ぺ", ["po"] = "ぽ",
-    ["kya"] = "きゃ", ["kyu"] = "きゅ", ["kyo"] = "きょ",
-    ["sha"] = "しゃ", ["shu"] = "しゅ", ["sho"] = "しょ",
-    ["sya"] = "しゃ", ["syu"] = "しゅ", ["syo"] = "しょ",
-    ["cha"] = "ちゃ", ["chu"] = "ちゅ", ["cho"] = "ちょ",
-    ["tya"] = "ちゃ", ["tyu"] = "ちゅ", ["tyo"] = "ちょ",
-    ["nya"] = "にゃ", ["nyu"] = "にゅ", ["nyo"] = "にょ",
-    ["hya"] = "ひゃ", ["hyu"] = "ひゅ", ["hyo"] = "ひょ",
-    ["mya"] = "みゃ", ["myu"] = "みゅ", ["myo"] = "みょ",
-    ["rya"] = "りゃ", ["ryu"] = "りゅ", ["ryo"] = "りょ",
-    ["gya"] = "ぎゃ", ["gyu"] = "ぎゅ", ["gyo"] = "ぎょ",
-    ["ja"] = "じゃ", ["ju"] = "じゅ", ["jo"] = "じょ",
-    ["jya"] = "じゃ", ["jyu"] = "じゅ", ["jyo"] = "じょ",
-    ["zya"] = "じゃ", ["zyu"] = "じゅ", ["zyo"] = "じょ",
-    ["bya"] = "びゃ", ["byu"] = "びゅ", ["byo"] = "びょ",
-    ["pya"] = "ぴゃ", ["pyu"] = "ぴゅ", ["pyo"] = "ぴょ",
-    ["xtu"] = "っ", ["xtsu"] = "っ", ["ltu"] = "っ",
+    ["a"] = "あ",
+    ["i"] = "い",
+    ["u"] = "う",
+    ["e"] = "え",
+    ["o"] = "お",
+    ["ka"] = "か",
+    ["ki"] = "き",
+    ["ku"] = "く",
+    ["ke"] = "け",
+    ["ko"] = "こ",
+    ["sa"] = "さ",
+    ["shi"] = "し",
+    ["si"] = "し",
+    ["su"] = "す",
+    ["se"] = "せ",
+    ["so"] = "そ",
+    ["ta"] = "た",
+    ["chi"] = "ち",
+    ["ti"] = "ち",
+    ["tsu"] = "つ",
+    ["tu"] = "つ",
+    ["te"] = "て",
+    ["to"] = "と",
+    ["na"] = "な",
+    ["ni"] = "に",
+    ["nu"] = "ぬ",
+    ["ne"] = "ね",
+    ["no"] = "の",
+    ["ha"] = "は",
+    ["hi"] = "ひ",
+    ["fu"] = "ふ",
+    ["hu"] = "ふ",
+    ["he"] = "へ",
+    ["ho"] = "ほ",
+    ["ma"] = "ま",
+    ["mi"] = "み",
+    ["mu"] = "む",
+    ["me"] = "め",
+    ["mo"] = "も",
+    ["ya"] = "や",
+    ["yu"] = "ゆ",
+    ["yo"] = "よ",
+    ["ra"] = "ら",
+    ["ri"] = "り",
+    ["ru"] = "る",
+    ["re"] = "れ",
+    ["ro"] = "ろ",
+    ["wa"] = "わ",
+    ["wo"] = "を",
+    ["n"] = "ん",
+    ["nn"] = "ん",
+    ["ga"] = "が",
+    ["gi"] = "ぎ",
+    ["gu"] = "ぐ",
+    ["ge"] = "げ",
+    ["go"] = "ご",
+    ["za"] = "ざ",
+    ["ji"] = "じ",
+    ["zi"] = "じ",
+    ["zu"] = "ず",
+    ["ze"] = "ぜ",
+    ["zo"] = "ぞ",
+    ["da"] = "だ",
+    ["di"] = "ぢ",
+    ["du"] = "づ",
+    ["de"] = "で",
+    ["do"] = "ど",
+    ["ba"] = "ば",
+    ["bi"] = "び",
+    ["bu"] = "ぶ",
+    ["be"] = "べ",
+    ["bo"] = "ぼ",
+    ["pa"] = "ぱ",
+    ["pi"] = "ぴ",
+    ["pu"] = "ぷ",
+    ["pe"] = "ぺ",
+    ["po"] = "ぽ",
+    ["kya"] = "きゃ",
+    ["kyu"] = "きゅ",
+    ["kyo"] = "きょ",
+    ["sha"] = "しゃ",
+    ["shu"] = "しゅ",
+    ["sho"] = "しょ",
+    ["sya"] = "しゃ",
+    ["syu"] = "しゅ",
+    ["syo"] = "しょ",
+    ["cha"] = "ちゃ",
+    ["chu"] = "ちゅ",
+    ["cho"] = "ちょ",
+    ["tya"] = "ちゃ",
+    ["tyu"] = "ちゅ",
+    ["tyo"] = "ちょ",
+    ["nya"] = "にゃ",
+    ["nyu"] = "にゅ",
+    ["nyo"] = "にょ",
+    ["hya"] = "ひゃ",
+    ["hyu"] = "ひゅ",
+    ["hyo"] = "ひょ",
+    ["mya"] = "みゃ",
+    ["myu"] = "みゅ",
+    ["myo"] = "みょ",
+    ["rya"] = "りゃ",
+    ["ryu"] = "りゅ",
+    ["ryo"] = "りょ",
+    ["gya"] = "ぎゃ",
+    ["gyu"] = "ぎゅ",
+    ["gyo"] = "ぎょ",
+    ["ja"] = "じゃ",
+    ["ju"] = "じゅ",
+    ["jo"] = "じょ",
+    ["jya"] = "じゃ",
+    ["jyu"] = "じゅ",
+    ["jyo"] = "じょ",
+    ["zya"] = "じゃ",
+    ["zyu"] = "じゅ",
+    ["zyo"] = "じょ",
+    ["bya"] = "びゃ",
+    ["byu"] = "びゅ",
+    ["byo"] = "びょ",
+    ["pya"] = "ぴゃ",
+    ["pyu"] = "ぴゅ",
+    ["pyo"] = "ぴょ",
+    ["xtu"] = "っ",
+    ["xtsu"] = "っ",
+    ["ltu"] = "っ",
     ["-"] = "ー",
-    ["fa"] = "ふぁ", ["fi"] = "ふぃ", ["fe"] = "ふぇ", ["fo"] = "ふぉ",
+    ["fa"] = "ふぁ",
+    ["fi"] = "ふぃ",
+    ["fe"] = "ふぇ",
+    ["fo"] = "ふぉ",
 }
 
 -- ===============================================
@@ -165,11 +262,16 @@ end
 -- ===============================================
 local function init(env)
     env.default_position = 2
+    env.ja_only_suffix = "//"
     local config = env.engine.schema.config
     if config then
         local pos = config:get_int("moran_ja/default_position")
         if pos and pos > 0 then
             env.default_position = pos
+        end
+        local suffix = config:get_string("moran_ja/ja_only_suffix")
+        if suffix and #suffix > 0 then
+            env.ja_only_suffix = suffix
         end
     end
 end
@@ -187,7 +289,6 @@ local function filter(input, env)
     local context = env.engine.context
     local input_text = context.input or ""
 
-    -- 早期退出：输入过短，不可能产生日语候选
     if #input_text < 2 then
         for cand in input:iter() do
             yield(cand)
@@ -195,7 +296,16 @@ local function filter(input, env)
         return
     end
 
-    update_cache(input_text)
+    local ja_only_suffix = env.ja_only_suffix
+    local ja_only_mode = false
+    local real_input = input_text
+
+    if #input_text > #ja_only_suffix and input_text:sub(- #ja_only_suffix) == ja_only_suffix then
+        ja_only_mode = true
+        real_input = input_text:sub(1, - #ja_only_suffix - 1)
+    end
+
+    update_cache(real_input)
 
     local is_romaji = cache.is_romaji
     local kana_preview = cache.kana_preview
@@ -222,7 +332,16 @@ local function filter(input, env)
         end
     end
 
-    -- 早期退出：无日语候选，直接输出中文
+    if ja_only_mode then
+        local suffix_len = #ja_only_suffix
+        for _, cand in ipairs(japanese_candidates) do
+            local extended_cand = Candidate(cand.type, cand.start, cand._end + suffix_len, cand.text, cand.comment)
+            extended_cand.quality = cand.quality
+            yield(extended_cand)
+        end
+        return
+    end
+
     if not has_japanese then
         for _, cand in ipairs(chinese_candidates) do
             yield(cand)
