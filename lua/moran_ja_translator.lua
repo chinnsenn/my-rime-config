@@ -22,6 +22,7 @@ local function func(input, seg, env)
     for cand in translation:iter() do
         local wrapped = ShadowCandidate(cand, "jaroomaji", cand.text, cand.comment, true)
         wrapped.quality = cand.quality
+        -- wrapped.preedit = cand.preedit  -- 继承假名 preedit
         yield(wrapped)
     end
 end

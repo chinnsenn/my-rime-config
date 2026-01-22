@@ -366,6 +366,7 @@ local function filter(input, env)
 
             local new_cand = Candidate(cand.type, cand.start, cand._end, cand.text, new_comment)
             new_cand.quality = cand.quality
+            new_cand.preedit = cand.preedit
             ja_n = ja_n + 1
             japanese_candidates[ja_n] = new_cand
         else
@@ -376,10 +377,13 @@ local function filter(input, env)
 
     if ja_only_mode then
         local suffix_len = #ja_only_suffix
+        local input_len = #input_text
         for i = 1, ja_n do
             local cand = japanese_candidates[i]
-            local extended_cand = Candidate(cand.type, cand.start, cand._end + suffix_len, cand.text, cand.comment)
+            local safe_end = math.min(cand._end + suffix_len, input_len)
+            local extended_cand = Candidate(cand.type, cand.start, safe_end, cand.text, cand.comment)
             extended_cand.quality = cand.quality
+            extended_cand.preedit = real_input
             yield(extended_cand)
         end
         return
