@@ -364,14 +364,14 @@ local function filter(input, env)
                 new_comment = "[" .. kana_preview .. "]"
             end
 
-            local new_cand = Candidate(cand.type, cand.start, cand._end, cand.text, new_comment)
-            new_cand.quality = cand.quality
+            -- 灵魂手术：使用 ShadowCandidate 包装，保留原始 quality 和绑定关系
+            local new_cand = ShadowCandidate(cand, cand.type or "jaroomaji", cand.text, new_comment)
             new_cand.preedit = cand.preedit
             ja_n = ja_n + 1
             japanese_candidates[ja_n] = new_cand
         else
             cn_n = cn_n + 1
-            chinese_candidates[cn_n] = cand
+            chinese_candidates[cn_n] = cand -- 这里不重建，原样保留，绝对不丢词频！
         end
     end
 

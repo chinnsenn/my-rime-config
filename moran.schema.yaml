@@ -125,6 +125,7 @@ speller:
 
 smart: # 整句輸入模式設置，在 top_translator 中被調用
   dictionary: moran.extended
+  user_dict: moran
   prism: moran
   initial_quality: 5
   max_homophones: 7

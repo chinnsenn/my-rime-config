@@ -92,18 +92,18 @@ engine:
     - reverse_lookup_translator@reverse_bopomofo
     - table_translator@custom_phrase
     - table_translator@english
-    - lua_translator@*moran_ja_translator # 日語混輸 (包装 jaroomaji, type="jaroomaji")
     - lua_translator@*moran_express_translator@with_reorder
+    - lua_translator@*moran_ja_translator # 日語混輸 (包装 jaroomaji, type="jaroomaji")
     - lua_translator@*moran_shijian
     - lua_translator@*moran_number
     - lua_translator@*moran_unicode
     - lua_translator@*moran_pin*panacea_translator
     - history_translator@quick_repeat
   filters:
-    - lua_filter@*moran_ja_filter # 日語智能排序 + 假名預覽（前置以減少無效遍歷）
-    - lua_filter@*moran_charset_filter
-    - lua_filter@*moran_pin*pin_filter
     - lua_filter@*moran_reorder_filter
+    - lua_filter@*moran_pin*pin_filter
+    - lua_filter@*moran_ja_filter # 日語智能排序 + 假名預覽
+    - lua_filter@*moran_charset_filter
     - lua_filter@*moran_ijrq_filter
     - lua_filter@*moran_hint_filter
     - simplifier@emoji
@@ -133,6 +133,7 @@ speller:
 
 smart:
   dictionary: moran.extended
+  user_dict: moran_ja_hybrid
   prism: moran
   initial_quality: 5
   max_homophones: 7
@@ -639,7 +640,7 @@ moran:
   enable_word_filter: false
   word_filter_match_indicator: {}
   ijrq:
-    enable: true
+    enable: false # 彻底关闭出简让全，不再压制全码词
     show_hint: true
     enable_word: false
     enable_word_defer: 1

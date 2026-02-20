@@ -129,6 +129,7 @@ end
 function top.fini(env)
    env.fixed = nil
    env.smart = nil
+   env.memory = nil
    env.rfixed = nil
    env.output_injected_secondary = nil
    collectgarbage()
@@ -216,7 +217,7 @@ function top.func(input, seg, env)
    if (not fixed_triggered and input_len == 4) then
       for cand in moran.query_translation(env.fixed, input, seg, nil) do
          local cand_len = utf8.len(cand.text)
-         if (env.inject_fixed_chars and cand_len == 1) or (env.inject_fixed_words and cand_len > 2) then
+         if (env.inject_fixed_chars and cand_len == 1) or (env.inject_fixed_words and cand_len >= 2) then
             if cand_len ~= 1 or (cand_len == 1 and not env.quick_code_indicator_skip_chars) then
                cand:get_genuine().comment = indicator
             end
