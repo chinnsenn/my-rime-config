@@ -668,7 +668,9 @@ moran_ja:
   default_position: 2
   # 日語模式指示符
   indicator: "🇯🇵"
-  gray_zone_inputs: [koko, nori]
+  gray_zone_inputs:
+    - koko
+    - nori
   state_machine:
     enabled: true
     window_size: 6
@@ -677,7 +679,7 @@ moran_ja:
     zh_threshold: 2
   telemetry:
     enabled: false
-    log_file: "moran_ja_hybrid.telemetry.jsonl"
+    log_file: "moran_ja_hybrid.telemetry.jsonl" # 相对路径基于 Rime 用户目录
     sample_rate: 1.0
 
 __include: moran:/octagram/enable_for_sentence
