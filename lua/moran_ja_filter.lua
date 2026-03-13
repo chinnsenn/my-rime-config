@@ -206,6 +206,10 @@ end
 
 local SHUANGPIN_INITIAL_KEYS = "bpmfdtnlgkhjqxrzcsywv"
 local SHUANGPIN_FINAL_KEYS = "aoeiuvnrg"
+local DEFAULT_GRAY_ZONE_SHUANGPIN_INPUTS = {
+    koko = true,
+    nori = true,
+}
 local gray_zone_shuangpin_inputs = {}
 
 local function has_shuangpin_negative_feature(input)
@@ -334,7 +338,10 @@ end
 -- ===============================================
 local function init(env)
     env.default_position = 2
-    gray_zone_shuangpin_inputs = {}
+    gray_zone_shuangpin_inputs = {
+        koko = DEFAULT_GRAY_ZONE_SHUANGPIN_INPUTS.koko,
+        nori = DEFAULT_GRAY_ZONE_SHUANGPIN_INPUTS.nori,
+    }
 
     local config = env.engine.schema.config
     if config then
@@ -348,14 +355,20 @@ local function init(env)
         end)
         if ok_list and list then
             local size = tonumber(list.size) or 0
+            local parsed = {}
+            local parsed_count = 0
             for i = 0, size - 1 do
                 local item = list:get_at(i)
                 local ok_value, value = pcall(function()
                     return item and item:get_value()
                 end)
                 if ok_value and value and value ~= "" then
-                    gray_zone_shuangpin_inputs[string_lower(value)] = true
+                    parsed[string_lower(value)] = true
+                    parsed_count = parsed_count + 1
                 end
+            end
+            if parsed_count > 0 then
+                gray_zone_shuangpin_inputs = parsed
             end
         end
     end
