@@ -38,6 +38,7 @@ local function to_jsonl_line(event_table)
         "ts",
         "event",
         "input",
+        "input_len",
         "top1_lang",
         "selection_index",
         "committed_lang",
@@ -209,17 +210,19 @@ local function init(env)
             enabled = telemetry_enabled,
             log_file = config_get_string(config, "moran_ja/telemetry/log_file", ""),
             sample_rate = tonumber(config_get_string(config, "moran_ja/telemetry/sample_rate", "1.0")) or 1.0,
+            log_raw_input = config_get_bool(config, "moran_ja/telemetry/log_raw_input", false),
         },
     }
 
     active_telemetry = env.config.telemetry
 
     publish_state(env)
-    emit_event({
+    local init_payload = {
         event = "state",
-        input = "",
         state = env.state.current,
-    })
+    }
+    apply_input_telemetry(init_payload, "", env.config and env.config.telemetry)
+    emit_event(init_payload)
 end
 
 local function fini(env)
@@ -260,22 +263,46 @@ local function safe_keycode(key_event)
     return tonumber(value) or -1
 end
 
+local function normalize_input(input)
+    if input == nil then
+        return ""
+    end
+    if type(input) == "string" then
+        return input
+    end
+    return tostring(input)
+end
+
+local function apply_input_telemetry(payload, input, telemetry)
+    if not payload then
+        return
+    end
+
+    local normalized_input = normalize_input(input)
+    if telemetry and telemetry.log_raw_input == true then
+        payload.input = normalized_input
+    else
+        payload.input_len = #normalized_input
+    end
+end
+
 local function detect_telemetry_event(key_event, input)
     local key_repr = safe_key_repr(key_event)
     local keycode = safe_keycode(key_event)
+    local normalized_input = normalize_input(input)
 
     local is_digit_select = string.match(key_repr, "^[1-9]$") ~= nil
     local is_commit_key = key_repr == "space" or key_repr == "Return" or key_repr == "KP_Enter" or keycode == 0x20
 
-    if is_commit_key and #input > 0 then
+    if is_commit_key and #normalized_input > 0 then
         return "commit"
     end
 
-    if is_digit_select and #input > 0 then
+    if is_digit_select and #normalized_input > 0 then
         return "select"
     end
 
-    if #input > 0 then
+    if #normalized_input > 0 then
         return "filter"
     end
 
@@ -309,7 +336,7 @@ local function processor(key_event, env)
     -- 轻量启发式：基于当前输入更新 ja/zh 分数
     -- ===============================================
     local context = env and env.engine and env.engine.context
-    local input = context and context.input or ""
+    local input = normalize_input(context and context.input or "")
 
     local has_ascii_letter = false
     local has_digit = false
@@ -366,11 +393,12 @@ local function processor(key_event, env)
 
     local event_type = detect_telemetry_event(key_event, input)
     if event_type ~= nil then
-        emit_event({
+        local payload = {
             event = event_type,
-            input = input,
             state = state.current,
-        })
+        }
+        apply_input_telemetry(payload, input, env and env.config and env.config.telemetry)
+        emit_event(payload)
     end
 
     state.last_event_ts = now
