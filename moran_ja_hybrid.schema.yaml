@@ -64,7 +64,6 @@ engine:
     - key_binder
     - lua_processor@*moran_pin*pin_processor
     - lua_processor@*moran_processor
-    - lua_processor@moran_ja_processor
     - ascii_composer
     - recognizer
     - speller
@@ -168,7 +167,7 @@ english:
   enable_completion: true
   enable_sentence: false
   enable_user_dict: true
-  initial_quality: 1
+  initial_quality: -1
   enable_encoder: false
   encode_commit_history: false
   comment_format:
@@ -177,7 +176,7 @@ english:
 # 日語翻譯器配置
 jaroomaji_translator:
   dictionary: jaroomaji
-  enable_completion: true
+  enable_completion: false
   prism: jaroomaji
   enable_sentence: true
   enable_user_dict: true

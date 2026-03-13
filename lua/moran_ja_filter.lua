@@ -204,20 +204,48 @@ local function is_japanese_candidate(cand)
     return has_kana(cand.text)
 end
 
+local SHUANGPIN_INITIAL_KEYS = "bpmfdtnlgkhjqxrzcsywv"
+local SHUANGPIN_FINAL_KEYS = "aoeiuvnrg"
+local GRAY_ZONE_SHUANGPIN_INPUTS = {
+    koko = true,
+    nori = true,
+}
+
+local function has_shuangpin_negative_feature(input)
+    if not GRAY_ZONE_SHUANGPIN_INPUTS[input] then
+        return false
+    end
+
+    local len = #input
+    if len ~= 4 then
+        return false
+    end
+
+    for i = 1, len, 2 do
+        local c1 = string_sub(input, i, i)
+        local c2 = string_sub(input, i + 1, i + 1)
+        if not string_find(SHUANGPIN_INITIAL_KEYS, c1, 1, true)
+           or not string_find(SHUANGPIN_FINAL_KEYS, c2, 1, true) then
+            return false
+        end
+    end
+
+    return true
+end
+
 local function is_romaji_pattern(input)
     if not input or #input < 3 then return false end
-    if input == cache.input then return cache.is_romaji end
 
     local lower = string_lower(input)
 
-    -- 检查预编译的固定模式
+    -- 强日文特征 1：固定模式
     for _, pattern in ipairs(JA_PATTERNS) do
         if string_find(lower, pattern, 1, true) then
             return true
         end
     end
 
-    -- 检查拗音模式：辅音 + y + 元音
+    -- 强日文特征 2：拗音（辅音 + y + 元音）
     for i = 1, #lower - 2 do
         local c1 = string_sub(lower, i, i)
         local c2 = string_sub(lower, i + 1, i + 1)
@@ -235,7 +263,17 @@ local function is_romaji_pattern(input)
         cv_count = cv_count + 1
     end
 
-    return cv_count >= 3
+    -- 强日文特征 3：CV 组合足够多
+    if cv_count >= 3 then
+        return true
+    end
+
+    -- 灰区判定：仅在无强特征时应用双拼负特征，保守收敛误判
+    if cv_count >= 2 then
+        return not has_shuangpin_negative_feature(lower)
+    end
+
+    return false
 end
 
 -- ===============================================
@@ -243,7 +281,6 @@ end
 -- ===============================================
 local function romaji_to_kana_preview(input)
     if not input or #input == 0 then return "" end
-    if input == cache.input then return cache.kana_preview end
 
     local parts = {}
     local n = 0
@@ -289,9 +326,9 @@ end
 -- ===============================================
 local function update_cache(input)
     if input ~= cache.input then
-        cache.input = input
         cache.is_romaji = is_romaji_pattern(input)
         cache.kana_preview = romaji_to_kana_preview(input)
+        cache.input = input
     end
 end
 
