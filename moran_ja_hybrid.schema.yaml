@@ -668,8 +668,6 @@ moran_ja:
   default_position: 2
   # 日語模式指示符
   indicator: "🇯🇵"
-  # 只顯示日語候選的後綴（輸入 nihon// 只顯示日語）
-  ja_only_suffix: "//"
 
 __include: moran:/octagram/enable_for_sentence
 

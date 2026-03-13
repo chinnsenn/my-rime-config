@@ -300,16 +300,11 @@ end
 -- ===============================================
 local function init(env)
     env.default_position = 2
-    env.ja_only_suffix = "//"
     local config = env.engine.schema.config
     if config then
         local pos = config:get_int("moran_ja/default_position")
         if pos and pos > 0 then
             env.default_position = pos
-        end
-        local suffix = config:get_string("moran_ja/ja_only_suffix")
-        if suffix and #suffix > 0 then
-            env.ja_only_suffix = suffix
         end
     end
 end
@@ -334,16 +329,7 @@ local function filter(input, env)
         return
     end
 
-    local ja_only_suffix = env.ja_only_suffix
-    local ja_only_mode = false
-    local real_input = input_text
-
-    if #input_text > #ja_only_suffix and string_sub(input_text, -#ja_only_suffix) == ja_only_suffix then
-        ja_only_mode = true
-        real_input = string_sub(input_text, 1, -#ja_only_suffix - 1)
-    end
-
-    update_cache(real_input)
+    update_cache(input_text)
 
     local is_romaji = cache.is_romaji
     local kana_preview = cache.kana_preview
@@ -373,20 +359,6 @@ local function filter(input, env)
             cn_n = cn_n + 1
             chinese_candidates[cn_n] = cand -- 这里不重建，原样保留，绝对不丢词频！
         end
-    end
-
-    if ja_only_mode then
-        local suffix_len = #ja_only_suffix
-        local input_len = #input_text
-        for i = 1, ja_n do
-            local cand = japanese_candidates[i]
-            local safe_end = math.min(cand._end + suffix_len, input_len)
-            local extended_cand = Candidate(cand.type, cand.start, safe_end, cand.text, cand.comment)
-            extended_cand.quality = cand.quality
-            extended_cand.preedit = real_input
-            yield(extended_cand)
-        end
-        return
     end
 
     if not has_japanese then
