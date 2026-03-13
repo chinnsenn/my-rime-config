@@ -37,18 +37,67 @@ local function publish_state(env)
     safe_set_property(context, STATE_UPDATED_AT_PROPERTY, state.last_decay_ts)
 end
 
+local function transition_state(env, next_state, now)
+    local state = env and env.state
+    if not state or not next_state then
+        return
+    end
+
+    if state.current == next_state then
+        return
+    end
+
+    state.current = next_state
+    state.last_decay_ts = now or os.time()
+    publish_state(env)
+end
+
+local function config_get_bool(config, key, default_value)
+    if not config then
+        return default_value
+    end
+    local ok, value = pcall(function()
+        return config:get_bool(key)
+    end)
+    if not ok or value == nil then
+        return default_value
+    end
+    return value
+end
+
+local function config_get_int(config, key, default_value)
+    if not config then
+        return default_value
+    end
+    local ok, value = pcall(function()
+        return config:get_int(key)
+    end)
+    if not ok or value == nil then
+        return default_value
+    end
+    return value
+end
+
+local function config_get_string(config, key, default_value)
+    if not config then
+        return default_value
+    end
+    local ok, value = pcall(function()
+        return config:get_string(key)
+    end)
+    if not ok or value == nil then
+        return default_value
+    end
+    return value
+end
+
 local function init(env)
-    local config = env.engine.schema.config
+    local engine = env and env.engine
+    local schema = engine and engine.schema
+    local config = schema and schema.config
 
-    local sm_enabled = config:get_bool("moran_ja/state_machine/enabled")
-    if sm_enabled == nil then
-        sm_enabled = true
-    end
-
-    local telemetry_enabled = config:get_bool("moran_ja/telemetry/enabled")
-    if telemetry_enabled == nil then
-        telemetry_enabled = false
-    end
+    local sm_enabled = config_get_bool(config, "moran_ja/state_machine/enabled", true)
+    local telemetry_enabled = config_get_bool(config, "moran_ja/telemetry/enabled", false)
 
     env.state = {
         current = STATE_NEUTRAL,
@@ -61,15 +110,15 @@ local function init(env)
     env.config = {
         state_machine = {
             enabled = sm_enabled,
-            window_size = config:get_int("moran_ja/state_machine/window_size") or 6,
-            decay_seconds = config:get_int("moran_ja/state_machine/decay_seconds") or 25,
-            ja_threshold = config:get_int("moran_ja/state_machine/ja_threshold") or 2,
-            zh_threshold = config:get_int("moran_ja/state_machine/zh_threshold") or 2,
+            window_size = config_get_int(config, "moran_ja/state_machine/window_size", 6),
+            decay_seconds = config_get_int(config, "moran_ja/state_machine/decay_seconds", 25),
+            ja_threshold = config_get_int(config, "moran_ja/state_machine/ja_threshold", 2),
+            zh_threshold = config_get_int(config, "moran_ja/state_machine/zh_threshold", 2),
         },
         telemetry = {
             enabled = telemetry_enabled,
-            log_file = config:get_string("moran_ja/telemetry/log_file") or "",
-            sample_rate = tonumber(config:get_string("moran_ja/telemetry/sample_rate") or "") or 1.0,
+            log_file = config_get_string(config, "moran_ja/telemetry/log_file", ""),
+            sample_rate = tonumber(config_get_string(config, "moran_ja/telemetry/sample_rate", "1.0")) or 1.0,
         },
     }
 
@@ -98,14 +147,71 @@ local function processor(key_event, env)
     local elapsed = now - (state.last_decay_ts or now)
 
     -- ===============================================
-    -- 衰减骨架：当前仅在窗口超时后回落 neutral
+    -- 衰减路径：超时回落 neutral
     -- ===============================================
     if cfg.decay_seconds > 0 and elapsed >= cfg.decay_seconds then
-        state.current = STATE_NEUTRAL
         state.ja_score = 0
         state.zh_score = 0
-        state.last_decay_ts = now
-        publish_state(env)
+        transition_state(env, STATE_NEUTRAL, now)
+    end
+
+    -- ===============================================
+    -- 轻量启发式：基于当前输入更新 ja/zh 分数
+    -- ===============================================
+    local context = env and env.engine and env.engine.context
+    local input = context and context.input or ""
+
+    local has_ascii_letter = false
+    local has_digit = false
+    for i = 1, #input do
+        local c = string.sub(input, i, i)
+        if string.match(c, "%a") then
+            has_ascii_letter = true
+        elseif string.match(c, "%d") then
+            has_digit = true
+        end
+    end
+
+    if #input > 0 then
+        if has_ascii_letter and not has_digit then
+            state.ja_score = state.ja_score + 1
+            if state.zh_score > 0 then
+                state.zh_score = state.zh_score - 1
+            end
+        elseif has_digit and not has_ascii_letter then
+            state.zh_score = state.zh_score + 1
+            if state.ja_score > 0 then
+                state.ja_score = state.ja_score - 1
+            end
+        else
+            if state.ja_score > 0 then
+                state.ja_score = state.ja_score - 1
+            end
+            if state.zh_score > 0 then
+                state.zh_score = state.zh_score - 1
+            end
+        end
+
+        local window = cfg.window_size or 6
+        if window > 0 then
+            if state.ja_score > window then
+                state.ja_score = window
+            end
+            if state.zh_score > window then
+                state.zh_score = window
+            end
+        end
+    end
+
+    -- ===============================================
+    -- 最小状态迁移：达到阈值时进入偏置态
+    -- ===============================================
+    if state.ja_score >= (cfg.ja_threshold or 2) then
+        transition_state(env, STATE_JA_BIAS, now)
+    elseif state.zh_score >= (cfg.zh_threshold or 2) then
+        transition_state(env, STATE_ZH_BIAS, now)
+    elseif state.ja_score == 0 and state.zh_score == 0 then
+        transition_state(env, STATE_NEUTRAL, now)
     end
 
     state.last_event_ts = now
