@@ -64,6 +64,7 @@ engine:
     - key_binder
     - lua_processor@*moran_pin*pin_processor
     - lua_processor@*moran_processor
+    - lua_processor@moran_ja_processor
     - ascii_composer
     - recognizer
     - speller
@@ -667,6 +668,17 @@ moran_ja:
   default_position: 2
   # 日語模式指示符
   indicator: "🇯🇵"
+  gray_zone_inputs: [koko, nori]
+  state_machine:
+    enabled: true
+    window_size: 6
+    decay_seconds: 25
+    ja_threshold: 2
+    zh_threshold: 2
+  telemetry:
+    enabled: false
+    log_file: "moran_ja_hybrid.telemetry.jsonl"
+    sample_rate: 1.0
 
 __include: moran:/octagram/enable_for_sentence
 
