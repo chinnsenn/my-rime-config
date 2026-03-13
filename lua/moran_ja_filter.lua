@@ -206,13 +206,10 @@ end
 
 local SHUANGPIN_INITIAL_KEYS = "bpmfdtnlgkhjqxrzcsywv"
 local SHUANGPIN_FINAL_KEYS = "aoeiuvnrg"
-local GRAY_ZONE_SHUANGPIN_INPUTS = {
-    koko = true,
-    nori = true,
-}
+local gray_zone_shuangpin_inputs = {}
 
 local function has_shuangpin_negative_feature(input)
-    if not GRAY_ZONE_SHUANGPIN_INPUTS[input] then
+    if not gray_zone_shuangpin_inputs[input] then
         return false
     end
 
@@ -337,11 +334,29 @@ end
 -- ===============================================
 local function init(env)
     env.default_position = 2
+    gray_zone_shuangpin_inputs = {}
+
     local config = env.engine.schema.config
     if config then
         local pos = config:get_int("moran_ja/default_position")
         if pos and pos > 0 then
             env.default_position = pos
+        end
+
+        local ok_list, list = pcall(function()
+            return config:get_list("moran_ja/gray_zone_inputs")
+        end)
+        if ok_list and list then
+            local size = tonumber(list.size) or 0
+            for i = 0, size - 1 do
+                local item = list:get_at(i)
+                local ok_value, value = pcall(function()
+                    return item and item:get_value()
+                end)
+                if ok_value and value and value ~= "" then
+                    gray_zone_shuangpin_inputs[string_lower(value)] = true
+                end
+            end
         end
     end
 end
