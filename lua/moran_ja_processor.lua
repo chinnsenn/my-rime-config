@@ -7,6 +7,96 @@
 
 local kNoop = 2
 
+local active_telemetry = nil
+
+-- ===============================================
+-- JSONL telemetry（最小骨架）
+-- ===============================================
+local function clamp_sample_rate(value)
+    local n = tonumber(value) or 1.0
+    if n < 0 then
+        return 0
+    end
+    if n > 1 then
+        return 1
+    end
+    return n
+end
+
+local function json_escape(s)
+    local t = tostring(s or "")
+    t = string.gsub(t, "\\", "\\\\")
+    t = string.gsub(t, '"', '\\"')
+    t = string.gsub(t, "\n", "\\n")
+    t = string.gsub(t, "\r", "\\r")
+    t = string.gsub(t, "\t", "\\t")
+    return t
+end
+
+local function to_jsonl_line(event_table)
+    local fields = {
+        "ts",
+        "event",
+        "input",
+        "top1_lang",
+        "selection_index",
+        "committed_lang",
+        "state",
+    }
+
+    local parts = {}
+    for _, key in ipairs(fields) do
+        local value = event_table and event_table[key]
+        if value ~= nil then
+            if type(value) == "number" or type(value) == "boolean" then
+                parts[#parts + 1] = string.format('"%s":%s', key, tostring(value))
+            else
+                parts[#parts + 1] = string.format('"%s":"%s"', key, json_escape(value))
+            end
+        end
+    end
+
+    return "{" .. table.concat(parts, ",") .. "}\n"
+end
+
+local function emit_event(event_table)
+    local telemetry = active_telemetry
+    if not telemetry or not telemetry.enabled then
+        return
+    end
+
+    local log_file = telemetry.log_file
+    if not log_file or log_file == "" then
+        return
+    end
+
+    local sample_rate = clamp_sample_rate(telemetry.sample_rate)
+    if sample_rate <= 0 then
+        return
+    end
+
+    if sample_rate < 1 and math.random() > sample_rate then
+        return
+    end
+
+    local payload = event_table or {}
+    if payload.ts == nil then
+        payload.ts = os.time()
+    end
+    if payload.event == nil then
+        payload.event = "heartbeat"
+    end
+
+    pcall(function()
+        local fp = io.open(log_file, "a")
+        if not fp then
+            return
+        end
+        fp:write(to_jsonl_line(payload))
+        fp:close()
+    end)
+end
+
 -- ===============================================
 -- 软状态机常量
 -- ===============================================
@@ -122,14 +212,26 @@ local function init(env)
         },
     }
 
+    active_telemetry = env.config.telemetry
+
     publish_state(env)
+    emit_event({
+        event = "state",
+        input = "",
+        state = env.state.current,
+    })
 end
 
 local function fini(env)
     if env and env.state then
+        emit_event({
+            event = "state",
+            state = env.state.current,
+        })
         env.state.current = STATE_NEUTRAL
         publish_state(env)
     end
+    active_telemetry = nil
 end
 
 local function processor(key_event, env)
@@ -213,6 +315,12 @@ local function processor(key_event, env)
     elseif state.ja_score == 0 and state.zh_score == 0 then
         transition_state(env, STATE_NEUTRAL, now)
     end
+
+    emit_event({
+        event = "heartbeat",
+        input = input,
+        state = state.current,
+    })
 
     state.last_event_ts = now
     return kNoop
