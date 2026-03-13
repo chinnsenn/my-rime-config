@@ -15,7 +15,8 @@ moran_express_translator.lua: 快速翻译器，整合 fixed+smart 双词库
 moran_fix_filter.lua: 固顶码过滤器，处理简快码优先级
 moran_hint_filter.lua: 提示过滤器，显示编码提示
 moran_ijrq_filter.lua: 出简让全过滤器
-moran_ja_filter.lua: 日语混合过滤器，分离中日候选并智能排序
+moran_ja_filter.lua: 日语混合过滤器，分离中日候选并按软状态偏置插位
+moran_ja_processor.lua: 日语混输软状态机处理器，维护 zh/ja 偏置并输出可开关 JSONL 埋点
 moran_ja_translator.lua: jaroomaji 包装翻译器，标记 type="jaroomaji"
 moran_number.lua: 数字翻译器，大写数字转换
 moran_pin.lua: 固顶词处理器/过滤器
