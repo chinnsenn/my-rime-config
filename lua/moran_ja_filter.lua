@@ -206,6 +206,10 @@ end
 
 local SHUANGPIN_INITIAL_KEYS = "bpmfdtnlgkhjqxrzcsywv"
 local SHUANGPIN_FINAL_KEYS = "aoeiuvnrg"
+local JA_STATE_PROPERTY = "moran_ja/state"
+local JA_STATE_NEUTRAL = "neutral"
+local JA_STATE_JA_BIAS = "ja_bias"
+local JA_STATE_ZH_BIAS = "zh_bias"
 local DEFAULT_GRAY_ZONE_SHUANGPIN_INPUTS = {
     koko = true,
     nori = true,
@@ -380,6 +384,29 @@ local function fini(env)
     cache.kana_preview = ""
 end
 
+local function resolve_ja_state(context)
+    local ok, state = pcall(function()
+        return context:get_property(JA_STATE_PROPERTY)
+    end)
+    if not ok then
+        return JA_STATE_NEUTRAL
+    end
+    if state == JA_STATE_JA_BIAS or state == JA_STATE_ZH_BIAS or state == JA_STATE_NEUTRAL then
+        return state
+    end
+    return JA_STATE_NEUTRAL
+end
+
+local function prefer_default_position_insertion(is_romaji, ja_state)
+    if ja_state == JA_STATE_ZH_BIAS then
+        return true
+    end
+    if ja_state == JA_STATE_JA_BIAS then
+        return false
+    end
+    return not is_romaji
+end
+
 -- ===============================================
 -- 核心过滤逻辑
 -- ===============================================
@@ -398,6 +425,8 @@ local function filter(input, env)
 
     local is_romaji = cache.is_romaji
     local kana_preview = cache.kana_preview
+    local ja_state = resolve_ja_state(context)
+    local use_default_position_insertion = prefer_default_position_insertion(is_romaji, ja_state)
 
     local chinese_candidates = {}
     local japanese_candidates = {}
@@ -433,7 +462,7 @@ local function filter(input, env)
         return
     end
 
-    if is_romaji then
+    if not use_default_position_insertion then
         if chinese_candidates[1] then
             yield(chinese_candidates[1])
         end
@@ -445,25 +474,26 @@ local function filter(input, env)
         for i = 2, cn_n do
             yield(chinese_candidates[i])
         end
-    else
-        local ja_idx = 1
-        local cn_idx = 1
-        local output_idx = 1
-        local default_pos = env.default_position or 2
+        return
+    end
 
-        while cn_idx <= cn_n or ja_idx <= ja_n do
-            if output_idx == default_pos and ja_idx <= ja_n then
-                yield(japanese_candidates[ja_idx])
-                ja_idx = ja_idx + 1
-            elseif cn_idx <= cn_n then
-                yield(chinese_candidates[cn_idx])
-                cn_idx = cn_idx + 1
-            elseif ja_idx <= ja_n then
-                yield(japanese_candidates[ja_idx])
-                ja_idx = ja_idx + 1
-            end
-            output_idx = output_idx + 1
+    local ja_idx = 1
+    local cn_idx = 1
+    local output_idx = 1
+    local default_pos = env.default_position or 2
+
+    while cn_idx <= cn_n or ja_idx <= ja_n do
+        if output_idx == default_pos and ja_idx <= ja_n then
+            yield(japanese_candidates[ja_idx])
+            ja_idx = ja_idx + 1
+        elseif cn_idx <= cn_n then
+            yield(chinese_candidates[cn_idx])
+            cn_idx = cn_idx + 1
+        elseif ja_idx <= ja_n then
+            yield(japanese_candidates[ja_idx])
+            ja_idx = ja_idx + 1
         end
+        output_idx = output_idx + 1
     end
 end
 
