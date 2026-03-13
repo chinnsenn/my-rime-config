@@ -234,6 +234,54 @@ local function fini(env)
     active_telemetry = nil
 end
 
+local function safe_key_repr(key_event)
+    if not key_event then
+        return ""
+    end
+    local ok, value = pcall(function()
+        return key_event:repr()
+    end)
+    if not ok or not value then
+        return ""
+    end
+    return tostring(value)
+end
+
+local function safe_keycode(key_event)
+    if not key_event then
+        return -1
+    end
+    local ok, value = pcall(function()
+        return key_event.keycode
+    end)
+    if not ok or value == nil then
+        return -1
+    end
+    return tonumber(value) or -1
+end
+
+local function detect_telemetry_event(key_event, input)
+    local key_repr = safe_key_repr(key_event)
+    local keycode = safe_keycode(key_event)
+
+    local is_digit_select = string.match(key_repr, "^[1-9]$") ~= nil
+    local is_commit_key = key_repr == "space" or key_repr == "Return" or key_repr == "KP_Enter" or keycode == 0x20
+
+    if is_commit_key and #input > 0 then
+        return "commit"
+    end
+
+    if is_digit_select and #input > 0 then
+        return "select"
+    end
+
+    if #input > 0 then
+        return "filter"
+    end
+
+    return nil
+end
+
 local function processor(key_event, env)
     if key_event:release() then
         return kNoop
@@ -316,11 +364,14 @@ local function processor(key_event, env)
         transition_state(env, STATE_NEUTRAL, now)
     end
 
-    emit_event({
-        event = "heartbeat",
-        input = input,
-        state = state.current,
-    })
+    local event_type = detect_telemetry_event(key_event, input)
+    if event_type ~= nil then
+        emit_event({
+            event = event_type,
+            input = input,
+            state = state.current,
+        })
+    end
 
     state.last_event_ts = now
     return kNoop
