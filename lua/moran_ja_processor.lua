@@ -1,6 +1,6 @@
 -- ===================================================================
 -- [INPUT]:  依赖 Rime Lua API (KeyEvent, Context, SchemaConfig, env)
--- [OUTPUT]: 对外提供 moran_ja_processor (lua_processor, 软状态机骨架)
+-- [OUTPUT]: 对外提供 moran_ja_processor (lua_processor, commit 行为状态机)
 -- [POS]:    lua/ 目录的日语混输状态处理器，被 moran_ja_hybrid 方案与过滤器协作读取
 -- [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
 -- ===================================================================
@@ -99,6 +99,22 @@ local function emit_event(event_table)
 end
 
 -- ===============================================
+-- 假名检测：判断文本是否包含日文假名
+-- ===============================================
+local utf8_codes = utf8.codes
+
+local function has_kana(text)
+    if not text or #text == 0 then return false end
+    for _, codepoint in utf8_codes(text) do
+        -- 平假名 (U+3040-U+309F) 或 片假名 (U+30A0-U+30FF)
+        if codepoint >= 0x3040 and codepoint <= 0x30FF then
+            return true
+        end
+    end
+    return false
+end
+
+-- ===============================================
 -- 软状态机常量
 -- ===============================================
 local STATE_NEUTRAL = "neutral"
@@ -143,6 +159,34 @@ local function transition_state(env, next_state, now)
     publish_state(env)
 end
 
+-- ===============================================
+-- 滑动窗口：记录最近 N 次 commit 的语言
+-- ===============================================
+local function push_commit_lang(state, lang, window_size)
+    local history = state.commit_history
+    history[#history + 1] = lang
+    -- 超出窗口时，移除最旧的记录
+    while #history > window_size do
+        table.remove(history, 1)
+    end
+end
+
+local function count_langs(state)
+    local ja_count = 0
+    local zh_count = 0
+    for _, lang in ipairs(state.commit_history) do
+        if lang == "ja" then
+            ja_count = ja_count + 1
+        else
+            zh_count = zh_count + 1
+        end
+    end
+    return ja_count, zh_count
+end
+
+-- ===============================================
+-- 配置读取工具
+-- ===============================================
 local function config_get_bool(config, key, default_value)
     if not config then
         return default_value
@@ -182,87 +226,9 @@ local function config_get_string(config, key, default_value)
     return value
 end
 
-local function init(env)
-    local engine = env and env.engine
-    local schema = engine and engine.schema
-    local config = schema and schema.config
-
-    local sm_enabled = config_get_bool(config, "moran_ja/state_machine/enabled", true)
-    local telemetry_enabled = config_get_bool(config, "moran_ja/telemetry/enabled", false)
-
-    env.state = {
-        current = STATE_NEUTRAL,
-        ja_score = 0,
-        zh_score = 0,
-        last_event_ts = 0,
-        last_decay_ts = os.time(),
-    }
-
-    env.config = {
-        state_machine = {
-            enabled = sm_enabled,
-            window_size = config_get_int(config, "moran_ja/state_machine/window_size", 6),
-            decay_seconds = config_get_int(config, "moran_ja/state_machine/decay_seconds", 25),
-            ja_threshold = config_get_int(config, "moran_ja/state_machine/ja_threshold", 2),
-            zh_threshold = config_get_int(config, "moran_ja/state_machine/zh_threshold", 2),
-        },
-        telemetry = {
-            enabled = telemetry_enabled,
-            log_file = config_get_string(config, "moran_ja/telemetry/log_file", ""),
-            sample_rate = tonumber(config_get_string(config, "moran_ja/telemetry/sample_rate", "1.0")) or 1.0,
-            log_raw_input = config_get_bool(config, "moran_ja/telemetry/log_raw_input", false),
-        },
-    }
-
-    active_telemetry = env.config.telemetry
-
-    publish_state(env)
-    local init_payload = {
-        event = "state",
-        state = env.state.current,
-    }
-    apply_input_telemetry(init_payload, "", env.config and env.config.telemetry)
-    emit_event(init_payload)
-end
-
-local function fini(env)
-    if env and env.state then
-        emit_event({
-            event = "state",
-            state = env.state.current,
-        })
-        env.state.current = STATE_NEUTRAL
-        publish_state(env)
-    end
-    active_telemetry = nil
-end
-
-local function safe_key_repr(key_event)
-    if not key_event then
-        return ""
-    end
-    local ok, value = pcall(function()
-        return key_event:repr()
-    end)
-    if not ok or not value then
-        return ""
-    end
-    return tostring(value)
-end
-
-local function safe_keycode(key_event)
-    if not key_event then
-        return -1
-    end
-    local ok, value = pcall(function()
-        return key_event.keycode
-    end)
-    if not ok or value == nil then
-        return -1
-    end
-    return tonumber(value) or -1
-end
-
+-- ===============================================
+-- 生命周期
+-- ===============================================
 local function normalize_input(input)
     if input == nil then
         return ""
@@ -286,13 +252,134 @@ local function apply_input_telemetry(payload, input, telemetry)
     end
 end
 
+local function init(env)
+    local engine = env and env.engine
+    local schema = engine and engine.schema
+    local config = schema and schema.config
+
+    local sm_enabled = config_get_bool(config, "moran_ja/state_machine/enabled", true)
+    local telemetry_enabled = config_get_bool(config, "moran_ja/telemetry/enabled", false)
+
+    env.state = {
+        current = STATE_NEUTRAL,
+        commit_history = {},  -- 滑动窗口：记录 "ja" 或 "zh"
+        last_event_ts = 0,
+        last_decay_ts = os.time(),
+    }
+
+    env.config = {
+        state_machine = {
+            enabled = sm_enabled,
+            window_size = config_get_int(config, "moran_ja/state_machine/window_size", 8),
+            decay_seconds = config_get_int(config, "moran_ja/state_machine/decay_seconds", 45),
+            ja_threshold = config_get_int(config, "moran_ja/state_machine/ja_threshold", 3),
+            zh_threshold = config_get_int(config, "moran_ja/state_machine/zh_threshold", 2),
+        },
+        telemetry = {
+            enabled = telemetry_enabled,
+            log_file = config_get_string(config, "moran_ja/telemetry/log_file", ""),
+            sample_rate = tonumber(config_get_string(config, "moran_ja/telemetry/sample_rate", "1.0")) or 1.0,
+            log_raw_input = config_get_bool(config, "moran_ja/telemetry/log_raw_input", false),
+        },
+    }
+
+    active_telemetry = env.config.telemetry
+
+    -- ===============================================
+    -- 挂载 commit_notifier：追踪用户实际选择行为
+    -- ===============================================
+    if sm_enabled then
+        env.commit_conn = engine.context.commit_notifier:connect(function(ctx)
+            local cfg = env.config.state_machine
+            if not cfg or not cfg.enabled then
+                return
+            end
+
+            local now = os.time()
+
+            -- 获取 commit 文本，判断语言
+            local ok, commit_text = pcall(function()
+                return ctx:get_commit_text()
+            end)
+            if not ok or not commit_text or #commit_text == 0 then
+                return
+            end
+
+            local committed_lang = has_kana(commit_text) and "ja" or "zh"
+
+            -- 推入滑动窗口
+            push_commit_lang(env.state, committed_lang, cfg.window_size)
+
+            -- 统计窗口内 ja/zh 计数，决定状态迁移
+            local ja_count, zh_count = count_langs(env.state)
+
+            if ja_count >= cfg.ja_threshold then
+                transition_state(env, STATE_JA_BIAS, now)
+            elseif zh_count >= cfg.zh_threshold then
+                transition_state(env, STATE_ZH_BIAS, now)
+            elseif ja_count == 0 and zh_count == 0 then
+                transition_state(env, STATE_NEUTRAL, now)
+            end
+
+            -- 遥测
+            emit_event({
+                event = "commit",
+                committed_lang = committed_lang,
+                state = env.state.current,
+            })
+        end)
+    end
+
+    publish_state(env)
+    local init_payload = {
+        event = "state",
+        state = env.state.current,
+    }
+    apply_input_telemetry(init_payload, "", env.config and env.config.telemetry)
+    emit_event(init_payload)
+end
+
+local function fini(env)
+    if env and env.state then
+        emit_event({
+            event = "state",
+            state = env.state.current,
+        })
+        env.state.current = STATE_NEUTRAL
+        publish_state(env)
+    end
+
+    -- 断开 commit_notifier
+    if env and env.commit_conn then
+        env.commit_conn:disconnect()
+        env.commit_conn = nil
+    end
+
+    active_telemetry = nil
+end
+
+-- ===============================================
+-- telemetry 辅助
+-- ===============================================
+local function safe_key_repr(key_event)
+    if not key_event then
+        return ""
+    end
+    local ok, value = pcall(function()
+        return key_event:repr()
+    end)
+    if not ok or not value then
+        return ""
+    end
+    return tostring(value)
+end
+
 local function detect_telemetry_event(key_event, input)
     local key_repr = safe_key_repr(key_event)
-    local keycode = safe_keycode(key_event)
     local normalized_input = normalize_input(input)
 
     local is_digit_select = string.match(key_repr, "^[1-9]$") ~= nil
-    local is_commit_key = key_repr == "space" or key_repr == "Return" or key_repr == "KP_Enter" or keycode == 0x20
+    local is_commit_key = key_repr == "space" or key_repr == "Return" or key_repr == "KP_Enter"
 
     if is_commit_key and #normalized_input > 0 then
         return "commit"
@@ -309,6 +396,9 @@ local function detect_telemetry_event(key_event, input)
     return nil
 end
 
+-- ===============================================
+-- 核心 processor：仅衰减 + telemetry，打分已移至 commit_notifier
+-- ===============================================
 local function processor(key_event, env)
     if key_event:release() then
         return kNoop
@@ -324,72 +414,18 @@ local function processor(key_event, env)
     local elapsed = now - (state.last_decay_ts or now)
 
     -- ===============================================
-    -- 衰减路径：超时回落 neutral
+    -- 衰减路径：超时清空窗口，回落 neutral
     -- ===============================================
     if cfg.decay_seconds > 0 and elapsed >= cfg.decay_seconds then
-        state.ja_score = 0
-        state.zh_score = 0
+        state.commit_history = {}
         transition_state(env, STATE_NEUTRAL, now)
     end
 
     -- ===============================================
-    -- 轻量启发式：基于当前输入更新 ja/zh 分数
+    -- 遥测事件
     -- ===============================================
     local context = env and env.engine and env.engine.context
     local input = normalize_input(context and context.input or "")
-
-    local has_ascii_letter = false
-    local has_digit = false
-    for i = 1, #input do
-        local c = string.sub(input, i, i)
-        if string.match(c, "%a") then
-            has_ascii_letter = true
-        elseif string.match(c, "%d") then
-            has_digit = true
-        end
-    end
-
-    if #input > 0 then
-        if has_ascii_letter and not has_digit then
-            state.ja_score = state.ja_score + 1
-            if state.zh_score > 0 then
-                state.zh_score = state.zh_score - 1
-            end
-        elseif has_digit and not has_ascii_letter then
-            state.zh_score = state.zh_score + 1
-            if state.ja_score > 0 then
-                state.ja_score = state.ja_score - 1
-            end
-        else
-            if state.ja_score > 0 then
-                state.ja_score = state.ja_score - 1
-            end
-            if state.zh_score > 0 then
-                state.zh_score = state.zh_score - 1
-            end
-        end
-
-        local window = cfg.window_size or 6
-        if window > 0 then
-            if state.ja_score > window then
-                state.ja_score = window
-            end
-            if state.zh_score > window then
-                state.zh_score = window
-            end
-        end
-    end
-
-    -- ===============================================
-    -- 最小状态迁移：达到阈值时进入偏置态
-    -- ===============================================
-    if state.ja_score >= (cfg.ja_threshold or 2) then
-        transition_state(env, STATE_JA_BIAS, now)
-    elseif state.zh_score >= (cfg.zh_threshold or 2) then
-        transition_state(env, STATE_ZH_BIAS, now)
-    elseif state.ja_score == 0 and state.zh_score == 0 then
-        transition_state(env, STATE_NEUTRAL, now)
-    end
 
     local event_type = detect_telemetry_event(key_event, input)
     if event_type ~= nil then

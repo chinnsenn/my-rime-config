@@ -157,29 +157,107 @@ local romaji_to_kana = {
 -- ===============================================
 local cache = {
     input = "",
-    is_romaji = false,
+    exclusive = "ambiguous",  -- "zh" | "ja" | "ambiguous"
     kana_preview = "",
 }
 
 -- ===============================================
--- 日语模式检测：预编译模式数组（避免每次 gmatch）
+-- 日语独占特征：双拼里不存在的编码模式
 -- ===============================================
-local JA_PATTERNS = {
-    "shi", "chi", "tsu", "fu", "nn", "xtsu", "xtu", "ltu",
+local JA_EXCLUSIVE_PATTERNS = {
+    "shi", "chi", "tsu", "xtsu", "xtu", "ltu",
 }
--- 拗音模式：辅音 + y + 元音
+
+-- 拗音辅音集（可产生 CyV 模式）
 local YOUON_CONSONANTS = "kstcnhmyrwgzjdbp"
-local CV_PATTERN = "[kstcnhmyrwgzjdbp][aiueo]"
--- 促音检测模式
-local SOKUON_PATTERN = "[kstcgzjdbp]"
+
+-- 促音检测：辅音重叠
+local SOKUON_CHARS = "kstcgzjdbp"
 
 -- ===============================================
--- 日语候选判定：优先检测来源，其次检测假名
+-- 中文独占特征：罗马字里不存在的编码模式
+-- ===============================================
+-- 自然码双拼韵母中非元音的辅音韵尾
+local ZH_CONSONANT_FINALS = "gnrv"
+-- 自然码声母中日语罗马字不使用的字母
+local ZH_EXCLUSIVE_INITIALS = "xqv"
+
+-- ===============================================
+-- 独占特征检测：返回 "zh" / "ja" / "ambiguous"
+-- 设计原则：日语独占先判，命中即返回；中文独占后判，要求完整双拼音节对
+-- ===============================================
+local SHUANGPIN_INITIALS = "bpmfdtnlgkhjqxrzcsywv"
+
+local function detect_exclusive_feature(input)
+    if not input or #input < 2 then return "ambiguous" end
+
+    local lower = string_lower(input)
+    local len = #lower
+
+    -- ── 日语独占特征（优先判定，命中即返回 "ja"）──
+
+    -- 1. 固定模式 (shi/chi/tsu/xtsu/xtu/ltu)
+    for _, pattern in ipairs(JA_EXCLUSIVE_PATTERNS) do
+        if string_find(lower, pattern, 1, true) then
+            return "ja"
+        end
+    end
+
+    -- 2. nn（拨音）
+    if string_find(lower, "nn", 1, true) then
+        return "ja"
+    end
+
+    -- 3. 拗音（辅音 + y + 元音）
+    for i = 1, len - 2 do
+        local c1 = string_sub(lower, i, i)
+        local c2 = string_sub(lower, i + 1, i + 1)
+        local c3 = string_sub(lower, i + 2, i + 2)
+        if string_find(YOUON_CONSONANTS, c1, 1, true)
+           and c2 == "y"
+           and (c3 == "a" or c3 == "u" or c3 == "o") then
+            return "ja"
+        end
+    end
+
+    -- 4. 促音（辅音重叠 kk/tt/ss...）
+    for i = 1, len - 1 do
+        local c1 = string_sub(lower, i, i)
+        local c2 = string_sub(lower, i + 1, i + 1)
+        if c1 == c2 and string_find(SOKUON_CHARS, c1, 1, true) then
+            return "ja"
+        end
+    end
+
+    -- ── 中文独占特征（严格验证完整双拼音节对）──
+
+    -- 5. x/q/v 作为声母（仅在奇数位检测）
+    for i = 1, len, 2 do
+        local c = string_sub(lower, i, i)
+        if string_find(ZH_EXCLUSIVE_INITIALS, c, 1, true) then
+            return "zh"
+        end
+    end
+
+    -- 6. 辅音韵尾（g/n/r/v 在偶数位，且前一位必须是合法声母）
+    for i = 2, len, 2 do
+        local initial = string_sub(lower, i - 1, i - 1)
+        local final = string_sub(lower, i, i)
+        if string_find(ZH_CONSONANT_FINALS, final, 1, true)
+           and string_find(SHUANGPIN_INITIALS, initial, 1, true) then
+            return "zh"
+        end
+    end
+
+    return "ambiguous"
+end
+
+-- ===============================================
+-- 日语候选判定
 -- ===============================================
 local function has_kana(text)
     if not text or #text == 0 then return false end
     for _, codepoint in utf8_codes(text) do
-        -- 平假名 (U+3040-U+309F) 或 片假名 (U+30A0-U+30FF)
         if (codepoint >= 0x3040 and codepoint <= 0x30FF) then
             return true
         end
@@ -196,94 +274,17 @@ local function is_from_jaroomaji(cand)
 end
 
 local function is_japanese_candidate(cand)
-    -- 1. 来源检测：来自 jaroomaji 翻译器
     if is_from_jaroomaji(cand) then
         return true
     end
-    -- 2. 内容检测：包含假名字符
     return has_kana(cand.text)
 end
 
-local SHUANGPIN_INITIAL_KEYS = "bpmfdtnlgkhjqxrzcsywv"
-local SHUANGPIN_FINAL_KEYS = "aoeiuvnrg"
-local JA_STATE_PROPERTY = "moran_ja/state"
-local JA_STATE_NEUTRAL = "neutral"
-local JA_STATE_JA_BIAS = "ja_bias"
-local JA_STATE_ZH_BIAS = "zh_bias"
-local DEFAULT_GRAY_ZONE_SHUANGPIN_INPUTS = {
-    koko = true,
-    nori = true,
-}
-local gray_zone_shuangpin_inputs = {}
-
-local function has_shuangpin_negative_feature(input)
-    if not gray_zone_shuangpin_inputs[input] then
-        return false
-    end
-
-    local len = #input
-    if len ~= 4 then
-        return false
-    end
-
-    for i = 1, len, 2 do
-        local c1 = string_sub(input, i, i)
-        local c2 = string_sub(input, i + 1, i + 1)
-        if not string_find(SHUANGPIN_INITIAL_KEYS, c1, 1, true)
-           or not string_find(SHUANGPIN_FINAL_KEYS, c2, 1, true) then
-            return false
-        end
-    end
-
-    return true
-end
-
-local function is_romaji_pattern(input)
-    if not input or #input < 3 then return false end
-
-    local lower = string_lower(input)
-
-    -- 强日文特征 1：固定模式
-    for _, pattern in ipairs(JA_PATTERNS) do
-        if string_find(lower, pattern, 1, true) then
-            return true
-        end
-    end
-
-    -- 强日文特征 2：拗音（辅音 + y + 元音）
-    for i = 1, #lower - 2 do
-        local c1 = string_sub(lower, i, i)
-        local c2 = string_sub(lower, i + 1, i + 1)
-        local c3 = string_sub(lower, i + 2, i + 2)
-        if string_find(YOUON_CONSONANTS, c1, 1, true)
-           and c2 == "y"
-           and (c3 == "a" or c3 == "u" or c3 == "o") then
-            return true
-        end
-    end
-
-    -- CV 计数（辅音+元音组合）
-    local cv_count = 0
-    for _ in lower:gmatch(CV_PATTERN) do
-        cv_count = cv_count + 1
-    end
-
-    -- 强日文特征 3：CV 组合足够多
-    if cv_count >= 3 then
-        return true
-    end
-
-    -- 灰区判定：仅在无强特征时应用双拼负特征，保守收敛误判
-    if cv_count >= 2 then
-        return not has_shuangpin_negative_feature(lower)
-    end
-
-    return false
-end
-
 -- ===============================================
--- 罗马字 → 假名预览（优化：O(n) 字符串拼接）
+-- 罗马字 → 假名预览（O(n) 字符串拼接）
 -- ===============================================
+local SOKUON_PATTERN = "[kstcgzjdbp]"
+
 local function romaji_to_kana_preview(input)
     if not input or #input == 0 then return "" end
 
@@ -331,58 +332,19 @@ end
 -- ===============================================
 local function update_cache(input)
     if input ~= cache.input then
-        cache.is_romaji = is_romaji_pattern(input)
+        cache.exclusive = detect_exclusive_feature(input)
         cache.kana_preview = romaji_to_kana_preview(input)
         cache.input = input
     end
 end
 
 -- ===============================================
--- Filter 生命周期
+-- 状态机读取
 -- ===============================================
-local function init(env)
-    env.default_position = 2
-    gray_zone_shuangpin_inputs = {
-        koko = DEFAULT_GRAY_ZONE_SHUANGPIN_INPUTS.koko,
-        nori = DEFAULT_GRAY_ZONE_SHUANGPIN_INPUTS.nori,
-    }
-
-    local config = env.engine.schema.config
-    if config then
-        local pos = config:get_int("moran_ja/default_position")
-        if pos and pos > 0 then
-            env.default_position = pos
-        end
-
-        local ok_list, list = pcall(function()
-            return config:get_list("moran_ja/gray_zone_inputs")
-        end)
-        if ok_list and list then
-            local size = tonumber(list.size) or 0
-            local parsed = {}
-            local parsed_count = 0
-            for i = 0, size - 1 do
-                local item = list:get_at(i)
-                local ok_value, value = pcall(function()
-                    return item and item:get_value()
-                end)
-                if ok_value and value and value ~= "" then
-                    parsed[string_lower(value)] = true
-                    parsed_count = parsed_count + 1
-                end
-            end
-            if parsed_count > 0 then
-                gray_zone_shuangpin_inputs = parsed
-            end
-        end
-    end
-end
-
-local function fini(env)
-    cache.input = ""
-    cache.is_romaji = false
-    cache.kana_preview = ""
-end
+local JA_STATE_PROPERTY = "moran_ja/state"
+local JA_STATE_NEUTRAL = "neutral"
+local JA_STATE_JA_BIAS = "ja_bias"
+local JA_STATE_ZH_BIAS = "zh_bias"
 
 local function resolve_ja_state(context)
     local ok, state = pcall(function()
@@ -397,14 +359,50 @@ local function resolve_ja_state(context)
     return JA_STATE_NEUTRAL
 end
 
-local function prefer_default_position_insertion(is_romaji, ja_state)
-    if ja_state == JA_STATE_ZH_BIAS then
+-- ===============================================
+-- 决策矩阵：独占特征 × 状态机 → 是否用默认位置插入
+-- ===============================================
+-- 返回 true = 中文优先（日语插入 default_position）
+-- 返回 false = 日语优先（日语排第 2 位，中文保留第 1 位）
+local function prefer_zh_first(exclusive, ja_state)
+    -- 独占中文特征 → 无条件中文优先
+    if exclusive == "zh" then
         return true
     end
-    if ja_state == JA_STATE_JA_BIAS then
+
+    -- 独占日文特征 → 无条件日语优先
+    if exclusive == "ja" then
         return false
     end
-    return not is_romaji
+
+    -- ambiguous（重叠区）→ 由状态机裁决
+    if ja_state == JA_STATE_JA_BIAS then
+        return false  -- 日语优先
+    end
+
+    -- zh_bias 或 neutral → 中文优先（neutral 时兜底中文）
+    return true
+end
+
+-- ===============================================
+-- Filter 生命周期
+-- ===============================================
+local function init(env)
+    env.default_position = 2
+
+    local config = env.engine.schema.config
+    if config then
+        local pos = config:get_int("moran_ja/default_position")
+        if pos and pos > 0 then
+            env.default_position = pos
+        end
+    end
+end
+
+local function fini(env)
+    cache.input = ""
+    cache.exclusive = "ambiguous"
+    cache.kana_preview = ""
 end
 
 -- ===============================================
@@ -423,10 +421,10 @@ local function filter(input, env)
 
     update_cache(input_text)
 
-    local is_romaji = cache.is_romaji
+    local exclusive = cache.exclusive
     local kana_preview = cache.kana_preview
     local ja_state = resolve_ja_state(context)
-    local use_default_position_insertion = prefer_default_position_insertion(is_romaji, ja_state)
+    local use_default_position = prefer_zh_first(exclusive, ja_state)
 
     local chinese_candidates = {}
     local japanese_candidates = {}
@@ -444,14 +442,13 @@ local function filter(input, env)
                 new_comment = "[" .. kana_preview .. "]"
             end
 
-            -- 灵魂手术：使用 ShadowCandidate 包装，保留原始 quality 和绑定关系
             local new_cand = ShadowCandidate(cand, cand.type or "jaroomaji", cand.text, new_comment)
             new_cand.preedit = cand.preedit
             ja_n = ja_n + 1
             japanese_candidates[ja_n] = new_cand
         else
             cn_n = cn_n + 1
-            chinese_candidates[cn_n] = cand -- 这里不重建，原样保留，绝对不丢词频！
+            chinese_candidates[cn_n] = cand
         end
     end
 
@@ -462,7 +459,8 @@ local function filter(input, env)
         return
     end
 
-    if not use_default_position_insertion then
+    -- 日语优先模式：中文第1位 + 日语从第2位起
+    if not use_default_position then
         if chinese_candidates[1] then
             yield(chinese_candidates[1])
         end
@@ -477,6 +475,7 @@ local function filter(input, env)
         return
     end
 
+    -- 中文优先模式：日语插入 default_position
     local ja_idx = 1
     local cn_idx = 1
     local output_idx = 1
