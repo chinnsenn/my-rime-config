@@ -77,7 +77,7 @@ engine:
     - matcher
     - matcher@recognizer_emoji
     - matcher@recognizer_secondary
-    - affix_segmentor@japanese_o
+    - affix_segmentor@japanese_only
     - abc_segmentor
     - punct_segmentor
     - fallback_segmentor
@@ -94,6 +94,7 @@ engine:
     - table_translator@english
     - lua_translator@*moran_express_translator@with_reorder
     - lua_translator@*moran_ja_translator # 日語混輸 (包装 jaroomaji, type="jaroomaji")
+    - script_translator@japanese_only
     - lua_translator@*moran_shijian
     - lua_translator@*moran_number
     - lua_translator@*moran_unicode
@@ -185,6 +186,23 @@ jaroomaji_translator:
   enable_encoder: false
   encode_commit_history: false
   preedit_format:
+    - "xform/ //"
+
+japanese_only:
+  tag: japanese_only
+  dictionary: jaroomaji
+  enable_completion: false
+  prism: jaroomaji
+  enable_sentence: true
+  enable_user_dict: true
+  initial_quality: 1.0
+  enable_encoder: false
+  encode_commit_history: false
+  prefix: ";j"
+  suffix: ""
+  tips: "〔日本語〕"
+  preedit_format:
+    - "xform/^;j//"
     - "xform/ //"
     # ひらがな(変換優先順)
     - "xform/nn/ん/"
@@ -624,7 +642,7 @@ recognizer:
     reverse_cangjie5: "^ocj[A-Za-z]*$"
     reverse_zrlf: "^olf[A-Za-z]*$"
     reverse_bopomofo: '^ovy[A-Za-z0-9,.;/\-]*$'
-    japanese_o: "(^ojp[a-z]*$)"
+    japanese_only: ";j[a-z]*$"
 
 recognizer_emoji:
   patterns:
