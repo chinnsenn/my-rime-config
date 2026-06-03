@@ -1,0 +1,38 @@
+# [INPUT]: 依赖 iOS 仓鼠输入法 (Hamster) 主题解析器，被 Hamster App 加载
+# [OUTPUT]: 对外提供 Hamster 极致冷灰主题配置文件 (基于毛玻璃与铝灰质感)
+# [POS]: skins_and_layouts/hamster 的核心主题配色文件，用于竖屏与横屏的暗色模式呈现
+# [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
+
+name: Moran Hybrid Slate Gray
+dark: true
+
+colors:
+  # 键盘主面板背景 (毛玻璃加玄色覆层，极具苹果原生高级感)
+  keyboardBackground: "rgba(18, 18, 20, 0.95)"
+
+  # 普通字符按键样式 (曜石灰，高清晰白字)
+  keyBackground: "rgba(30, 30, 34, 1.0)"
+  keyText: "#E0E0E0"
+  keyBorder: "rgba(0, 0, 0, 0.15)"
+
+  # 功能/修饰按键样式 (退格、回车、符号键)
+  functionalKeyBackground: "rgba(42, 42, 46, 1.0)"
+  functionalKeyText: "#FFFFFF"
+  functionalKeyBorder: "rgba(0, 0, 0, 0.15)"
+
+  # 核心分号键与 "🇯🇵 JA" 专属按键的高亮色 (科技蓝)
+  accentKeyBackground: "#3B82F6"
+  accentKeyText: "#FFFFFF"
+  accentKeyBorder: "#2563EB"
+
+  # 滑动手势预览字符指示色 (极客绿)
+  swipeHintText: "#10B981"
+
+  # 候选词展示栏样式 (居中视野)
+  candidateBackground: "rgba(18, 18, 20, 0.95)"
+  candidateText: "#C8C8CC"
+  activeCandidateBackground: "#3B82F6"
+  activeCandidateText: "#FFFFFF"
+
+  # 光标手势指示灯
+  cursorColor: "#3B82F6"

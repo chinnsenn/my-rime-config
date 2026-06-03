@@ -94,6 +94,7 @@ engine:
     - table_translator@english
     - lua_translator@*moran_express_translator@with_reorder
     - lua_translator@*moran_ja_translator # 日語混輸 (包装 jaroomaji, type="jaroomaji")
+    - table_translator@custom_phrase_ja # 日語自定義短語
     - script_translator@japanese_only
     - lua_translator@*moran_shijian
     - lua_translator@*moran_number
@@ -162,6 +163,14 @@ custom_phrase:
   enable_sentence: false
   initial_quality: 1000
 
+custom_phrase_ja:
+  dictionary: ""
+  user_dict: moran_ja_custom_phrases
+  db_class: stabledb
+  enable_completion: false
+  enable_sentence: false
+  initial_quality: 1000
+
 english:
   tag: english
   dictionary: moran_english
@@ -183,8 +192,8 @@ jaroomaji_translator:
   enable_sentence: true
   enable_user_dict: true
   initial_quality: 1.0
-  enable_encoder: false
-  encode_commit_history: false
+  enable_encoder: true
+  encode_commit_history: true
   preedit_format:
     - "xform/ //"
 

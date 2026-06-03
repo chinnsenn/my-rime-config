@@ -1,0 +1,57 @@
+# [INPUT]: 依赖 Fcitx5-Android 虚拟键盘布局渲染器，被 Android 客户端加载
+# [OUTPUT]: 对外提供 Moran Ja 虚拟键盘按键布局配置 (包含分号常驻与日语一键引导)
+# [POS]: skins_and_layouts/fcitx5 的核心布局定义，解决移动端双拼辅码和日语模式的快速切换
+# [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
+
+[Keyboard]
+Name=Moran Ja Hybrid Layout
+Creator=Antigravity
+Rows=4
+
+# 行 0: 经典第一排字母
+[Row0]
+Keys=q,w,e,r,t,y,u,i,o,p
+Widths=10,10,10,10,10,10,10,10,10,10
+
+# 行 1: 中排字母，将分号 (;) 常驻为字母键，回归物理键盘习惯 (L 右侧)
+[Row1]
+Keys=a,s,d,f,g,h,j,k,l,semicolon
+Widths=10,10,10,10,10,10,10,10,10,10
+# 针对分号键自定义：上滑发送 j，配合常驻的分号，一划即输入 ";j" (日语模式)
+[Key.semicolon]
+Label=;
+Commit=;
+SwipeUp=j
+
+# 行 2: 下排字母与退格
+[Row2]
+Keys=Shift_L,z,x,c,v,b,n,m,BackSpace
+Widths=12,9,9,9,9,9,9,9,16
+
+# 行 3: 功能按键层，提供一键引导日混的实体键
+[Row3]
+Keys=Symbol_Layer,JA_Guide,Space,Period,Return
+Widths=15,15,40,15,15
+
+[Key.Symbol_Layer]
+Label=?123
+Action=SwitchToSymbolLayer
+
+# 核心 "🇯🇵 JA" 引导键：一键直达 Rime 的 japanese_only 模式
+[Key.JA_Guide]
+Label=🇯🇵 JA
+Commit=;j
+# 上滑发送 "`" 以快速调用两分拆字反查前缀
+SwipeUp=`
+
+[Key.Space]
+Label=Space
+Action=Space
+
+[Key.Period]
+Label=.
+Commit=.
+
+[Key.Return]
+Label=Enter
+Action=Return
