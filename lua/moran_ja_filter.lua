@@ -11,6 +11,7 @@
 local utf8_codes = utf8.codes
 local string_sub = string.sub
 local string_lower = string.lower
+local string_upper = string.upper
 local string_find = string.find
 local string_match = string.match
 local table_concat = table.concat
@@ -153,15 +154,6 @@ local romaji_to_kana = {
 }
 
 -- ===============================================
--- 缓存结构：避免相同输入重复计算
--- ===============================================
-local cache = {
-    input = "",
-    exclusive = "ambiguous",  -- "zh" | "ja" | "ambiguous"
-    kana_preview = "",
-}
-
--- ===============================================
 -- 日语独占特征：双拼里不存在的编码模式
 -- ===============================================
 local JA_EXCLUSIVE_PATTERNS = {
@@ -265,16 +257,16 @@ local function has_kana(text)
     return false
 end
 
-local function is_from_jaroomaji(cand)
-    if cand.type == "jaroomaji" then
+local function has_japanese_source(cand)
+    if cand.type == "jaroomaji" or cand.type == "moran_ja" then
         return true
     end
     local genuine = cand:get_genuine()
-    return genuine and genuine.type == "jaroomaji"
+    return genuine and (genuine.type == "jaroomaji" or genuine.type == "moran_ja")
 end
 
 local function is_japanese_candidate(cand)
-    if is_from_jaroomaji(cand) then
+    if has_japanese_source(cand) then
         return true
     end
     return has_kana(cand.text)
@@ -284,6 +276,17 @@ end
 -- 罗马字 → 假名预览（O(n) 字符串拼接）
 -- ===============================================
 local SOKUON_PATTERN = "[kstcgzjdbp]"
+
+local function hiragana_to_katakana(text)
+    local parts = {}
+    for _, codepoint in utf8_codes(text) do
+        if codepoint >= 0x3041 and codepoint <= 0x3096 then
+            codepoint = codepoint + 0x60
+        end
+        parts[#parts + 1] = utf8.char(codepoint)
+    end
+    return table_concat(parts)
+end
 
 local function romaji_to_kana_preview(input)
     if not input or #input == 0 then return "" end
@@ -324,13 +327,18 @@ local function romaji_to_kana_preview(input)
         end
     end
 
-    return table_concat(parts)
+    local kana = table_concat(parts)
+    local has_uppercase = input ~= string_lower(input)
+    if has_uppercase and input == string_upper(input) then
+        kana = hiragana_to_katakana(kana)
+    end
+    return kana
 end
 
 -- ===============================================
 -- 更新缓存
 -- ===============================================
-local function update_cache(input)
+local function update_cache(cache, input)
     if input ~= cache.input then
         cache.exclusive = detect_exclusive_feature(input)
         cache.kana_preview = romaji_to_kana_preview(input)
@@ -389,6 +397,11 @@ end
 -- ===============================================
 local function init(env)
     env.default_position = 2
+    env.cache = {
+        input = "",
+        exclusive = "ambiguous",
+        kana_preview = "",
+    }
 
     local config = env.engine.schema.config
     if config then
@@ -400,9 +413,101 @@ local function init(env)
 end
 
 local function fini(env)
-    cache.input = ""
-    cache.exclusive = "ambiguous"
-    cache.kana_preview = ""
+    env.cache = nil
+end
+
+-- ===============================================
+-- 候选包装与流式排序
+-- ===============================================
+local function append_preview(comment, preview)
+    local original = comment or ""
+    if original == "" then
+        return "[" .. preview .. "]"
+    end
+    return original .. " [" .. preview .. "]"
+end
+
+local function preview_candidate(candidate, kana_preview)
+    if not is_japanese_candidate(candidate) then
+        return candidate, false
+    end
+
+    local comment = candidate.comment or ""
+    if kana_preview ~= "" and kana_preview ~= candidate.text then
+        comment = append_preview(comment, kana_preview)
+    end
+    local shadow = ShadowCandidate(candidate, candidate.type or "jaroomaji", candidate.text, comment)
+    shadow.preedit = candidate.preedit
+    return shadow, true
+end
+
+local function yield_buffer(buffer)
+    for _, candidate in ipairs(buffer) do
+        yield(candidate)
+    end
+end
+
+local function filter_ja_first(input, kana_preview)
+    local pending_japanese = {}
+    local pending_chinese = {}
+    local yielded_head = false
+
+    for candidate in input:iter() do
+        local decorated, is_japanese = preview_candidate(candidate, kana_preview)
+        if is_japanese then
+            if yielded_head then
+                yield(decorated)
+            else
+                pending_japanese[#pending_japanese + 1] = decorated
+            end
+        elseif not yielded_head then
+            yield(decorated)
+            yielded_head = true
+            yield_buffer(pending_japanese)
+            pending_japanese = {}
+        else
+            pending_chinese[#pending_chinese + 1] = decorated
+        end
+    end
+
+    yield_buffer(pending_japanese)
+    yield_buffer(pending_chinese)
+end
+
+local function filter_at_position(input, kana_preview, default_position)
+    local chinese_before_insert = math.max(0, default_position - 1)
+    local pending_japanese = {}
+    local pending_chinese = {}
+    local chinese_count = 0
+    local inserted = false
+
+    for candidate in input:iter() do
+        local decorated, is_japanese = preview_candidate(candidate, kana_preview)
+        if inserted and is_japanese then
+            pending_japanese[#pending_japanese + 1] = decorated
+        elseif inserted then
+            yield(decorated)
+        elseif is_japanese and chinese_count >= chinese_before_insert then
+            yield(decorated)
+            inserted = true
+            yield_buffer(pending_chinese)
+            pending_chinese = {}
+        elseif is_japanese then
+            pending_japanese[#pending_japanese + 1] = decorated
+        elseif chinese_count < chinese_before_insert then
+            yield(decorated)
+            chinese_count = chinese_count + 1
+            if chinese_count >= chinese_before_insert and pending_japanese[1] then
+                yield(table.remove(pending_japanese, 1))
+                inserted = true
+            end
+        else
+            pending_chinese[#pending_chinese + 1] = decorated
+        end
+    end
+
+    yield_buffer(pending_chinese)
+    yield_buffer(pending_japanese)
 end
 
 -- ===============================================
@@ -411,89 +516,21 @@ end
 local function filter(input, env)
     local context = env.engine.context
     local input_text = context.input or ""
-
     if #input_text < 2 then
-        for cand in input:iter() do
-            yield(cand)
+        for candidate in input:iter() do
+            yield(candidate)
         end
         return
     end
 
-    update_cache(input_text)
-
-    local exclusive = cache.exclusive
-    local kana_preview = cache.kana_preview
+    update_cache(env.cache, input_text)
     local ja_state = resolve_ja_state(context)
-    local use_default_position = prefer_zh_first(exclusive, ja_state)
-
-    local chinese_candidates = {}
-    local japanese_candidates = {}
-    local cn_n = 0
-    local ja_n = 0
-    local has_japanese = false
-
-    for cand in input:iter() do
-        local is_ja = is_japanese_candidate(cand)
-
-        if is_ja then
-            has_japanese = true
-            local new_comment = cand.comment or ""
-            if kana_preview ~= "" and kana_preview ~= cand.text then
-                new_comment = "[" .. kana_preview .. "]"
-            end
-
-            local new_cand = ShadowCandidate(cand, cand.type or "jaroomaji", cand.text, new_comment)
-            new_cand.preedit = cand.preedit
-            ja_n = ja_n + 1
-            japanese_candidates[ja_n] = new_cand
-        else
-            cn_n = cn_n + 1
-            chinese_candidates[cn_n] = cand
-        end
-    end
-
-    if not has_japanese then
-        for i = 1, cn_n do
-            yield(chinese_candidates[i])
-        end
+    local use_default_position = prefer_zh_first(env.cache.exclusive, ja_state)
+    if use_default_position then
+        filter_at_position(input, env.cache.kana_preview, env.default_position or 2)
         return
     end
-
-    -- 日语优先模式：中文第1位 + 日语从第2位起
-    if not use_default_position then
-        if chinese_candidates[1] then
-            yield(chinese_candidates[1])
-        end
-
-        for i = 1, ja_n do
-            yield(japanese_candidates[i])
-        end
-
-        for i = 2, cn_n do
-            yield(chinese_candidates[i])
-        end
-        return
-    end
-
-    -- 中文优先模式：日语插入 default_position
-    local ja_idx = 1
-    local cn_idx = 1
-    local output_idx = 1
-    local default_pos = env.default_position or 2
-
-    while cn_idx <= cn_n or ja_idx <= ja_n do
-        if output_idx == default_pos and ja_idx <= ja_n then
-            yield(japanese_candidates[ja_idx])
-            ja_idx = ja_idx + 1
-        elseif cn_idx <= cn_n then
-            yield(chinese_candidates[cn_idx])
-            cn_idx = cn_idx + 1
-        elseif ja_idx <= ja_n then
-            yield(japanese_candidates[ja_idx])
-            ja_idx = ja_idx + 1
-        end
-        output_idx = output_idx + 1
-    end
+    filter_ja_first(input, env.cache.kana_preview)
 end
 
 return { init = init, func = filter, fini = fini }
