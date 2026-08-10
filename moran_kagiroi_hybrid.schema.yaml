@@ -1,0 +1,379 @@
+# Rime schema
+# encoding: utf-8
+# ===================================================================
+# [INPUT]: 依赖 moran 主方案组件，以及已安装的 rime-kagiroi（kagiroi、kagiroi_romaji 与 lua/kagiroi）
+# [OUTPUT]: 对外提供中文自然码主输入与分号前缀 Kagiroi 日文长文转换
+# [POS]:   独立方案文件；不修改 moran、moran_ja_hybrid 或 jaroomaji 的行为
+# [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
+# ===================================================================
+
+schema:
+  schema_id: moran_kagiroi_hybrid
+  name: 魔然·篝火日混
+  version: "1.0"
+  author:
+    - 自然碼發明人：周志農
+    - 魔然方案製作：ksqsf
+    - Kagiroi：kuroame
+  description: |
+    魔然中文主输入 + Kagiroi 日文长文输入。
+    中文保持自然码候选与快捷键；输入分号后进入 Kagiroi 罗马字路径。
+    依赖：安装 rimeinn/rime-kagiroi 后再部署本方案。
+  dependencies:
+    - moran_fixed
+    - moran_sentence
+    - moran_reverse
+    - moran_charset
+    - moran_english
+    - kagiroi
+    - kagiroi_romaji
+    - stroke
+    - tiger
+    - cangjie5
+    - bopomofo
+    - zrlf
+
+switches:
+  - name: ascii_mode
+    states: [中文, 西文]
+  - name: full_shape
+    states: [半角, 全角]
+  - name: traditionalization
+    states: [汉字, 漢字]
+  - name: ascii_punct
+    states: [。，, ．，]
+  - name: extended_charset
+    states: [通用, 增廣]
+  - name: inflexible
+    states: [動詞, 固詞]
+  - name: emoji
+    states: [🈚, 🈶]
+  - name: chaifen
+    states: [不拆, 扌斥]
+  - name: pinyinhint
+    states: [🔇, 🔊]
+  - name: unicode_comment
+    states: [U關, U開]
+  - options: [std_opencc, std_tw, std_hk, std_dzing]
+    reset: 0
+    states: [通, 臺, 港, 寍]
+
+engine:
+  processors:
+    - key_binder
+    - lua_processor@*moran_pin*pin_processor
+    - lua_processor@*moran_processor
+    - ascii_composer
+    - recognizer
+    - lua_processor@*kagiroi/kagiroi_kana_speller
+    - speller
+    - punctuator
+    - selector
+    - navigator
+    - express_editor
+  segmentors:
+    - ascii_segmentor
+    - matcher
+    - matcher@recognizer_emoji
+    - matcher@recognizer_secondary
+    - affix_segmentor@kagiroi
+    - abc_segmentor
+    - punct_segmentor
+    - fallback_segmentor
+  translators:
+    - punct_translator
+    - reverse_lookup_translator@reverse_tick
+    - reverse_lookup_translator@reverse_universal
+    - reverse_lookup_translator@reverse_tiger
+    - reverse_lookup_translator@reverse_stroke
+    - reverse_lookup_translator@reverse_cangjie5
+    - reverse_lookup_translator@reverse_zrlf
+    - reverse_lookup_translator@reverse_bopomofo
+    - table_translator@custom_phrase
+    - table_translator@english
+    - lua_translator@*moran_express_translator@with_reorder
+    - lua_translator@*kagiroi/kagiroi_translator
+    - lua_translator@*moran_shijian
+    - lua_translator@*moran_number
+    - lua_translator@*moran_unicode
+    - lua_translator@*moran_pin*panacea_translator
+  filters:
+    - lua_filter@*moran_reorder_filter
+    - lua_filter@*moran_pin*pin_filter
+    - lua_filter@*moran_charset_filter
+    - lua_filter@*moran_ijrq_filter
+    - lua_filter@*moran_hint_filter
+    - simplifier@emoji
+    - simplifier@chaifen
+    - simplifier@pinyinhint
+    - simplifier@std_hk
+    - simplifier@std_tw
+    - simplifier@std_dzing
+    - simplifier@simplifier
+    - lua_filter@*moran_charset_comment_filter
+    - lua_filter@*moran_unicode_display_filter
+    - lua_filter@*moran_english_filter
+    - uniquifier
+
+speller:
+  # Kagiroi 处理器会将 ; 后的罗马字转为平假名；此字母表同时容纳自然码与平假名。
+  alphabet: ょぁぃぅぇぉあいうえおかきくけこがぎぐげごさしすせそざじずぜぞたちつてとだぢづでどなにぬねのはひふへほばびぶべぼぱぴぷぺぽまみむめもやゆよらりるれろわゐ𛄟ゑをんゃっゕゖーゅabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ/;-
+  delimiter: " '"
+  auto_select: true
+  auto_select_pattern: ^;(\w+|;)
+  algebra:
+    __patch:
+      - moran:/algebra/user_force_top?
+      - moran:/algebra/user_sentence_top?
+      - moran:/algebra/generate_code
+      - moran:/algebra/user_sentence_bottom?
+      - moran:/algebra/user_force_bottom?
+
+smart:
+  dictionary: moran.extended
+  user_dict: moran_kagiroi_hybrid
+  prism: moran
+  initial_quality: 5
+  max_homophones: 7
+  spelling_hints: 3
+  contextual_suggestions: true
+  preedit_format:
+    - xform/([a-z][a-z][a-z][a-z])o/$1°/
+  core_word_length: 4
+  max_word_length: 10
+
+fixed:
+  dictionary: moran_fixed_simp
+  initial_quality: 100
+  enable_completion: false
+  enable_sentence: false
+  enable_user_dict: false
+  enable_encoder: false
+  encode_commit_history: true
+
+custom_phrase:
+  dictionary: ""
+  user_dict: moran_custom_phrases
+  db_class: stabledb
+  enable_completion: false
+  enable_sentence: false
+  initial_quality: 1000
+
+english:
+  tag: english
+  dictionary: moran_english
+  prism: moran_english
+  enable_completion: true
+  enable_sentence: false
+  enable_user_dict: true
+  initial_quality: -1
+  enable_encoder: false
+  encode_commit_history: false
+  comment_format:
+    - xform/.*//
+
+# Kagiroi 前缀段：分号本身属于模式标记，随后输入按 Kagiroi 罗马字即时转假名。
+kagiroi:
+  tag: kagiroi
+  prefix: ";"
+  suffix: ""
+  tips: "〔日本語·Kagiroi〕"
+  layout: romaji
+  speller:
+    # 排除分号，避免前缀被 Kagiroi 罗马字处理器当作输入内容。
+    alphabet: -qwertyuiopasdfghjklzxcvbnm
+  translator:
+    sentence:
+      size: 2
+    input_mapping:
+      # 词尾单 n 直接解释为拨音，连续日文保持标准输入节奏。
+      - xform/^(.*)n$/$1ん$/
+  gikun:
+    delimiter: "/"
+
+
+simplifier:
+  option_name: traditionalization
+  opencc_config: s2t.json
+  tags: [abc, number]
+
+chaifen:
+  option_name: chaifen
+  opencc_config: moran_chaifen.json
+  tips: char
+  show_in_comment: true
+  comment_format:
+    - "xform/-/ /"
+    - "xform/〕〔/｜/"
+
+pinyinhint:
+  option_name: pinyinhint
+  opencc_config: moran_pinyinhint.json
+  tips: char
+  show_in_comment: true
+  comment_format:
+    __include: :/chaifen/comment_format
+
+emoji:
+  opencc_config: moran_emoji.json
+  option_name: emoji
+  tips: none
+  tags: [has_emoji]
+
+std_hk:
+  opencc_config: t2hk.json
+  option_name: std_hk
+  tags: [abc]
+
+std_tw:
+  opencc_config: t2tw.json
+  option_name: std_tw
+  tags: [abc]
+
+std_dzing:
+  opencc_config: moran_dzing.json
+  option_name: std_dzing
+  tips: all
+  tags: [abc]
+
+reverse_format:
+  target: smart
+  comment_format:
+    - xform/(\w\w);(\w\w)/$1[$2]/
+  preedit_format:
+    - xform/^o(lf|bh|cj|vy|hm)//
+
+reverse_tiger:
+  tag: reverse_tiger
+  dictionary: tiger
+  enable_completion: true
+  prefix: "ohm"
+  tips: 〔虎碼〕
+  __include: reverse_format
+
+reverse_universal:
+  tag: reverse_universal
+  dictionary: moran.chars
+  tips: 〔通配〕
+  __include: reverse_format
+
+reverse_stroke:
+  tag: reverse_stroke
+  dictionary: stroke
+  prefix: "obh"
+  enable_completion: true
+  tips: 〔橫h豎s撇p捺n折z〕
+  __include: reverse_format
+
+reverse_cangjie5:
+  tag: reverse_cangjie5
+  dictionary: cangjie5
+  prefix: "ocj"
+  enable_completion: true
+  tips: 〔倉頡五代〕
+  __include: reverse_format
+
+reverse_zrlf:
+  tag: reverse_zrlf
+  dictionary: zrlf
+  prefix: "olf"
+  enable_completion: true
+  tips: 〔兩分〕
+  __include: reverse_format
+
+reverse_bopomofo:
+  tag: reverse_bopomofo
+  dictionary: terra_pinyin
+  prism: bopomofo
+  prefix: "ovy"
+  enable_completion: true
+  tips: 〔注音符號〕
+  comment_format:
+    - xform/(\w\w);(\w\w)/$1[$2]/
+  preedit_format:
+    - xform/^o(lf|bh|cj|vy)//
+    - "xlit|1qaz2wsxedcrfv5tgbyhnujm8ik,9ol.0p;/- 6347'|ㄅㄆㄇㄈㄉㄊㄋㄌㄍㄎㄏㄐㄑㄒㄓㄔㄕㄖㄗㄘㄙㄧㄨㄩㄚㄛㄜㄝㄞㄟㄠㄡㄢㄣㄤㄥㄦˉˊˇˋ˙ |"
+  __include: reverse_format
+
+reverse_tick:
+  __include: reverse_zrlf
+  tag: reverse_tick
+  prefix: "`"
+
+punctuator:
+  import_preset: symbols
+  half_shape:
+    ",": ["，", "、"]
+    ".": { commit: "。" }
+    "/": ["/", "・", "…", "／"]
+    "?": { commit: "？" }
+    "!": { commit: "！" }
+
+key_binder:
+  import_preset: default
+  custom_bindings:
+    __append: []
+  bindings:
+    __patch:
+      - :/key_binder/custom_bindings?
+      - moran:/key_bindings/moran_tab
+      - moran:/key_bindings/moran_switches
+      - moran:/key_bindings/moran_keypad
+      - moran:/key_bindings/moran_toggle_inflexible
+
+recognizer:
+  import_preset: default
+  patterns:
+    unicode: "^U[a-fA-F0-9]+"
+    number: "^S[0-9\\.]+"
+    shijian: "^N[0-9]+"
+    uppercase: "[A-Z][-_+.'A-Za-z]*$"
+    punct: "^/([0-9]0?|[A-Za-z]+)$"
+    reverse_universal: "(^(`[a-z`]+))|(^([a-z]{2}(`[a-z`]?|[a-z`]`))|^([a-z]{4}`))"
+    reverse_tick: "(^`$)|(^`[a-zA-Z]+$)"
+    reverse_tiger: "^ohm[a-z]+$"
+    reverse_stroke: "^obh[A-Za-z]*$"
+    reverse_cangjie5: "^ocj[A-Za-z]*$"
+    reverse_zrlf: "^olf[A-Za-z]*$"
+    reverse_bopomofo: '^ovy[A-Za-z0-9,.;/\-]*$'
+    kagiroi: "^;.*$"
+
+recognizer_emoji:
+  patterns:
+    has_emoji: "(^[a-np-z][a-z/]*$)|(^[a-z]$)|(^ou[a-z/]*$)"
+
+recognizer_secondary:
+  patterns:
+    english: "(^[A-Za-z]{4}[A-Za-z]*)|(^[A-Z][A-Za-z]*)|(^[a-z][A-Z][a-zA-Z]*)|(^[a-z][a-z][A-Z][a-zA-Z]*)"
+
+moran:
+  quick_code_indicator: "⚡️"
+  quick_code_in_sentence_making: true
+  enable_word_filter: false
+  word_filter_match_indicator: {}
+  ijrq:
+    enable: false
+    show_hint: true
+    enable_word: false
+    enable_word_defer: 1
+    enable_word_delay: 0
+  enable_aux_hint: false
+  enable_quick_code_hint: false
+  quick_code_hint_indicator: null
+  quick_code_hint_skip_chars: false
+  inject_fixed_chars: false
+  inject_fixed_words: true
+  inject_prioritize: "any"
+  pin:
+    enable: true
+    indicator: "📌"
+    panacea:
+      prompt: "〔加詞〕"
+      infix: "//"
+      freestyle: false
+  charset: both
+  shorthands: false
+
+__include: moran:/octagram/enable_for_sentence
+
+__patch: moran.custom:/patch?
