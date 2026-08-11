@@ -7,8 +7,6 @@
 
 local kNoop = 2
 
-local active_telemetry = nil
-
 -- ===============================================
 -- JSONL telemetry（最小骨架）
 -- ===============================================
@@ -60,8 +58,7 @@ local function to_jsonl_line(event_table)
     return "{" .. table.concat(parts, ",") .. "}\n"
 end
 
-local function emit_event(event_table)
-    local telemetry = active_telemetry
+local function emit_event(telemetry, event_table)
     if not telemetry or not telemetry.enabled then
         return
     end
@@ -112,6 +109,64 @@ local function has_kana(text)
         end
     end
     return false
+end
+
+local CHINESE_CANDIDATE_TYPES = {
+    table = true,
+    phrase = true,
+    user_phrase = true,
+    sentence = true,
+    fixed = true,
+    pinned = true,
+    simplified = true,
+}
+
+local JAPANESE_CANDIDATE_TYPES = {
+    jaroomaji = true,
+    moran_ja = true,
+    kagiroi = true,
+}
+
+local function safe_candidate_type(candidate)
+    if not candidate then
+        return nil
+    end
+    local ok, candidate_type = pcall(function()
+        return candidate.type
+    end)
+    return ok and candidate_type or nil
+end
+
+local function safe_genuine(candidate)
+    if not candidate then
+        return nil
+    end
+    local ok, genuine = pcall(function()
+        return candidate:get_genuine()
+    end)
+    return ok and genuine or nil
+end
+
+local function selected_language(context)
+    local ok, candidate = pcall(function()
+        return context:get_selected_candidate()
+    end)
+    if not ok or not candidate then
+        return nil
+    end
+
+    local candidate_type = safe_candidate_type(candidate)
+    local genuine_type = safe_candidate_type(safe_genuine(candidate))
+    if JAPANESE_CANDIDATE_TYPES[candidate_type] or JAPANESE_CANDIDATE_TYPES[genuine_type] then
+        return "ja"
+    end
+    if has_kana(candidate.text) then
+        return "ja"
+    end
+    if CHINESE_CANDIDATE_TYPES[candidate_type] or CHINESE_CANDIDATE_TYPES[genuine_type] then
+        return "zh"
+    end
+    return nil
 end
 
 -- ===============================================
@@ -182,6 +237,22 @@ local function count_langs(state)
         end
     end
     return ja_count, zh_count
+end
+
+local function resolve_commit_state(committed_lang, ja_count, zh_count, cfg)
+    if committed_lang == "ja" and ja_count >= cfg.ja_threshold then
+        return STATE_JA_BIAS
+    end
+    if committed_lang == "zh" and zh_count >= cfg.zh_threshold then
+        return STATE_ZH_BIAS
+    end
+    if ja_count >= cfg.ja_threshold then
+        return STATE_JA_BIAS
+    end
+    if zh_count >= cfg.zh_threshold then
+        return STATE_ZH_BIAS
+    end
+    return STATE_NEUTRAL
 end
 
 -- ===============================================
@@ -283,8 +354,6 @@ local function init(env)
         },
     }
 
-    active_telemetry = env.config.telemetry
-
     -- ===============================================
     -- 挂载 commit_notifier：追踪用户实际选择行为
     -- ===============================================
@@ -297,7 +366,7 @@ local function init(env)
 
             local now = os.time()
 
-            -- 获取 commit 文本，判断语言
+            -- 获取 commit 文本与已选候选身份
             local ok, commit_text = pcall(function()
                 return ctx:get_commit_text()
             end)
@@ -305,24 +374,23 @@ local function init(env)
                 return
             end
 
-            local committed_lang = has_kana(commit_text) and "ja" or "zh"
+            local committed_lang = selected_language(ctx)
+            if not committed_lang then
+                return
+            end
 
             -- 推入滑动窗口
             push_commit_lang(env.state, committed_lang, cfg.window_size)
+            env.state.last_decay_ts = now
 
             -- 统计窗口内 ja/zh 计数，决定状态迁移
             local ja_count, zh_count = count_langs(env.state)
-
-            if ja_count >= cfg.ja_threshold then
-                transition_state(env, STATE_JA_BIAS, now)
-            elseif zh_count >= cfg.zh_threshold then
-                transition_state(env, STATE_ZH_BIAS, now)
-            elseif ja_count == 0 and zh_count == 0 then
-                transition_state(env, STATE_NEUTRAL, now)
-            end
+            local next_state = resolve_commit_state(committed_lang, ja_count, zh_count, cfg)
+            transition_state(env, next_state, now)
+            publish_state(env)
 
             -- 遥测
-            emit_event({
+            emit_event(env.config.telemetry, {
                 event = "commit",
                 committed_lang = committed_lang,
                 state = env.state.current,
@@ -336,12 +404,12 @@ local function init(env)
         state = env.state.current,
     }
     apply_input_telemetry(init_payload, "", env.config and env.config.telemetry)
-    emit_event(init_payload)
+    emit_event(env.config.telemetry, init_payload)
 end
 
 local function fini(env)
     if env and env.state then
-        emit_event({
+        emit_event(env.config and env.config.telemetry, {
             event = "state",
             state = env.state.current,
         })
@@ -355,7 +423,6 @@ local function fini(env)
         env.commit_conn = nil
     end
 
-    active_telemetry = nil
 end
 
 -- ===============================================
@@ -434,7 +501,7 @@ local function processor(key_event, env)
             state = state.current,
         }
         apply_input_telemetry(payload, input, env and env.config and env.config.telemetry)
-        emit_event(payload)
+        emit_event(env.config.telemetry, payload)
     end
 
     state.last_event_ts = now

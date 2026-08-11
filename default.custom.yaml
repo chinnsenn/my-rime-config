@@ -12,6 +12,7 @@ patch:
   schema_list:
     - schema: moran # 魔然·整句模式
     - schema: moran_ja_hybrid # 魔然+日语混合输入
+    - schema: moran_kagiroi_hybrid # 魔然+Kagiroi 日文长文混输
     - schema: jaroomaji # 日本語ローマ字入力
 
   # ===============================================

@@ -1,0 +1,38 @@
+# [INPUT]: 依赖 iOS 仓鼠输入法 (Hamster) 主题解析器，被 Hamster App 加载
+# [OUTPUT]: 对外提供 Hamster 日式暖木主题配置文件 (基于胡桃木与和纸感配色)
+# [POS]: skins_and_layouts/hamster 的核心主题配色文件，用于营造温润书卷意境
+# [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
+
+name: Moran Hybrid Warm Wood
+dark: false
+
+colors:
+  # 键盘主面板背景 (深胡桃木色素雅背景)
+  keyboardBackground: "rgba(42, 30, 23, 0.98)"
+
+  # 普通字符按键样式 (燕麦和纸白，炭墨字)
+  keyBackground: "rgba(244, 241, 234, 1.0)"
+  keyText: "#3A322D"
+  keyBorder: "rgba(100, 80, 70, 0.1)"
+
+  # 功能/修饰按键样式 (暖沙灰，温润低对比度)
+  functionalKeyBackground: "rgba(228, 222, 201, 1.0)"
+  functionalKeyText: "#3A322D"
+  functionalKeyBorder: "rgba(100, 80, 70, 0.1)"
+
+  # 核心分号键与 "🇯🇵 JA" 专属按键的高亮色 (朱砂漆红)
+  accentKeyBackground: "#D94E34"
+  accentKeyText: "#FFFFFF"
+  accentKeyBorder: "#C23B22"
+
+  # 滑动手势预览字符指示色 (木炭棕)
+  swipeHintText: "#7C695A"
+
+  # 候选词展示栏样式 (居中视野)
+  candidateBackground: "rgba(42, 30, 23, 0.98)"
+  candidateText: "#E4DEC9"
+  activeCandidateBackground: "#D94E34"
+  activeCandidateText: "#FFFFFF"
+
+  # 光标手势指示灯
+  cursorColor: "#D94E34"

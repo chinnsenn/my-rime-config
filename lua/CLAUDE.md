@@ -15,9 +15,11 @@ moran_express_translator.lua: 快速翻译器，整合 fixed+smart 双词库
 moran_fix_filter.lua: 固顶码过滤器，处理简快码优先级
 moran_hint_filter.lua: 提示过滤器，显示编码提示
 moran_ijrq_filter.lua: 出简让全过滤器
-moran_ja_filter.lua: 日语混合过滤器，独占特征检测(zh/ja/ambiguous) × commit行为状态机决策矩阵排序
-moran_ja_processor.lua: commit行为状态机，挂载commit_notifier追踪用户实际选择语言，滑动窗口+衰减
+moran_ja_custom_translator.lua: 日语自定义短语边界适配器，包装 custom_phrase_ja 并标记稳定 moran_ja 候选类型
+moran_ja_filter.lua: 日语混合过滤器，按独占特征与提交偏置流式插位，并追加平假名/片假名预览
+moran_ja_processor.lua: 提交行为状态机，按已选候选真实类型追踪中日语言，维护滑动窗口、阈值夺权与活动衰减
 moran_ja_translator.lua: jaroomaji 包装翻译器，标记 type="jaroomaji"
+moran_kagiroi_selector.lua: Kagiroi 前缀段数字选词处理器，按当前页选择 1–0 对应候选
 moran_number.lua: 数字翻译器，大写数字转换
 moran_pin.lua: 固顶词处理器/过滤器
 moran_processor.lua: 按键处理器

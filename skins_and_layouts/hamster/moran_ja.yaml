@@ -1,0 +1,64 @@
+# [INPUT]: 依赖 iOS 仓鼠输入法 (Hamster) 键盘布局解析器，被 Hamster App 加载
+# [OUTPUT]: 对外提供 Hamster 自定义键盘布局配置 (含一键日语模式、分号键、以及空格滑行映射)
+# [POS]: skins_and_layouts/hamster 的核心布局文件
+# [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
+
+name: Moran Ja Hybrid Layout
+author: Antigravity
+version: 1.0
+
+# 竖屏布局定义
+portrait:
+  # 工具栏：可以定义一些快速功能，或者留空用默认工具栏
+  toolbar:
+    - { label: "🇯🇵 JA", action: { commit: ";j" } }
+    - { label: "兩分", action: { commit: "`" } }
+    - { label: "虎碼", action: { commit: "ohm" } }
+    - { label: "注音", action: { commit: "ovy" } }
+    - { label: "繁/简", action: { rime: "traditionalization" } }
+
+  # 四行主键盘
+  rows:
+    # 第一行：Q-P
+    - - { key: q }
+      - { key: w }
+      - { key: e }
+      - { key: r }
+      - { key: t }
+      - { key: y }
+      - { key: u }
+      - { key: i }
+      - { key: o }
+      - { key: p }
+
+    # 第二行：A-L + 分号键常驻 (QWERTY 物理键盘的逻辑位置)
+    - - { key: a }
+      - { key: s }
+      - { key: d }
+      - { key: f }
+      - { key: g }
+      - { key: h }
+      - { key: j }
+      - { key: k }
+      - { key: l }
+      - { key: ";", label: ";", action: { commit: ";" }, swipe: [{ direction: up, action: { commit: "j" }, label: "j" }] }
+
+    # 第三行：Shift + Z-M + 退格
+    - - { key: shift, width: 1.25 }
+      - { key: z }
+      - { key: x }
+      - { key: c }
+      - { key: v }
+      - { key: b }
+      - { key: n }
+      - { key: m }
+      - { key: backspace, width: 1.25 }
+
+    # 第四行：123数字切换 + 日语专属直达键 + 空格键 (带手势) + 标点与回车
+    - - { key: symbol, label: "?123", width: 1.5 }
+      # 空格左侧的 "🇯🇵 JA" 快捷键：点击一键日语，上滑一键两分反查
+      - { key: ja_guide, label: "🇯🇵 JA", action: { commit: ";j" }, swipe: [{ direction: up, action: { commit: "`" }, label: "`" }], width: 1.5 }
+      # 空格键：长按移动光标；左滑输入 ";j" (日语专属状态)；右滑输入 "`" (两分反查)
+      - { key: space, label: "Space", action: { space: "" }, swipe: [{ direction: left, action: { commit: ";j" }, label: "🇯🇵 JA" }, { direction: right, action: { commit: "`" }, label: "兩分" }], width: 4.0 }
+      - { key: ".", label: "." }
+      - { key: return, label: "Enter", width: 1.5 }
