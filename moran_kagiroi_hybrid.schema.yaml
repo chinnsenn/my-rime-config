@@ -36,6 +36,13 @@ schema:
     - bopomofo
     - zrlf
 
+# Trime 会优先调用与方案同名的主键盘；符号层与数字层供主键盘切换。
+style:
+  keyboards:
+    - moran_kagiroi_hybrid
+    - moran_kagiroi_symbols
+    - number
+
 switches:
   - name: ascii_mode
     states: [中文, 西文]

@@ -13,7 +13,9 @@ tests/ - Lua 行为回归测试 (Rime API 边界 fake、schema 规则执行器)
 
 <config>
 default.custom.yaml - 全局快捷键与方案列表
+trime.custom.yaml - 同文输入法（Trime）键盘配置加载器
 moran.schema.yaml - 魔然主方案配置
 moran_kagiroi_hybrid.schema.yaml - 魔然中文主输入与 Kagiroi 分号前缀日文长文转换方案（依赖 rime-kagiroi）
+moran_kagiroi_hybrid.trime.yaml - 魔然·篝火日混的 Trime 虚拟键盘布局
 installation.yaml - Rime 安装标识
 </config>

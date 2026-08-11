@@ -2,7 +2,6 @@
 > L2 | 父级: /CLAUDE.md
 
 成员清单
-trime/moran_kagiroi_hybrid.trime.yaml: Trime 独立主题与键盘布局，适配魔然·篝火日混的分号 Kagiroi 前缀、斜杠训读分隔符与罗马字输入
 fcitx5/slate_gray.conf: Fcitx5 主题，极致冷灰配色，基于 Hex 颜色码
 fcitx5/warm_wood.conf: Fcitx5 主题，日式暖木与朱砂漆红配色，基于 Hex 颜色码与背景图
 fcitx5/moran_ja.keyboard: Fcitx5 自定义键盘布局，适配自然双拼加分号辅码，定义了右侧常驻分号与 🇯🇵JA 引导键
