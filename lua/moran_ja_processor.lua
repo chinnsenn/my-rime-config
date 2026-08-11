@@ -124,6 +124,7 @@ local CHINESE_CANDIDATE_TYPES = {
 local JAPANESE_CANDIDATE_TYPES = {
     jaroomaji = true,
     moran_ja = true,
+    kagiroi = true,
 }
 
 local function safe_candidate_type(candidate)

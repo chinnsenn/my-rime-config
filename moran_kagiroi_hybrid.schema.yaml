@@ -1,8 +1,8 @@
 # Rime schema
 # encoding: utf-8
 # ===================================================================
-# [INPUT]: 依赖 moran 主方案组件，以及已安装的 rime-kagiroi（kagiroi、kagiroi_romaji 与 lua/kagiroi）
-# [OUTPUT]: 对外提供中文自然码主输入与分号前缀 Kagiroi 日文长文转换
+# [INPUT]: 依赖 moran 主方案组件、jaroomaji 混输组件和已安装的 rime-kagiroi
+# [OUTPUT]: 对外提供中文自然码、日语候选并行显示与 Kagiroi 日文长文转换
 # [POS]:   独立方案文件；不修改 moran、moran_ja_hybrid 或 jaroomaji 的行为
 # [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
 # ===================================================================
@@ -10,14 +10,14 @@
 schema:
   schema_id: moran_kagiroi_hybrid
   name: 魔然·篝火日混
-  version: "1.0"
+  version: "1.3"
   author:
     - 自然碼發明人：周志農
     - 魔然方案製作：ksqsf
     - Kagiroi：kuroame
   description: |
     魔然中文主输入 + Kagiroi 日文长文输入。
-    中文保持自然码候选与快捷键；输入分号后进入 Kagiroi 罗马字路径。
+    中文与日语候选同时显示，按 moran_ja_hybrid 的规则智能排序；Kagiroi 保留日文长句转换。
     依赖：安装 rimeinn/rime-kagiroi 后再部署本方案。
   dependencies:
     - moran_fixed
@@ -25,8 +25,11 @@ schema:
     - moran_reverse
     - moran_charset
     - moran_english
+    - jaroomaji
     - kagiroi
     - kagiroi_romaji
+    - kagiroi_kanji
+    - kagiroi_matrix
     - stroke
     - tiger
     - cangjie5
@@ -60,12 +63,15 @@ switches:
 
 engine:
   processors:
+    # ; 前缀进入 Kagiroi 段后，必须优先把罗马字转为假名。
+    - lua_processor@*kagiroi/kagiroi_kana_speller
+    - lua_processor@*moran_kagiroi_selector
     - key_binder
-    - lua_processor@*moran_pin*pin_processor
-    - lua_processor@*moran_processor
     - ascii_composer
     - recognizer
-    - lua_processor@*kagiroi/kagiroi_kana_speller
+    - lua_processor@*moran_pin*pin_processor
+    - lua_processor@*moran_processor
+    - lua_processor@moran_ja_processor
     - speller
     - punctuator
     - selector
@@ -92,6 +98,8 @@ engine:
     - table_translator@custom_phrase
     - table_translator@english
     - lua_translator@*moran_express_translator@with_reorder
+    - lua_translator@*moran_ja_translator
+    - lua_translator@*moran_ja_custom_translator
     - lua_translator@*kagiroi/kagiroi_translator
     - lua_translator@*moran_shijian
     - lua_translator@*moran_number
@@ -100,6 +108,7 @@ engine:
   filters:
     - lua_filter@*moran_reorder_filter
     - lua_filter@*moran_pin*pin_filter
+    - lua_filter@*moran_ja_filter
     - lua_filter@*moran_charset_filter
     - lua_filter@*moran_ijrq_filter
     - lua_filter@*moran_hint_filter
@@ -116,11 +125,10 @@ engine:
     - uniquifier
 
 speller:
-  # Kagiroi 处理器会将 ; 后的罗马字转为平假名；此字母表同时容纳自然码与平假名。
+  # 自动识别后的罗马字会转为平假名；此字母表同时容纳自然码与平假名。
   alphabet: ょぁぃぅぇぉあいうえおかきくけこがぎぐげごさしすせそざじずぜぞたちつてとだぢづでどなにぬねのはひふへほばびぶべぼぱぴぷぺぽまみむめもやゆよらりるれろわゐ𛄟ゑをんゃっゕゖーゅabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ/;-
   delimiter: " '"
   auto_select: true
-  auto_select_pattern: ^;(\w+|;)
   algebra:
     __patch:
       - moran:/algebra/user_force_top?
@@ -159,6 +167,14 @@ custom_phrase:
   enable_sentence: false
   initial_quality: 1000
 
+custom_phrase_ja:
+  dictionary: ""
+  user_dict: moran_ja_custom_phrases
+  db_class: stabledb
+  enable_completion: false
+  enable_sentence: false
+  initial_quality: 1000
+
 english:
   tag: english
   dictionary: moran_english
@@ -172,15 +188,29 @@ english:
   comment_format:
     - xform/.*//
 
-# Kagiroi 前缀段：分号本身属于模式标记，随后输入按 Kagiroi 罗马字即时转假名。
+jaroomaji_translator:
+  dictionary: jaroomaji
+  enable_completion: false
+  prism: jaroomaji
+  enable_sentence: true
+  enable_user_dict: true
+  initial_quality: 1.0
+  enable_encoder: true
+  encode_commit_history: true
+  preedit_format:
+    - "xform/ //"
+
+# Kagiroi 日文段：输入 ; 后进入，可跨 iOS、Android 与 macOS 使用。
 kagiroi:
+  # 未转换的罗马字不进入 Kagiroi，避免产生 nihoん 这类半转换候选。
   tag: kagiroi
+  # 必须是单个非字母字符；Kagiroi 会把字母或多字符前缀误当作罗马字处理。
   prefix: ";"
   suffix: ""
   tips: "〔日本語·Kagiroi〕"
   layout: romaji
   speller:
-    # 排除分号，避免前缀被 Kagiroi 罗马字处理器当作输入内容。
+    # Kagiroi 罗马字布局。
     alphabet: -qwertyuiopasdfghjklzxcvbnm
   translator:
     sentence:
@@ -373,6 +403,20 @@ moran:
       freestyle: false
   charset: both
   shorthands: false
+
+moran_ja:
+  default_position: 2
+  indicator: "🇯🇵"
+  state_machine:
+    enabled: true
+    window_size: 8
+    decay_seconds: 45
+    ja_threshold: 3
+    zh_threshold: 2
+  telemetry:
+    enabled: false
+    log_file: "moran_kagiroi_hybrid.telemetry.jsonl"
+    sample_rate: 1.0
 
 __include: moran:/octagram/enable_for_sentence
 

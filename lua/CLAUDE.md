@@ -19,6 +19,7 @@ moran_ja_custom_translator.lua: 日语自定义短语边界适配器，包装 cu
 moran_ja_filter.lua: 日语混合过滤器，按独占特征与提交偏置流式插位，并追加平假名/片假名预览
 moran_ja_processor.lua: 提交行为状态机，按已选候选真实类型追踪中日语言，维护滑动窗口、阈值夺权与活动衰减
 moran_ja_translator.lua: jaroomaji 包装翻译器，标记 type="jaroomaji"
+moran_kagiroi_selector.lua: Kagiroi 前缀段数字选词处理器，按当前页选择 1–0 对应候选
 moran_number.lua: 数字翻译器，大写数字转换
 moran_pin.lua: 固顶词处理器/过滤器
 moran_processor.lua: 按键处理器

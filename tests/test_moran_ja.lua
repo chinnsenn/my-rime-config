@@ -72,6 +72,13 @@ test("ShadowCandidate 的 genuine jaroomaji 类型参与日语累计", function(
     end)
 end)
 
+test("Kagiroi 纯汉字候选参与日语累计", function()
+    with_processor(state_config({ ["moran_ja/state_machine/ja_threshold"] = 1 }), function(env)
+        env:commit(fake.candidate("kagiroi", "創価"))
+        fake.equal(env.state.current, processor.ja_bias, "Kagiroi 纯汉字候选应建立日语偏置")
+    end)
+end)
+
 test("纯汉字日语自定义短语经翻译器携带日语身份并累计偏置", function()
     local custom_translator = require("moran_ja_custom_translator")
     local restore_globals = fake.install_rime_globals()
