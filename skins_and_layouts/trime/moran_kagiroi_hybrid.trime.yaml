@@ -1,0 +1,166 @@
+# Rime schema
+# encoding: utf-8
+# ===================================================================
+# [INPUT]: 依赖同文输入法（Trime）的主题与虚拟键盘解析器，以及
+#          moran_kagiroi_hybrid.schema.yaml 的分号 Kagiroi 前缀规则。
+# [OUTPUT]: 提供全宽 QWERTY 主键盘和中日常用符号层；「日」键实际输入
+#           分号，直接开启 Kagiroi 罗马字日文段。
+# [POS]:   skins_and_layouts/trime 的独立 Trime 主题与键盘布局。
+# [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
+# ===================================================================
+
+config_version: "1.0"
+name: "魔然·篝火日混"
+author: "Codex"
+
+# 保留同文内置的功能键与配色，避免覆盖用户已安装主题的基础能力。
+android_keys:
+  __include: trime:/android_keys
+preset_keys:
+  __include: trime:/preset_keys
+  Keyboard_moran_kagiroi_symbols:
+    label: "符"
+    send: Eisu_toggle
+    select: moran_kagiroi_symbols
+  Keyboard_moran_kagiroi_hybrid:
+    label: "ABC"
+    send: Eisu_toggle
+    select: moran_kagiroi_hybrid
+fallback_colors:
+  __include: trime:/fallback_colors
+preset_color_schemes:
+  __include: trime:/preset_color_schemes
+
+style:
+  # 所有会从本布局切换到的键盘必须在此声明。
+  keyboards:
+    - .default
+    - moran_kagiroi_hybrid
+    - moran_kagiroi_symbols
+  horizontal: true
+  proximity_correction: true
+  reset_ascii_mode: false
+  auto_caps: ascii
+
+preset_keyboards:
+  # 主层：保留数字行和完整 QWERTY，适合自然码与 Kagiroi 罗马字共用。
+  moran_kagiroi_hybrid:
+    name: "魔然·篝火日混"
+    author: "Codex"
+    ascii_mode: 0
+    ascii_keyboard: moran_kagiroi_hybrid
+    lock: true
+    width: 10
+    height: 50
+    horizontal_gap: 1
+    vertical_gap: 1
+    label_transform: none
+    keys:
+      # 数字行：S + 数字可继续触发方案中的数字输入；长按是常用符号。
+      - {click: '1', long_click: '!'}
+      - {click: '2', long_click: '@'}
+      - {click: '3', long_click: '#'}
+      - {click: '4', long_click: '$'}
+      - {click: '5', long_click: '%'}
+      - {click: '6', long_click: '^'}
+      - {click: '7', long_click: '&'}
+      - {click: '8', long_click: '*'}
+      - {click: '9', long_click: '('}
+      - {click: '0', long_click: ')'}
+
+      # 罗马字主行。长按保留编程/英文常用符号。
+      - {click: q, long_click: '_'}
+      - {click: w, long_click: '-'}
+      - {click: e, long_click: '+'}
+      - {click: r, long_click: '='}
+      - {click: t, long_click: '|'}
+      - {click: y, long_click: '\\'}
+      - {click: u, long_click: '['}
+      - {click: i, long_click: ']'}
+      - {click: o, long_click: '{'}
+      - {click: p, long_click: '}'}
+
+      # 「日」的实际输出是分号；分号是本方案进入 Kagiroi 日文段的前缀。
+      - {click: a, long_click: select_all}
+      - {click: s, long_click: Home}
+      - {click: d, long_click: End}
+      - {click: f, long_click: Page_Up}
+      - {click: g, long_click: Page_Down}
+      - {click: h, long_click: Left}
+      - {click: j, long_click: Down}
+      - {click: k, long_click: Up}
+      - {click: l, long_click: Right}
+      - {click: ';', label: "日", hint: ";", long_click: ':'}
+
+      # / 必须首层可用：它同时是方案 gikun 的分隔符与常用标点。
+      - {click: z, long_click: '`'}
+      - {click: x, long_click: cut}
+      - {click: c, long_click: copy}
+      - {click: v, long_click: paste}
+      - {click: b, long_click: '~'}
+      - {click: n, long_click: '"'}
+      - {click: m, long_click: "'"}
+      - {click: ',', long_click: '<'}
+      - {click: '.', long_click: '>'}
+      - {click: '/', label: '/', hint: "訓", long_click: '?'}
+
+      # - 是 Kagiroi 罗马字字母表的一部分；长按可直接输入日文长音符。
+      - {click: Shift_L, send_bindings: false, width: 12}
+      - {click: Keyboard_moran_kagiroi_symbols, long_click: Keyboard_number, width: 12}
+      - {click: Mode_switch, label: "中/英", long_click: Menu, width: 12}
+      - {click: space, label: "魔然日混", preview: " ", width: 36}
+      - {click: '-', label: "-", hint: "ー", long_click: "ー", width: 8}
+      - {click: BackSpace, swipe_left: Escape, width: 10}
+      - {click: Return, long_click: CommitComment, width: 10}
+
+  # 第二层只放中日混输高频符号，减少回到主键盘前的路径。
+  moran_kagiroi_symbols:
+    name: "日混符号"
+    author: "Codex"
+    ascii_mode: 1
+    lock: true
+    width: 10
+    height: 50
+    horizontal_gap: 1
+    vertical_gap: 1
+    label_transform: none
+    keys:
+      - {click: '1', long_click: '!'}
+      - {click: '2', long_click: '@'}
+      - {click: '3', long_click: '#'}
+      - {click: '4', long_click: '$'}
+      - {click: '5', long_click: '%'}
+      - {click: '6', long_click: '^'}
+      - {click: '7', long_click: '&'}
+      - {click: '8', long_click: '*'}
+      - {click: '9', long_click: '('}
+      - {click: '0', long_click: ')'}
+
+      - {click: '@'}
+      - {click: '#'}
+      - {click: '￥'}
+      - {click: '&'}
+      - {click: '*'}
+      - {click: '('}
+      - {click: ')'}
+      - {click: '-'}
+      - {click: '_'}
+      - {click: '+'}
+
+      - {click: '、'}
+      - {click: '。'}
+      - {click: '・'}
+      - {click: 'ー'}
+      - {click: '「'}
+      - {click: '」'}
+      - {click: '（'}
+      - {click: '）'}
+      - {click: '['}
+      - {click: ']'}
+
+      - {click: Keyboard_moran_kagiroi_hybrid, long_click: Menu, width: 14}
+      - {click: ',', long_click: '<', width: 10}
+      - {click: space, label: "空格", preview: " ", width: 42}
+      - {click: '.', long_click: '>', width: 10}
+      - {click: BackSpace, swipe_left: Escape, width: 14}
+      - {click: Return, long_click: CommitComment, width: 10}
