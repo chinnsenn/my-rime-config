@@ -42,27 +42,24 @@ style:
     - moran_kagiroi_hybrid
     - moran_kagiroi_hybrid_landscape
     - moran_kagiroi_numbers
-    - moran_kagiroi_symbol_catalog
-    - moran_kagiroi_numbers
-    - moran_kagiroi_symbol_catalog
-    - moran_kagiroi_symbols_english
-    - moran_kagiroi_symbols_chinese
-    - moran_kagiroi_symbols_japanese
-    - moran_kagiroi_symbols_math
-    - moran_kagiroi_symbols_special
-    - moran_kagiroi_symbols_units
-    - moran_kagiroi_symbols_list
-    - moran_kagiroi_symbols_pinyin
-    - moran_kagiroi_symbols_bopomofo
-    - moran_kagiroi_symbols_radicals
-    - moran_kagiroi_symbols_greek
-    - moran_kagiroi_symbols_cyrillic
-    - moran_kagiroi_symbols_latin
-    - moran_kagiroi_symbols_korean
-    - moran_kagiroi_symbols_ipa
-    - moran_kagiroi_symbols_hiragana
-    - moran_kagiroi_symbols_katakana
-    - moran_kagiroi_symbols
+    - moran_kagiroi_symbols_ios
+    - moran_kagiroi_symbols_english_ios
+    - moran_kagiroi_symbols_chinese_ios
+    - moran_kagiroi_symbols_japanese_ios
+    - moran_kagiroi_symbols_math_ios
+    - moran_kagiroi_symbols_special_ios
+    - moran_kagiroi_symbols_units_ios
+    - moran_kagiroi_symbols_list_ios
+    - moran_kagiroi_symbols_pinyin_ios
+    - moran_kagiroi_symbols_bopomofo_ios
+    - moran_kagiroi_symbols_radicals_ios
+    - moran_kagiroi_symbols_greek_ios
+    - moran_kagiroi_symbols_cyrillic_ios
+    - moran_kagiroi_symbols_latin_ios
+    - moran_kagiroi_symbols_korean_ios
+    - moran_kagiroi_symbols_ipa_ios
+    - moran_kagiroi_symbols_hiragana_ios
+    - moran_kagiroi_symbols_katakana_ios
     - number
 
 switches:

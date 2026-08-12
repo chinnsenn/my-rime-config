@@ -21,7 +21,7 @@ preset_keys:
   Keyboard_moran_kagiroi_symbols:
     label: "符"
     send: Eisu_toggle
-    select: moran_kagiroi_symbols
+    select: moran_kagiroi_symbols_ios
   Keyboard_moran_kagiroi_hybrid:
     label: "ABC"
     send: Eisu_toggle
@@ -37,71 +37,71 @@ preset_keys:
   Keyboard_moran_kagiroi_symbols_english:
     label: "英文"
     send: Eisu_toggle
-    select: moran_kagiroi_symbols_english
+    select: moran_kagiroi_symbols_english_ios
   Keyboard_moran_kagiroi_symbols_chinese:
     label: "中文"
     send: Eisu_toggle
-    select: moran_kagiroi_symbols_chinese
+    select: moran_kagiroi_symbols_chinese_ios
   Keyboard_moran_kagiroi_symbols_japanese:
     label: "日文"
     send: Eisu_toggle
-    select: moran_kagiroi_symbols_japanese
+    select: moran_kagiroi_symbols_japanese_ios
   Keyboard_moran_kagiroi_symbols_math:
     label: "数学"
     send: Eisu_toggle
-    select: moran_kagiroi_symbols_math
+    select: moran_kagiroi_symbols_math_ios
   Keyboard_moran_kagiroi_symbols_special:
     label: "特殊"
     send: Eisu_toggle
-    select: moran_kagiroi_symbols_special
+    select: moran_kagiroi_symbols_special_ios
   Keyboard_moran_kagiroi_symbols_units:
     label: "单位"
     send: Eisu_toggle
-    select: moran_kagiroi_symbols_units
+    select: moran_kagiroi_symbols_units_ios
   Keyboard_moran_kagiroi_symbols_list:
     label: "列表"
     send: Eisu_toggle
-    select: moran_kagiroi_symbols_list
+    select: moran_kagiroi_symbols_list_ios
   Keyboard_moran_kagiroi_symbols_pinyin:
     label: "拼音"
     send: Eisu_toggle
-    select: moran_kagiroi_symbols_pinyin
+    select: moran_kagiroi_symbols_pinyin_ios
   Keyboard_moran_kagiroi_symbols_bopomofo:
     label: "注音"
     send: Eisu_toggle
-    select: moran_kagiroi_symbols_bopomofo
+    select: moran_kagiroi_symbols_bopomofo_ios
   Keyboard_moran_kagiroi_symbols_radicals:
     label: "部首"
     send: Eisu_toggle
-    select: moran_kagiroi_symbols_radicals
+    select: moran_kagiroi_symbols_radicals_ios
   Keyboard_moran_kagiroi_symbols_greek:
     label: "希腊"
     send: Eisu_toggle
-    select: moran_kagiroi_symbols_greek
+    select: moran_kagiroi_symbols_greek_ios
   Keyboard_moran_kagiroi_symbols_cyrillic:
     label: "俄文"
     send: Eisu_toggle
-    select: moran_kagiroi_symbols_cyrillic
+    select: moran_kagiroi_symbols_cyrillic_ios
   Keyboard_moran_kagiroi_symbols_latin:
     label: "拉丁"
     send: Eisu_toggle
-    select: moran_kagiroi_symbols_latin
+    select: moran_kagiroi_symbols_latin_ios
   Keyboard_moran_kagiroi_symbols_korean:
     label: "韩文"
     send: Eisu_toggle
-    select: moran_kagiroi_symbols_korean
+    select: moran_kagiroi_symbols_korean_ios
   Keyboard_moran_kagiroi_symbols_ipa:
     label: "音标"
     send: Eisu_toggle
-    select: moran_kagiroi_symbols_ipa
+    select: moran_kagiroi_symbols_ipa_ios
   Keyboard_moran_kagiroi_symbols_hiragana:
     label: "平假"
     send: Eisu_toggle
-    select: moran_kagiroi_symbols_hiragana
+    select: moran_kagiroi_symbols_hiragana_ios
   Keyboard_moran_kagiroi_symbols_katakana:
     label: "片假"
     send: Eisu_toggle
-    select: moran_kagiroi_symbols_katakana
+    select: moran_kagiroi_symbols_katakana_ios
 fallback_colors:
   __include: trime:/fallback_colors
 preset_color_schemes:
@@ -114,25 +114,24 @@ style:
     - moran_kagiroi_hybrid
     - moran_kagiroi_hybrid_landscape
     - moran_kagiroi_numbers
-    - moran_kagiroi_symbol_catalog
-    - moran_kagiroi_symbols_english
-    - moran_kagiroi_symbols_chinese
-    - moran_kagiroi_symbols_japanese
-    - moran_kagiroi_symbols_math
-    - moran_kagiroi_symbols_special
-    - moran_kagiroi_symbols_units
-    - moran_kagiroi_symbols_list
-    - moran_kagiroi_symbols_pinyin
-    - moran_kagiroi_symbols_bopomofo
-    - moran_kagiroi_symbols_radicals
-    - moran_kagiroi_symbols_greek
-    - moran_kagiroi_symbols_cyrillic
-    - moran_kagiroi_symbols_latin
-    - moran_kagiroi_symbols_korean
-    - moran_kagiroi_symbols_ipa
-    - moran_kagiroi_symbols_hiragana
-    - moran_kagiroi_symbols_katakana
-    - moran_kagiroi_symbols
+    - moran_kagiroi_symbols_ios
+    - moran_kagiroi_symbols_english_ios
+    - moran_kagiroi_symbols_chinese_ios
+    - moran_kagiroi_symbols_japanese_ios
+    - moran_kagiroi_symbols_math_ios
+    - moran_kagiroi_symbols_special_ios
+    - moran_kagiroi_symbols_units_ios
+    - moran_kagiroi_symbols_list_ios
+    - moran_kagiroi_symbols_pinyin_ios
+    - moran_kagiroi_symbols_bopomofo_ios
+    - moran_kagiroi_symbols_radicals_ios
+    - moran_kagiroi_symbols_greek_ios
+    - moran_kagiroi_symbols_cyrillic_ios
+    - moran_kagiroi_symbols_latin_ios
+    - moran_kagiroi_symbols_korean_ios
+    - moran_kagiroi_symbols_ipa_ios
+    - moran_kagiroi_symbols_hiragana_ios
+    - moran_kagiroi_symbols_katakana_ios
   horizontal: true
   proximity_correction: true
   reset_ascii_mode: false
@@ -205,7 +204,7 @@ preset_keyboards:
       # - 是 Kagiroi 罗马字字母表的一部分；长按可直接输入日文长音符。
       - {click: Shift_L, send_bindings: false, width: 12}
       # 短按数字、长按常用符号；用提示标明长按切层，避免双入口占位。
-      - {click: Keyboard_moran_kagiroi_numbers, label: "123", hint: "符", long_click: Keyboard_moran_kagiroi_symbols, width: 12}
+      - {click: Keyboard_moran_kagiroi_numbers, label: "123", long_click: Keyboard_moran_kagiroi_symbols, width: 12}
       - {click: Mode_switch, label: "中/英", long_click: Menu, width: 12}
       - {click: space, label: "魔然日混", preview: " ", width: 36}
       - {click: '-', label: "-", hint: "ー", long_click: "ー", width: 8}
@@ -279,7 +278,7 @@ preset_keyboards:
 
       # 双空格留给左右拇指；中段保留 = 0 ÷，与上方数字区形成小键盘。
       - {click: Mode_switch, label: "中/英", long_click: Menu, width: 8}
-      - {click: Keyboard_moran_kagiroi_numbers, label: "123", hint: "符", long_click: Keyboard_moran_kagiroi_symbols, width: 8}
+      - {click: Keyboard_moran_kagiroi_numbers, label: "123", long_click: Keyboard_moran_kagiroi_symbols, width: 8}
       - {click: Shift_L, send_bindings: false, width: 8}
       - {click: "'", long_click: '"', width: 7}
       - {click: space, label: "空格", preview: " ", width: 16}
@@ -335,7 +334,7 @@ preset_keyboards:
       - {click: "／"}
 
       # 数字页仅保留一个返回键；长按直接进入常用符号，节省常驻入口。
-      - {click: Keyboard_moran_kagiroi_hybrid, label: "ABC", hint: "符", long_click: Keyboard_moran_kagiroi_symbols, width: 16}
+      - {click: Keyboard_moran_kagiroi_hybrid, label: "ABC", long_click: Keyboard_moran_kagiroi_symbols, width: 16}
       - {click: Mode_switch, label: "中/英", long_click: Menu, width: 12}
       - {click: space, label: "空格", preview: " ", width: 36}
       - {click: ",", long_click: "<", width: 8}
@@ -1351,6 +1350,996 @@ preset_keyboards:
 
       - {click: Keyboard_moran_kagiroi_hybrid, label: "ABC", hint: "123", long_click: Keyboard_moran_kagiroi_numbers, width: 12}
       - {click: Keyboard_moran_kagiroi_symbols, label: "符", hint: "目录", long_click: Keyboard_moran_kagiroi_symbol_catalog, width: 12}
+      - {click: Mode_switch, label: "中/英", long_click: Menu, width: 10}
+      - {click: space, label: "空格", preview: " ", width: 32}
+      - {click: ",", long_click: "<", width: 8}
+      - {click: ".", long_click: ">", width: 8}
+      - {click: BackSpace, swipe_left: Escape, width: 10}
+      - {click: Return, long_click: CommitComment, width: 8}
+
+  # iOS 式：左栏短按选择分类；「更多」长按跳过一组。
+  moran_kagiroi_symbols_ios:
+    name: "常用符号"
+    author: "Codex"
+    ascii_mode: 1
+    lock: true
+    columns: 30
+    width: 16.6666
+    height: 50
+    keyboard_height_land: 260
+    landscape_split_percent: 1
+    horizontal_gap: 1
+    vertical_gap: 1
+    label_transform: none
+    keys:
+      - {click: Keyboard_moran_kagiroi_symbols, label: "常用", width: 16.6666}
+      - {click: "，"}
+      - {click: "。"}
+      - {click: "！"}
+      - {click: "？"}
+      - {click: "、"}
+      - {click: Keyboard_moran_kagiroi_symbols_english, label: "英文", width: 16.6666}
+      - {click: "・"}
+      - {click: "ー"}
+      - {click: "「"}
+      - {click: "」"}
+      - {click: "『"}
+      - {click: Keyboard_moran_kagiroi_symbols_chinese, label: "中文", width: 16.6666}
+      - {click: "』"}
+      - {click: "（"}
+      - {click: "）"}
+      - {click: "【"}
+      - {click: "】"}
+      - {click: Keyboard_moran_kagiroi_symbols_japanese, label: "日文", width: 16.6666}
+      - {click: "［"}
+      - {click: "］"}
+      - {click: "｛"}
+      - {click: "｝"}
+      - {click: "："}
+      - {click: Keyboard_moran_kagiroi_symbols_math, label: "更多", long_click: Keyboard_moran_kagiroi_symbols_pinyin, width: 16.6666}
+      - {click: "；"}
+      - {click: "…"}
+      - {click: "—"}
+      - {click: "～"}
+      - {click: "·"}
+
+      - {click: Keyboard_moran_kagiroi_hybrid, label: "ABC", long_click: Keyboard_moran_kagiroi_numbers, width: 12}
+      - {click: Keyboard_moran_kagiroi_symbols, label: "符", long_click: Keyboard_moran_kagiroi_symbols_math, width: 12}
+      - {click: Mode_switch, label: "中/英", long_click: Menu, width: 10}
+      - {click: space, label: "空格", preview: " ", width: 32}
+      - {click: ",", long_click: "<", width: 8}
+      - {click: ".", long_click: ">", width: 8}
+      - {click: BackSpace, swipe_left: Escape, width: 10}
+      - {click: Return, long_click: CommitComment, width: 8}
+
+  # iOS 式：左栏短按选择分类；「更多」长按跳过一组。
+  moran_kagiroi_symbols_english_ios:
+    name: "英文符号"
+    author: "Codex"
+    ascii_mode: 1
+    lock: true
+    columns: 30
+    width: 16.6666
+    height: 50
+    keyboard_height_land: 260
+    landscape_split_percent: 1
+    horizontal_gap: 1
+    vertical_gap: 1
+    label_transform: none
+    keys:
+      - {click: Keyboard_moran_kagiroi_symbols, label: "常用", width: 16.6666}
+      - {click: "~"}
+      - {click: "`"}
+      - {click: "!"}
+      - {click: "@"}
+      - {click: "#"}
+      - {click: Keyboard_moran_kagiroi_symbols_english, label: "英文", width: 16.6666}
+      - {click: "$"}
+      - {click: "%"}
+      - {click: "^"}
+      - {click: "&"}
+      - {click: "*"}
+      - {click: Keyboard_moran_kagiroi_symbols_chinese, label: "中文", width: 16.6666}
+      - {click: "_"}
+      - {click: "-"}
+      - {click: "+"}
+      - {click: "="}
+      - {click: "/"}
+      - {click: Keyboard_moran_kagiroi_symbols_japanese, label: "日文", width: 16.6666}
+      - {click: "\\\\"}
+      - {click: "|"}
+      - {click: "<"}
+      - {click: ">"}
+      - {click: "?"}
+      - {click: Keyboard_moran_kagiroi_symbols_math, label: "更多", long_click: Keyboard_moran_kagiroi_symbols_pinyin, width: 16.6666}
+      - {click: "("}
+      - {click: ")"}
+      - {click: "["}
+      - {click: "]"}
+      - {click: "{"}
+
+      - {click: Keyboard_moran_kagiroi_hybrid, label: "ABC", long_click: Keyboard_moran_kagiroi_numbers, width: 12}
+      - {click: Keyboard_moran_kagiroi_symbols, label: "符", long_click: Keyboard_moran_kagiroi_symbols_math, width: 12}
+      - {click: Mode_switch, label: "中/英", long_click: Menu, width: 10}
+      - {click: space, label: "空格", preview: " ", width: 32}
+      - {click: ",", long_click: "<", width: 8}
+      - {click: ".", long_click: ">", width: 8}
+      - {click: BackSpace, swipe_left: Escape, width: 10}
+      - {click: Return, long_click: CommitComment, width: 8}
+
+  # iOS 式：左栏短按选择分类；「更多」长按跳过一组。
+  moran_kagiroi_symbols_chinese_ios:
+    name: "中文符号"
+    author: "Codex"
+    ascii_mode: 1
+    lock: true
+    columns: 30
+    width: 16.6666
+    height: 50
+    keyboard_height_land: 260
+    landscape_split_percent: 1
+    horizontal_gap: 1
+    vertical_gap: 1
+    label_transform: none
+    keys:
+      - {click: Keyboard_moran_kagiroi_symbols, label: "常用", width: 16.6666}
+      - {click: "，"}
+      - {click: "。"}
+      - {click: "！"}
+      - {click: "？"}
+      - {click: "；"}
+      - {click: Keyboard_moran_kagiroi_symbols_english, label: "英文", width: 16.6666}
+      - {click: "："}
+      - {click: "、"}
+      - {click: "“"}
+      - {click: "”"}
+      - {click: "‘"}
+      - {click: Keyboard_moran_kagiroi_symbols_chinese, label: "中文", width: 16.6666}
+      - {click: "’"}
+      - {click: "（"}
+      - {click: "）"}
+      - {click: "【"}
+      - {click: "】"}
+      - {click: Keyboard_moran_kagiroi_symbols_japanese, label: "日文", width: 16.6666}
+      - {click: "《"}
+      - {click: "》"}
+      - {click: "〈"}
+      - {click: "〉"}
+      - {click: "〖"}
+      - {click: Keyboard_moran_kagiroi_symbols_math, label: "更多", long_click: Keyboard_moran_kagiroi_symbols_pinyin, width: 16.6666}
+      - {click: "〗"}
+      - {click: "「"}
+      - {click: "」"}
+      - {click: "『"}
+      - {click: "』"}
+
+      - {click: Keyboard_moran_kagiroi_hybrid, label: "ABC", long_click: Keyboard_moran_kagiroi_numbers, width: 12}
+      - {click: Keyboard_moran_kagiroi_symbols, label: "符", long_click: Keyboard_moran_kagiroi_symbols_math, width: 12}
+      - {click: Mode_switch, label: "中/英", long_click: Menu, width: 10}
+      - {click: space, label: "空格", preview: " ", width: 32}
+      - {click: ",", long_click: "<", width: 8}
+      - {click: ".", long_click: ">", width: 8}
+      - {click: BackSpace, swipe_left: Escape, width: 10}
+      - {click: Return, long_click: CommitComment, width: 8}
+
+  # iOS 式：左栏短按选择分类；「更多」长按跳过一组。
+  moran_kagiroi_symbols_japanese_ios:
+    name: "日文符号"
+    author: "Codex"
+    ascii_mode: 1
+    lock: true
+    columns: 30
+    width: 16.6666
+    height: 50
+    keyboard_height_land: 260
+    landscape_split_percent: 1
+    horizontal_gap: 1
+    vertical_gap: 1
+    label_transform: none
+    keys:
+      - {click: Keyboard_moran_kagiroi_symbols, label: "常用", width: 16.6666}
+      - {click: "、"}
+      - {click: "。"}
+      - {click: "・"}
+      - {click: "ー"}
+      - {click: "〜"}
+      - {click: Keyboard_moran_kagiroi_symbols_english, label: "英文", width: 16.6666}
+      - {click: "「"}
+      - {click: "」"}
+      - {click: "『"}
+      - {click: "』"}
+      - {click: "（"}
+      - {click: Keyboard_moran_kagiroi_symbols_chinese, label: "中文", width: 16.6666}
+      - {click: "）"}
+      - {click: "［"}
+      - {click: "］"}
+      - {click: "｛"}
+      - {click: "｝"}
+      - {click: Keyboard_moran_kagiroi_symbols_japanese, label: "日文", width: 16.6666}
+      - {click: "【"}
+      - {click: "】"}
+      - {click: "〈"}
+      - {click: "〉"}
+      - {click: "〒"}
+      - {click: Keyboard_moran_kagiroi_symbols_math, label: "更多", long_click: Keyboard_moran_kagiroi_symbols_pinyin, width: 16.6666}
+      - {click: "〃"}
+      - {click: "々"}
+      - {click: "〆"}
+      - {click: "〤"}
+      - {click: "〇"}
+
+      - {click: Keyboard_moran_kagiroi_hybrid, label: "ABC", long_click: Keyboard_moran_kagiroi_numbers, width: 12}
+      - {click: Keyboard_moran_kagiroi_symbols, label: "符", long_click: Keyboard_moran_kagiroi_symbols_math, width: 12}
+      - {click: Mode_switch, label: "中/英", long_click: Menu, width: 10}
+      - {click: space, label: "空格", preview: " ", width: 32}
+      - {click: ",", long_click: "<", width: 8}
+      - {click: ".", long_click: ">", width: 8}
+      - {click: BackSpace, swipe_left: Escape, width: 10}
+      - {click: Return, long_click: CommitComment, width: 8}
+
+  # iOS 式：左栏短按选择分类；「更多」长按跳过一组。
+  moran_kagiroi_symbols_math_ios:
+    name: "数学符号"
+    author: "Codex"
+    ascii_mode: 1
+    lock: true
+    columns: 30
+    width: 16.6666
+    height: 50
+    keyboard_height_land: 260
+    landscape_split_percent: 1
+    horizontal_gap: 1
+    vertical_gap: 1
+    label_transform: none
+    keys:
+      - {click: Keyboard_moran_kagiroi_symbols_math, label: "数学", width: 16.6666}
+      - {click: "+"}
+      - {click: "−"}
+      - {click: "×"}
+      - {click: "÷"}
+      - {click: "="}
+      - {click: Keyboard_moran_kagiroi_symbols_special, label: "特殊", width: 16.6666}
+      - {click: "≠"}
+      - {click: "≈"}
+      - {click: "±"}
+      - {click: "∓"}
+      - {click: "%"}
+      - {click: Keyboard_moran_kagiroi_symbols_units, label: "单位", width: 16.6666}
+      - {click: "<"}
+      - {click: ">"}
+      - {click: "≤"}
+      - {click: "≥"}
+      - {click: "∞"}
+      - {click: Keyboard_moran_kagiroi_symbols_list, label: "列表", width: 16.6666}
+      - {click: "√"}
+      - {click: "∛"}
+      - {click: "∑"}
+      - {click: "∏"}
+      - {click: "∫"}
+      - {click: Keyboard_moran_kagiroi_symbols_pinyin, label: "更多", long_click: Keyboard_moran_kagiroi_symbols_cyrillic, width: 16.6666}
+      - {click: "∂"}
+      - {click: "∇"}
+      - {click: "∈"}
+      - {click: "∉"}
+      - {click: "∩"}
+
+      - {click: Keyboard_moran_kagiroi_hybrid, label: "ABC", long_click: Keyboard_moran_kagiroi_numbers, width: 12}
+      - {click: Keyboard_moran_kagiroi_symbols, label: "符", long_click: Keyboard_moran_kagiroi_symbols_math, width: 12}
+      - {click: Mode_switch, label: "中/英", long_click: Menu, width: 10}
+      - {click: space, label: "空格", preview: " ", width: 32}
+      - {click: ",", long_click: "<", width: 8}
+      - {click: ".", long_click: ">", width: 8}
+      - {click: BackSpace, swipe_left: Escape, width: 10}
+      - {click: Return, long_click: CommitComment, width: 8}
+
+  # iOS 式：左栏短按选择分类；「更多」长按跳过一组。
+  moran_kagiroi_symbols_special_ios:
+    name: "特殊符号"
+    author: "Codex"
+    ascii_mode: 1
+    lock: true
+    columns: 30
+    width: 16.6666
+    height: 50
+    keyboard_height_land: 260
+    landscape_split_percent: 1
+    horizontal_gap: 1
+    vertical_gap: 1
+    label_transform: none
+    keys:
+      - {click: Keyboard_moran_kagiroi_symbols_math, label: "数学", width: 16.6666}
+      - {click: "@"}
+      - {click: "#"}
+      - {click: "&"}
+      - {click: "*"}
+      - {click: "_"}
+      - {click: Keyboard_moran_kagiroi_symbols_special, label: "特殊", width: 16.6666}
+      - {click: "~"}
+      - {click: "|"}
+      - {click: "\\\\"}
+      - {click: "^"}
+      - {click: "°"}
+      - {click: Keyboard_moran_kagiroi_symbols_units, label: "单位", width: 16.6666}
+      - {click: "©"}
+      - {click: "®"}
+      - {click: "™"}
+      - {click: "✓"}
+      - {click: "✗"}
+      - {click: Keyboard_moran_kagiroi_symbols_list, label: "列表", width: 16.6666}
+      - {click: "★"}
+      - {click: "☆"}
+      - {click: "♥"}
+      - {click: "♠"}
+      - {click: "♣"}
+      - {click: Keyboard_moran_kagiroi_symbols_pinyin, label: "更多", long_click: Keyboard_moran_kagiroi_symbols_cyrillic, width: 16.6666}
+      - {click: "♦"}
+      - {click: "→"}
+      - {click: "←"}
+      - {click: "↑"}
+      - {click: "↓"}
+
+      - {click: Keyboard_moran_kagiroi_hybrid, label: "ABC", long_click: Keyboard_moran_kagiroi_numbers, width: 12}
+      - {click: Keyboard_moran_kagiroi_symbols, label: "符", long_click: Keyboard_moran_kagiroi_symbols_math, width: 12}
+      - {click: Mode_switch, label: "中/英", long_click: Menu, width: 10}
+      - {click: space, label: "空格", preview: " ", width: 32}
+      - {click: ",", long_click: "<", width: 8}
+      - {click: ".", long_click: ">", width: 8}
+      - {click: BackSpace, swipe_left: Escape, width: 10}
+      - {click: Return, long_click: CommitComment, width: 8}
+
+  # iOS 式：左栏短按选择分类；「更多」长按跳过一组。
+  moran_kagiroi_symbols_units_ios:
+    name: "单位符号"
+    author: "Codex"
+    ascii_mode: 1
+    lock: true
+    columns: 30
+    width: 16.6666
+    height: 50
+    keyboard_height_land: 260
+    landscape_split_percent: 1
+    horizontal_gap: 1
+    vertical_gap: 1
+    label_transform: none
+    keys:
+      - {click: Keyboard_moran_kagiroi_symbols_math, label: "数学", width: 16.6666}
+      - {click: "℃"}
+      - {click: "℉"}
+      - {click: "°"}
+      - {click: "‰"}
+      - {click: "‱"}
+      - {click: Keyboard_moran_kagiroi_symbols_special, label: "特殊", width: 16.6666}
+      - {click: "㎡"}
+      - {click: "㎥"}
+      - {click: "㎞"}
+      - {click: "㎏"}
+      - {click: "㎎"}
+      - {click: Keyboard_moran_kagiroi_symbols_units, label: "单位", width: 16.6666}
+      - {click: "μm"}
+      - {click: "nm"}
+      - {click: "cm"}
+      - {click: "km"}
+      - {click: "kg"}
+      - {click: Keyboard_moran_kagiroi_symbols_list, label: "列表", width: 16.6666}
+      - {click: "g"}
+      - {click: "lb"}
+      - {click: "oz"}
+      - {click: "L"}
+      - {click: "mL"}
+      - {click: Keyboard_moran_kagiroi_symbols_pinyin, label: "更多", long_click: Keyboard_moran_kagiroi_symbols_cyrillic, width: 16.6666}
+      - {click: "Hz"}
+      - {click: "kHz"}
+      - {click: "MHz"}
+      - {click: "GHz"}
+      - {click: "W"}
+
+      - {click: Keyboard_moran_kagiroi_hybrid, label: "ABC", long_click: Keyboard_moran_kagiroi_numbers, width: 12}
+      - {click: Keyboard_moran_kagiroi_symbols, label: "符", long_click: Keyboard_moran_kagiroi_symbols_math, width: 12}
+      - {click: Mode_switch, label: "中/英", long_click: Menu, width: 10}
+      - {click: space, label: "空格", preview: " ", width: 32}
+      - {click: ",", long_click: "<", width: 8}
+      - {click: ".", long_click: ">", width: 8}
+      - {click: BackSpace, swipe_left: Escape, width: 10}
+      - {click: Return, long_click: CommitComment, width: 8}
+
+  # iOS 式：左栏短按选择分类；「更多」长按跳过一组。
+  moran_kagiroi_symbols_list_ios:
+    name: "列表符号"
+    author: "Codex"
+    ascii_mode: 1
+    lock: true
+    columns: 30
+    width: 16.6666
+    height: 50
+    keyboard_height_land: 260
+    landscape_split_percent: 1
+    horizontal_gap: 1
+    vertical_gap: 1
+    label_transform: none
+    keys:
+      - {click: Keyboard_moran_kagiroi_symbols_math, label: "数学", width: 16.6666}
+      - {click: "•"}
+      - {click: "◦"}
+      - {click: "‣"}
+      - {click: "⁃"}
+      - {click: "⁌"}
+      - {click: Keyboard_moran_kagiroi_symbols_special, label: "特殊", width: 16.6666}
+      - {click: "‐"}
+      - {click: "–"}
+      - {click: "—"}
+      - {click: "―"}
+      - {click: "…"}
+      - {click: Keyboard_moran_kagiroi_symbols_units, label: "单位", width: 16.6666}
+      - {click: "①"}
+      - {click: "②"}
+      - {click: "③"}
+      - {click: "④"}
+      - {click: "⑤"}
+      - {click: Keyboard_moran_kagiroi_symbols_list, label: "列表", width: 16.6666}
+      - {click: "⑥"}
+      - {click: "⑦"}
+      - {click: "⑧"}
+      - {click: "⑨"}
+      - {click: "⑩"}
+      - {click: Keyboard_moran_kagiroi_symbols_pinyin, label: "更多", long_click: Keyboard_moran_kagiroi_symbols_cyrillic, width: 16.6666}
+      - {click: "㈠"}
+      - {click: "㈡"}
+      - {click: "㈢"}
+      - {click: "㈣"}
+      - {click: "㈤"}
+
+      - {click: Keyboard_moran_kagiroi_hybrid, label: "ABC", long_click: Keyboard_moran_kagiroi_numbers, width: 12}
+      - {click: Keyboard_moran_kagiroi_symbols, label: "符", long_click: Keyboard_moran_kagiroi_symbols_math, width: 12}
+      - {click: Mode_switch, label: "中/英", long_click: Menu, width: 10}
+      - {click: space, label: "空格", preview: " ", width: 32}
+      - {click: ",", long_click: "<", width: 8}
+      - {click: ".", long_click: ">", width: 8}
+      - {click: BackSpace, swipe_left: Escape, width: 10}
+      - {click: Return, long_click: CommitComment, width: 8}
+
+  # iOS 式：左栏短按选择分类；「更多」长按跳过一组。
+  moran_kagiroi_symbols_pinyin_ios:
+    name: "拼音声调"
+    author: "Codex"
+    ascii_mode: 1
+    lock: true
+    columns: 30
+    width: 16.6666
+    height: 50
+    keyboard_height_land: 260
+    landscape_split_percent: 1
+    horizontal_gap: 1
+    vertical_gap: 1
+    label_transform: none
+    keys:
+      - {click: Keyboard_moran_kagiroi_symbols_pinyin, label: "拼音", width: 16.6666}
+      - {click: "ā"}
+      - {click: "á"}
+      - {click: "ǎ"}
+      - {click: "à"}
+      - {click: "ē"}
+      - {click: Keyboard_moran_kagiroi_symbols_bopomofo, label: "注音", width: 16.6666}
+      - {click: "é"}
+      - {click: "ě"}
+      - {click: "è"}
+      - {click: "ī"}
+      - {click: "í"}
+      - {click: Keyboard_moran_kagiroi_symbols_radicals, label: "部首", width: 16.6666}
+      - {click: "ǐ"}
+      - {click: "ì"}
+      - {click: "ō"}
+      - {click: "ó"}
+      - {click: "ǒ"}
+      - {click: Keyboard_moran_kagiroi_symbols_greek, label: "希腊", width: 16.6666}
+      - {click: "ò"}
+      - {click: "ū"}
+      - {click: "ú"}
+      - {click: "ǔ"}
+      - {click: "ù"}
+      - {click: Keyboard_moran_kagiroi_symbols_cyrillic, label: "更多", long_click: Keyboard_moran_kagiroi_symbols_hiragana, width: 16.6666}
+      - {click: "ǖ"}
+      - {click: "ǘ"}
+      - {click: "ǚ"}
+      - {click: "ǜ"}
+      - {click: "ü"}
+
+      - {click: Keyboard_moran_kagiroi_hybrid, label: "ABC", long_click: Keyboard_moran_kagiroi_numbers, width: 12}
+      - {click: Keyboard_moran_kagiroi_symbols, label: "符", long_click: Keyboard_moran_kagiroi_symbols_math, width: 12}
+      - {click: Mode_switch, label: "中/英", long_click: Menu, width: 10}
+      - {click: space, label: "空格", preview: " ", width: 32}
+      - {click: ",", long_click: "<", width: 8}
+      - {click: ".", long_click: ">", width: 8}
+      - {click: BackSpace, swipe_left: Escape, width: 10}
+      - {click: Return, long_click: CommitComment, width: 8}
+
+  # iOS 式：左栏短按选择分类；「更多」长按跳过一组。
+  moran_kagiroi_symbols_bopomofo_ios:
+    name: "注音符号"
+    author: "Codex"
+    ascii_mode: 1
+    lock: true
+    columns: 30
+    width: 16.6666
+    height: 50
+    keyboard_height_land: 260
+    landscape_split_percent: 1
+    horizontal_gap: 1
+    vertical_gap: 1
+    label_transform: none
+    keys:
+      - {click: Keyboard_moran_kagiroi_symbols_pinyin, label: "拼音", width: 16.6666}
+      - {click: "ㄅ"}
+      - {click: "ㄆ"}
+      - {click: "ㄇ"}
+      - {click: "ㄈ"}
+      - {click: "ㄉ"}
+      - {click: Keyboard_moran_kagiroi_symbols_bopomofo, label: "注音", width: 16.6666}
+      - {click: "ㄊ"}
+      - {click: "ㄋ"}
+      - {click: "ㄌ"}
+      - {click: "ㄍ"}
+      - {click: "ㄎ"}
+      - {click: Keyboard_moran_kagiroi_symbols_radicals, label: "部首", width: 16.6666}
+      - {click: "ㄏ"}
+      - {click: "ㄐ"}
+      - {click: "ㄑ"}
+      - {click: "ㄒ"}
+      - {click: "ㄓ"}
+      - {click: Keyboard_moran_kagiroi_symbols_greek, label: "希腊", width: 16.6666}
+      - {click: "ㄔ"}
+      - {click: "ㄕ"}
+      - {click: "ㄖ"}
+      - {click: "ㄗ"}
+      - {click: "ㄘ"}
+      - {click: Keyboard_moran_kagiroi_symbols_cyrillic, label: "更多", long_click: Keyboard_moran_kagiroi_symbols_hiragana, width: 16.6666}
+      - {click: "ㄙ"}
+      - {click: "ㄧ"}
+      - {click: "ㄨ"}
+      - {click: "ㄩ"}
+      - {click: "ㄚ"}
+
+      - {click: Keyboard_moran_kagiroi_hybrid, label: "ABC", long_click: Keyboard_moran_kagiroi_numbers, width: 12}
+      - {click: Keyboard_moran_kagiroi_symbols, label: "符", long_click: Keyboard_moran_kagiroi_symbols_math, width: 12}
+      - {click: Mode_switch, label: "中/英", long_click: Menu, width: 10}
+      - {click: space, label: "空格", preview: " ", width: 32}
+      - {click: ",", long_click: "<", width: 8}
+      - {click: ".", long_click: ">", width: 8}
+      - {click: BackSpace, swipe_left: Escape, width: 10}
+      - {click: Return, long_click: CommitComment, width: 8}
+
+  # iOS 式：左栏短按选择分类；「更多」长按跳过一组。
+  moran_kagiroi_symbols_radicals_ios:
+    name: "部首"
+    author: "Codex"
+    ascii_mode: 1
+    lock: true
+    columns: 30
+    width: 16.6666
+    height: 50
+    keyboard_height_land: 260
+    landscape_split_percent: 1
+    horizontal_gap: 1
+    vertical_gap: 1
+    label_transform: none
+    keys:
+      - {click: Keyboard_moran_kagiroi_symbols_pinyin, label: "拼音", width: 16.6666}
+      - {click: "一"}
+      - {click: "丨"}
+      - {click: "丶"}
+      - {click: "丿"}
+      - {click: "乙"}
+      - {click: Keyboard_moran_kagiroi_symbols_bopomofo, label: "注音", width: 16.6666}
+      - {click: "亅"}
+      - {click: "二"}
+      - {click: "亠"}
+      - {click: "人"}
+      - {click: "儿"}
+      - {click: Keyboard_moran_kagiroi_symbols_radicals, label: "部首", width: 16.6666}
+      - {click: "入"}
+      - {click: "八"}
+      - {click: "冂"}
+      - {click: "冖"}
+      - {click: "冫"}
+      - {click: Keyboard_moran_kagiroi_symbols_greek, label: "希腊", width: 16.6666}
+      - {click: "几"}
+      - {click: "凵"}
+      - {click: "刀"}
+      - {click: "力"}
+      - {click: "勹"}
+      - {click: Keyboard_moran_kagiroi_symbols_cyrillic, label: "更多", long_click: Keyboard_moran_kagiroi_symbols_hiragana, width: 16.6666}
+      - {click: "匕"}
+      - {click: "匚"}
+      - {click: "匸"}
+      - {click: "十"}
+      - {click: "卜"}
+
+      - {click: Keyboard_moran_kagiroi_hybrid, label: "ABC", long_click: Keyboard_moran_kagiroi_numbers, width: 12}
+      - {click: Keyboard_moran_kagiroi_symbols, label: "符", long_click: Keyboard_moran_kagiroi_symbols_math, width: 12}
+      - {click: Mode_switch, label: "中/英", long_click: Menu, width: 10}
+      - {click: space, label: "空格", preview: " ", width: 32}
+      - {click: ",", long_click: "<", width: 8}
+      - {click: ".", long_click: ">", width: 8}
+      - {click: BackSpace, swipe_left: Escape, width: 10}
+      - {click: Return, long_click: CommitComment, width: 8}
+
+  # iOS 式：左栏短按选择分类；「更多」长按跳过一组。
+  moran_kagiroi_symbols_greek_ios:
+    name: "希腊字母"
+    author: "Codex"
+    ascii_mode: 1
+    lock: true
+    columns: 30
+    width: 16.6666
+    height: 50
+    keyboard_height_land: 260
+    landscape_split_percent: 1
+    horizontal_gap: 1
+    vertical_gap: 1
+    label_transform: none
+    keys:
+      - {click: Keyboard_moran_kagiroi_symbols_pinyin, label: "拼音", width: 16.6666}
+      - {click: "α"}
+      - {click: "β"}
+      - {click: "γ"}
+      - {click: "δ"}
+      - {click: "ε"}
+      - {click: Keyboard_moran_kagiroi_symbols_bopomofo, label: "注音", width: 16.6666}
+      - {click: "ζ"}
+      - {click: "η"}
+      - {click: "θ"}
+      - {click: "ι"}
+      - {click: "κ"}
+      - {click: Keyboard_moran_kagiroi_symbols_radicals, label: "部首", width: 16.6666}
+      - {click: "λ"}
+      - {click: "μ"}
+      - {click: "ν"}
+      - {click: "ξ"}
+      - {click: "ο"}
+      - {click: Keyboard_moran_kagiroi_symbols_greek, label: "希腊", width: 16.6666}
+      - {click: "π"}
+      - {click: "ρ"}
+      - {click: "σ"}
+      - {click: "τ"}
+      - {click: "υ"}
+      - {click: Keyboard_moran_kagiroi_symbols_cyrillic, label: "更多", long_click: Keyboard_moran_kagiroi_symbols_hiragana, width: 16.6666}
+      - {click: "φ"}
+      - {click: "χ"}
+      - {click: "ψ"}
+      - {click: "ω"}
+      - {click: "Α"}
+
+      - {click: Keyboard_moran_kagiroi_hybrid, label: "ABC", long_click: Keyboard_moran_kagiroi_numbers, width: 12}
+      - {click: Keyboard_moran_kagiroi_symbols, label: "符", long_click: Keyboard_moran_kagiroi_symbols_math, width: 12}
+      - {click: Mode_switch, label: "中/英", long_click: Menu, width: 10}
+      - {click: space, label: "空格", preview: " ", width: 32}
+      - {click: ",", long_click: "<", width: 8}
+      - {click: ".", long_click: ">", width: 8}
+      - {click: BackSpace, swipe_left: Escape, width: 10}
+      - {click: Return, long_click: CommitComment, width: 8}
+
+  # iOS 式：左栏短按选择分类；「更多」长按跳过一组。
+  moran_kagiroi_symbols_cyrillic_ios:
+    name: "俄文字母"
+    author: "Codex"
+    ascii_mode: 1
+    lock: true
+    columns: 30
+    width: 16.6666
+    height: 50
+    keyboard_height_land: 260
+    landscape_split_percent: 1
+    horizontal_gap: 1
+    vertical_gap: 1
+    label_transform: none
+    keys:
+      - {click: Keyboard_moran_kagiroi_symbols_cyrillic, label: "俄文", width: 16.6666}
+      - {click: "А"}
+      - {click: "Б"}
+      - {click: "В"}
+      - {click: "Г"}
+      - {click: "Д"}
+      - {click: Keyboard_moran_kagiroi_symbols_latin, label: "拉丁", width: 16.6666}
+      - {click: "Е"}
+      - {click: "Ё"}
+      - {click: "Ж"}
+      - {click: "З"}
+      - {click: "И"}
+      - {click: Keyboard_moran_kagiroi_symbols_korean, label: "韩文", width: 16.6666}
+      - {click: "Й"}
+      - {click: "К"}
+      - {click: "Л"}
+      - {click: "М"}
+      - {click: "Н"}
+      - {click: Keyboard_moran_kagiroi_symbols_ipa, label: "音标", width: 16.6666}
+      - {click: "О"}
+      - {click: "П"}
+      - {click: "Р"}
+      - {click: "С"}
+      - {click: "Т"}
+      - {click: Keyboard_moran_kagiroi_symbols_hiragana, label: "更多", long_click: Keyboard_moran_kagiroi_symbols, width: 16.6666}
+      - {click: "У"}
+      - {click: "Ф"}
+      - {click: "Х"}
+      - {click: "Ц"}
+      - {click: "Ч"}
+
+      - {click: Keyboard_moran_kagiroi_hybrid, label: "ABC", long_click: Keyboard_moran_kagiroi_numbers, width: 12}
+      - {click: Keyboard_moran_kagiroi_symbols, label: "符", long_click: Keyboard_moran_kagiroi_symbols_math, width: 12}
+      - {click: Mode_switch, label: "中/英", long_click: Menu, width: 10}
+      - {click: space, label: "空格", preview: " ", width: 32}
+      - {click: ",", long_click: "<", width: 8}
+      - {click: ".", long_click: ">", width: 8}
+      - {click: BackSpace, swipe_left: Escape, width: 10}
+      - {click: Return, long_click: CommitComment, width: 8}
+
+  # iOS 式：左栏短按选择分类；「更多」长按跳过一组。
+  moran_kagiroi_symbols_latin_ios:
+    name: "拉丁扩展"
+    author: "Codex"
+    ascii_mode: 1
+    lock: true
+    columns: 30
+    width: 16.6666
+    height: 50
+    keyboard_height_land: 260
+    landscape_split_percent: 1
+    horizontal_gap: 1
+    vertical_gap: 1
+    label_transform: none
+    keys:
+      - {click: Keyboard_moran_kagiroi_symbols_cyrillic, label: "俄文", width: 16.6666}
+      - {click: "á"}
+      - {click: "à"}
+      - {click: "â"}
+      - {click: "ä"}
+      - {click: "ã"}
+      - {click: Keyboard_moran_kagiroi_symbols_latin, label: "拉丁", width: 16.6666}
+      - {click: "å"}
+      - {click: "æ"}
+      - {click: "ç"}
+      - {click: "é"}
+      - {click: "è"}
+      - {click: Keyboard_moran_kagiroi_symbols_korean, label: "韩文", width: 16.6666}
+      - {click: "ê"}
+      - {click: "ë"}
+      - {click: "í"}
+      - {click: "ì"}
+      - {click: "î"}
+      - {click: Keyboard_moran_kagiroi_symbols_ipa, label: "音标", width: 16.6666}
+      - {click: "ï"}
+      - {click: "ñ"}
+      - {click: "ó"}
+      - {click: "ò"}
+      - {click: "ô"}
+      - {click: Keyboard_moran_kagiroi_symbols_hiragana, label: "更多", long_click: Keyboard_moran_kagiroi_symbols, width: 16.6666}
+      - {click: "ö"}
+      - {click: "õ"}
+      - {click: "ø"}
+      - {click: "ú"}
+      - {click: "ù"}
+
+      - {click: Keyboard_moran_kagiroi_hybrid, label: "ABC", long_click: Keyboard_moran_kagiroi_numbers, width: 12}
+      - {click: Keyboard_moran_kagiroi_symbols, label: "符", long_click: Keyboard_moran_kagiroi_symbols_math, width: 12}
+      - {click: Mode_switch, label: "中/英", long_click: Menu, width: 10}
+      - {click: space, label: "空格", preview: " ", width: 32}
+      - {click: ",", long_click: "<", width: 8}
+      - {click: ".", long_click: ">", width: 8}
+      - {click: BackSpace, swipe_left: Escape, width: 10}
+      - {click: Return, long_click: CommitComment, width: 8}
+
+  # iOS 式：左栏短按选择分类；「更多」长按跳过一组。
+  moran_kagiroi_symbols_korean_ios:
+    name: "韩文字符"
+    author: "Codex"
+    ascii_mode: 1
+    lock: true
+    columns: 30
+    width: 16.6666
+    height: 50
+    keyboard_height_land: 260
+    landscape_split_percent: 1
+    horizontal_gap: 1
+    vertical_gap: 1
+    label_transform: none
+    keys:
+      - {click: Keyboard_moran_kagiroi_symbols_cyrillic, label: "俄文", width: 16.6666}
+      - {click: "ㄱ"}
+      - {click: "ㄲ"}
+      - {click: "ㄴ"}
+      - {click: "ㄷ"}
+      - {click: "ㄸ"}
+      - {click: Keyboard_moran_kagiroi_symbols_latin, label: "拉丁", width: 16.6666}
+      - {click: "ㄹ"}
+      - {click: "ㅁ"}
+      - {click: "ㅂ"}
+      - {click: "ㅃ"}
+      - {click: "ㅅ"}
+      - {click: Keyboard_moran_kagiroi_symbols_korean, label: "韩文", width: 16.6666}
+      - {click: "ㅆ"}
+      - {click: "ㅇ"}
+      - {click: "ㅈ"}
+      - {click: "ㅉ"}
+      - {click: "ㅊ"}
+      - {click: Keyboard_moran_kagiroi_symbols_ipa, label: "音标", width: 16.6666}
+      - {click: "ㅋ"}
+      - {click: "ㅌ"}
+      - {click: "ㅍ"}
+      - {click: "ㅎ"}
+      - {click: "ㅏ"}
+      - {click: Keyboard_moran_kagiroi_symbols_hiragana, label: "更多", long_click: Keyboard_moran_kagiroi_symbols, width: 16.6666}
+      - {click: "ㅐ"}
+      - {click: "ㅑ"}
+      - {click: "ㅒ"}
+      - {click: "ㅓ"}
+      - {click: "ㅔ"}
+
+      - {click: Keyboard_moran_kagiroi_hybrid, label: "ABC", long_click: Keyboard_moran_kagiroi_numbers, width: 12}
+      - {click: Keyboard_moran_kagiroi_symbols, label: "符", long_click: Keyboard_moran_kagiroi_symbols_math, width: 12}
+      - {click: Mode_switch, label: "中/英", long_click: Menu, width: 10}
+      - {click: space, label: "空格", preview: " ", width: 32}
+      - {click: ",", long_click: "<", width: 8}
+      - {click: ".", long_click: ">", width: 8}
+      - {click: BackSpace, swipe_left: Escape, width: 10}
+      - {click: Return, long_click: CommitComment, width: 8}
+
+  # iOS 式：左栏短按选择分类；「更多」长按跳过一组。
+  moran_kagiroi_symbols_ipa_ios:
+    name: "国际音标"
+    author: "Codex"
+    ascii_mode: 1
+    lock: true
+    columns: 30
+    width: 16.6666
+    height: 50
+    keyboard_height_land: 260
+    landscape_split_percent: 1
+    horizontal_gap: 1
+    vertical_gap: 1
+    label_transform: none
+    keys:
+      - {click: Keyboard_moran_kagiroi_symbols_cyrillic, label: "俄文", width: 16.6666}
+      - {click: "ə"}
+      - {click: "ɪ"}
+      - {click: "ʊ"}
+      - {click: "ɛ"}
+      - {click: "æ"}
+      - {click: Keyboard_moran_kagiroi_symbols_latin, label: "拉丁", width: 16.6666}
+      - {click: "ʌ"}
+      - {click: "ɔ"}
+      - {click: "ɑ"}
+      - {click: "ɒ"}
+      - {click: "ɜ"}
+      - {click: Keyboard_moran_kagiroi_symbols_korean, label: "韩文", width: 16.6666}
+      - {click: "θ"}
+      - {click: "ð"}
+      - {click: "ʃ"}
+      - {click: "ʒ"}
+      - {click: "ŋ"}
+      - {click: Keyboard_moran_kagiroi_symbols_ipa, label: "音标", width: 16.6666}
+      - {click: "ɹ"}
+      - {click: "ɾ"}
+      - {click: "ʔ"}
+      - {click: "ɡ"}
+      - {click: "ɲ"}
+      - {click: Keyboard_moran_kagiroi_symbols_hiragana, label: "更多", long_click: Keyboard_moran_kagiroi_symbols, width: 16.6666}
+      - {click: "ˈ"}
+      - {click: "ˌ"}
+      - {click: "ː"}
+      - {click: "ˑ"}
+      - {click: "˚"}
+
+      - {click: Keyboard_moran_kagiroi_hybrid, label: "ABC", long_click: Keyboard_moran_kagiroi_numbers, width: 12}
+      - {click: Keyboard_moran_kagiroi_symbols, label: "符", long_click: Keyboard_moran_kagiroi_symbols_math, width: 12}
+      - {click: Mode_switch, label: "中/英", long_click: Menu, width: 10}
+      - {click: space, label: "空格", preview: " ", width: 32}
+      - {click: ",", long_click: "<", width: 8}
+      - {click: ".", long_click: ">", width: 8}
+      - {click: BackSpace, swipe_left: Escape, width: 10}
+      - {click: Return, long_click: CommitComment, width: 8}
+
+  # iOS 式：左栏短按选择分类；「更多」长按跳过一组。
+  moran_kagiroi_symbols_hiragana_ios:
+    name: "平假名"
+    author: "Codex"
+    ascii_mode: 1
+    lock: true
+    columns: 30
+    width: 16.6666
+    height: 50
+    keyboard_height_land: 260
+    landscape_split_percent: 1
+    horizontal_gap: 1
+    vertical_gap: 1
+    label_transform: none
+    keys:
+      - {click: Keyboard_moran_kagiroi_symbols_hiragana, label: "平假", width: 16.6666}
+      - {click: "あ"}
+      - {click: "い"}
+      - {click: "う"}
+      - {click: "え"}
+      - {click: "お"}
+      - {click: Keyboard_moran_kagiroi_symbols_katakana, label: "片假", width: 16.6666}
+      - {click: "か"}
+      - {click: "き"}
+      - {click: "く"}
+      - {click: "け"}
+      - {click: "こ"}
+      - {click: Keyboard_moran_kagiroi_symbols, label: "常用", width: 16.6666}
+      - {click: "さ"}
+      - {click: "し"}
+      - {click: "す"}
+      - {click: "せ"}
+      - {click: "そ"}
+      - {click: Keyboard_moran_kagiroi_symbols_japanese, label: "日文", width: 16.6666}
+      - {click: "た"}
+      - {click: "ち"}
+      - {click: "つ"}
+      - {click: "て"}
+      - {click: "と"}
+      - {click: Keyboard_moran_kagiroi_symbols_math, label: "更多", long_click: Keyboard_moran_kagiroi_symbols_english, width: 16.6666}
+      - {click: "な"}
+      - {click: "に"}
+      - {click: "ぬ"}
+      - {click: "ね"}
+      - {click: "の"}
+
+      - {click: Keyboard_moran_kagiroi_hybrid, label: "ABC", long_click: Keyboard_moran_kagiroi_numbers, width: 12}
+      - {click: Keyboard_moran_kagiroi_symbols, label: "符", long_click: Keyboard_moran_kagiroi_symbols_math, width: 12}
+      - {click: Mode_switch, label: "中/英", long_click: Menu, width: 10}
+      - {click: space, label: "空格", preview: " ", width: 32}
+      - {click: ",", long_click: "<", width: 8}
+      - {click: ".", long_click: ">", width: 8}
+      - {click: BackSpace, swipe_left: Escape, width: 10}
+      - {click: Return, long_click: CommitComment, width: 8}
+
+  # iOS 式：左栏短按选择分类；「更多」长按跳过一组。
+  moran_kagiroi_symbols_katakana_ios:
+    name: "片假名"
+    author: "Codex"
+    ascii_mode: 1
+    lock: true
+    columns: 30
+    width: 16.6666
+    height: 50
+    keyboard_height_land: 260
+    landscape_split_percent: 1
+    horizontal_gap: 1
+    vertical_gap: 1
+    label_transform: none
+    keys:
+      - {click: Keyboard_moran_kagiroi_symbols_hiragana, label: "平假", width: 16.6666}
+      - {click: "ア"}
+      - {click: "イ"}
+      - {click: "ウ"}
+      - {click: "エ"}
+      - {click: "オ"}
+      - {click: Keyboard_moran_kagiroi_symbols_katakana, label: "片假", width: 16.6666}
+      - {click: "カ"}
+      - {click: "キ"}
+      - {click: "ク"}
+      - {click: "ケ"}
+      - {click: "コ"}
+      - {click: Keyboard_moran_kagiroi_symbols, label: "常用", width: 16.6666}
+      - {click: "サ"}
+      - {click: "シ"}
+      - {click: "ス"}
+      - {click: "セ"}
+      - {click: "ソ"}
+      - {click: Keyboard_moran_kagiroi_symbols_japanese, label: "日文", width: 16.6666}
+      - {click: "タ"}
+      - {click: "チ"}
+      - {click: "ツ"}
+      - {click: "テ"}
+      - {click: "ト"}
+      - {click: Keyboard_moran_kagiroi_symbols_math, label: "更多", long_click: Keyboard_moran_kagiroi_symbols_english, width: 16.6666}
+      - {click: "ナ"}
+      - {click: "ニ"}
+      - {click: "ヌ"}
+      - {click: "ネ"}
+      - {click: "ノ"}
+
+      - {click: Keyboard_moran_kagiroi_hybrid, label: "ABC", long_click: Keyboard_moran_kagiroi_numbers, width: 12}
+      - {click: Keyboard_moran_kagiroi_symbols, label: "符", long_click: Keyboard_moran_kagiroi_symbols_math, width: 12}
       - {click: Mode_switch, label: "中/英", long_click: Menu, width: 10}
       - {click: space, label: "空格", preview: " ", width: 32}
       - {click: ",", long_click: "<", width: 8}
