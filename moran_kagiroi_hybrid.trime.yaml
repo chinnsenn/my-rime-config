@@ -128,6 +128,8 @@ preset_keyboards:
     width: 7.142857
     height: 48
     keyboard_height_land: 240
+    # 覆盖 Trime 全局「自动分割键盘比例」；1% 仅保留极细分界，避免中间大面积留白。
+    landscape_split_percent: 1
     horizontal_gap: 1
     vertical_gap: 1
     label_transform: none
