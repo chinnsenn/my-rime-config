@@ -10,14 +10,10 @@
 patch:
   "preset_keys/Keyboard_moran_kagiroi_symbols":
     __include: moran_kagiroi_hybrid.trime:/preset_keys/Keyboard_moran_kagiroi_symbols
-  "preset_keys/Keyboard_moran_kagiroi_symbols_quick":
-    __include: moran_kagiroi_hybrid.trime:/preset_keys/Keyboard_moran_kagiroi_symbols_quick
   "preset_keys/Keyboard_moran_kagiroi_hybrid":
     __include: moran_kagiroi_hybrid.trime:/preset_keys/Keyboard_moran_kagiroi_hybrid
   "preset_keys/Keyboard_moran_kagiroi_numbers":
     __include: moran_kagiroi_hybrid.trime:/preset_keys/Keyboard_moran_kagiroi_numbers
-  "preset_keys/Keyboard_moran_kagiroi_numbers_quick":
-    __include: moran_kagiroi_hybrid.trime:/preset_keys/Keyboard_moran_kagiroi_numbers_quick
   "preset_keys/Keyboard_moran_kagiroi_symbol_catalog":
     __include: moran_kagiroi_hybrid.trime:/preset_keys/Keyboard_moran_kagiroi_symbol_catalog
   "preset_keys/Keyboard_moran_kagiroi_symbols_english":
@@ -60,8 +56,6 @@ patch:
     __include: moran_kagiroi_hybrid.trime:/preset_keyboards/moran_kagiroi_hybrid_landscape
   "preset_keyboards/moran_kagiroi_numbers":
     __include: moran_kagiroi_hybrid.trime:/preset_keyboards/moran_kagiroi_numbers
-  "preset_keyboards/moran_kagiroi_numbers_quick":
-    __include: moran_kagiroi_hybrid.trime:/preset_keyboards/moran_kagiroi_numbers_quick
   "preset_keyboards/moran_kagiroi_symbol_catalog":
     __include: moran_kagiroi_hybrid.trime:/preset_keyboards/moran_kagiroi_symbol_catalog
   "preset_keyboards/moran_kagiroi_symbols_english":
@@ -100,8 +94,6 @@ patch:
     __include: moran_kagiroi_hybrid.trime:/preset_keyboards/moran_kagiroi_symbols_katakana
   "preset_keyboards/moran_kagiroi_symbols_ios":
     __include: moran_kagiroi_hybrid.trime:/preset_keyboards/moran_kagiroi_symbols_ios
-  "preset_keyboards/moran_kagiroi_symbols_quick":
-    __include: moran_kagiroi_hybrid.trime:/preset_keyboards/moran_kagiroi_symbols_quick
   "preset_keyboards/moran_kagiroi_symbols_english_ios":
     __include: moran_kagiroi_hybrid.trime:/preset_keyboards/moran_kagiroi_symbols_english_ios
   "preset_keyboards/moran_kagiroi_symbols_chinese_ios":

@@ -22,11 +22,6 @@ preset_keys:
     label: "符"
     send: Eisu_toggle
     select: moran_kagiroi_symbols_ios
-  Keyboard_moran_kagiroi_symbols_quick:
-    label: "符"
-    send: Eisu_toggle
-    # 锁键可进入会被 Trime 记忆的常驻符号页。
-    select: moran_kagiroi_symbols_quick
   Keyboard_moran_kagiroi_hybrid:
     label: "ABC"
     send: Eisu_toggle
@@ -35,11 +30,6 @@ preset_keys:
     label: "123"
     send: Eisu_toggle
     select: moran_kagiroi_numbers
-  Keyboard_moran_kagiroi_numbers_quick:
-    label: "123"
-    send: Eisu_toggle
-    # 不加入 Trime 的锁定键盘记忆；用于单次数字输入的配置侧近似。
-    select: moran_kagiroi_numbers_quick
   Keyboard_moran_kagiroi_symbol_catalog:
     label: "目录"
     send: Eisu_toggle
@@ -124,9 +114,7 @@ style:
     - moran_kagiroi_hybrid
     - moran_kagiroi_hybrid_landscape
     - moran_kagiroi_numbers
-    - moran_kagiroi_numbers_quick
     - moran_kagiroi_symbols_ios
-    - moran_kagiroi_symbols_quick
     - moran_kagiroi_symbols_english_ios
     - moran_kagiroi_symbols_chinese_ios
     - moran_kagiroi_symbols_japanese_ios
@@ -215,12 +203,11 @@ preset_keyboards:
 
       # - 是 Kagiroi 罗马字字母表的一部分；长按可直接输入日文长音符。
       - {click: Shift_L, send_bindings: false, width: 12}
-      # 短按数字、长按常用符号，均先进入不记忆的临时页；页内 🔒 可转为常驻页。
-      - {click: Keyboard_moran_kagiroi_numbers_quick, label: "123", long_click: Keyboard_moran_kagiroi_symbols_quick, width: 12}
+      # 短按数字、长按常用符号；用提示标明长按切层，避免双入口占位。
+      - {click: Keyboard_moran_kagiroi_numbers, label: "123", long_click: Keyboard_moran_kagiroi_symbols, width: 12}
       - {click: Mode_switch, label: "中/英", long_click: Menu, width: 12}
       - {click: space, label: "魔然日混", preview: " ", width: 36}
-      - {click: '-', label: "-", hint: "ー", long_click: "ー", width: 8}
-      - {click: BackSpace, swipe_left: Escape, width: 10}
+      - {click: BackSpace, swipe_left: Escape, width: 18}
       - {click: Return, long_click: CommitComment, width: 10}
 
   # 横屏主层：按「左侧自然码 / 中间数字运算 / 右侧日文入口」三段组织。
@@ -290,7 +277,7 @@ preset_keyboards:
 
       # 双空格留给左右拇指；中段保留 = 0 ÷，与上方数字区形成小键盘。
       - {click: Mode_switch, label: "中/英", long_click: Menu, width: 8}
-      - {click: Keyboard_moran_kagiroi_numbers_quick, label: "123", long_click: Keyboard_moran_kagiroi_symbols_quick, width: 8}
+      - {click: Keyboard_moran_kagiroi_numbers, label: "123", long_click: Keyboard_moran_kagiroi_symbols, width: 8}
       - {click: Shift_L, send_bindings: false, width: 8}
       - {click: "'", long_click: '"', width: 7}
       - {click: space, label: "空格", preview: " ", width: 16}
@@ -301,10 +288,8 @@ preset_keyboards:
       - {click: BackSpace, swipe_left: Escape, width: 9}
       - {click: Return, label: "搜寻", long_click: CommitComment, width: 7}
 
-  # 临时数字页：不会覆盖主键盘作为 Trime 的下次启动/切换目标。
-  # 输入后仍需手动返回；自动返回属于客户端侧能力。
-  moran_kagiroi_numbers_quick:
-    name: "数字（临时）"
+  moran_kagiroi_numbers:
+    name: "数字"
     author: "Codex"
     ascii_mode: 1
     lock: false
@@ -347,66 +332,12 @@ preset_keyboards:
       - {click: "_"}
       - {click: "／"}
 
-      - {click: Keyboard_moran_kagiroi_hybrid, label: "ABC", long_click: Keyboard_moran_kagiroi_symbols_quick, width: 12}
-      - {click: Keyboard_moran_kagiroi_numbers, label: "🔒", long_click: Keyboard_moran_kagiroi_symbols, width: 12}
+      # 数字页仅保留一个返回键；长按直接进入常用符号，节省常驻入口。
+      - {click: Keyboard_moran_kagiroi_hybrid, label: "ABC", long_click: Keyboard_moran_kagiroi_symbols, width: 16}
       - {click: Mode_switch, label: "中/英", long_click: Menu, width: 12}
-      - {click: space, label: "空格", preview: " ", width: 30}
-      - {click: ",", long_click: "<", width: 7}
-      - {click: ".", long_click: ">", width: 7}
-      - {click: BackSpace, swipe_left: Escape, width: 10}
-      - {click: Return, long_click: CommitComment, width: 10}
-
-  moran_kagiroi_numbers:
-    name: "数字"
-    author: "Codex"
-    ascii_mode: 1
-    lock: true
-    width: 10
-    height: 50
-    keyboard_height_land: 240
-    landscape_split_percent: 1
-    horizontal_gap: 1
-    vertical_gap: 1
-    label_transform: none
-    keys:
-      - {click: "1"}
-      - {click: "2"}
-      - {click: "3"}
-      - {click: "4"}
-      - {click: "5"}
-      - {click: "6"}
-      - {click: "7"}
-      - {click: "8"}
-      - {click: "9"}
-      - {click: "0"}
-      - {click: "+"}
-      - {click: "-"}
-      - {click: "×"}
-      - {click: "÷"}
-      - {click: "="}
-      - {click: "%"}
-      - {click: "("}
-      - {click: ")"}
-      - {click: "["}
-      - {click: "]"}
-      - {click: "."}
-      - {click: ","}
-      - {click: ":"}
-      - {click: ";"}
-      - {click: "@"}
-      - {click: "#"}
-      - {click: "￥"}
-      - {click: "$"}
-      - {click: "_"}
-      - {click: "／"}
-
-      # 🔓 回临时页；🔓 长按仍可直达常驻符号页。
-      - {click: Keyboard_moran_kagiroi_hybrid, label: "ABC", long_click: Keyboard_moran_kagiroi_symbols_quick, width: 12}
-      - {click: Keyboard_moran_kagiroi_numbers_quick, label: "🔓", long_click: Keyboard_moran_kagiroi_symbols, width: 12}
-      - {click: Mode_switch, label: "中/英", long_click: Menu, width: 12}
-      - {click: space, label: "空格", preview: " ", width: 30}
-      - {click: ",", long_click: "<", width: 7}
-      - {click: ".", long_click: ">", width: 7}
+      - {click: space, label: "空格", preview: " ", width: 36}
+      - {click: ",", long_click: "<", width: 8}
+      - {click: ".", long_click: ">", width: 8}
       - {click: BackSpace, swipe_left: Escape, width: 10}
       - {click: Return, long_click: CommitComment, width: 10}
 
@@ -415,7 +346,7 @@ preset_keyboards:
     name: "符号目录"
     author: "Codex"
     ascii_mode: 1
-    lock: true
+    lock: false
     columns: 30
     width: 16.6666
     height: 50
@@ -457,7 +388,7 @@ preset_keyboards:
     name: "常用符号"
     author: "Codex"
     ascii_mode: 1
-    lock: true
+    lock: false
     width: 10
     height: 50
     keyboard_height_land: 240
@@ -511,7 +442,7 @@ preset_keyboards:
     name: "英文符号"
     author: "Codex"
     ascii_mode: 1
-    lock: true
+    lock: false
     width: 10
     height: 50
     keyboard_height_land: 240
@@ -565,7 +496,7 @@ preset_keyboards:
     name: "中文符号"
     author: "Codex"
     ascii_mode: 1
-    lock: true
+    lock: false
     width: 10
     height: 50
     keyboard_height_land: 240
@@ -619,7 +550,7 @@ preset_keyboards:
     name: "日文符号"
     author: "Codex"
     ascii_mode: 1
-    lock: true
+    lock: false
     width: 10
     height: 50
     keyboard_height_land: 240
@@ -673,7 +604,7 @@ preset_keyboards:
     name: "数学符号"
     author: "Codex"
     ascii_mode: 1
-    lock: true
+    lock: false
     width: 10
     height: 50
     keyboard_height_land: 240
@@ -727,7 +658,7 @@ preset_keyboards:
     name: "特殊符号"
     author: "Codex"
     ascii_mode: 1
-    lock: true
+    lock: false
     width: 10
     height: 50
     keyboard_height_land: 240
@@ -781,7 +712,7 @@ preset_keyboards:
     name: "单位符号"
     author: "Codex"
     ascii_mode: 1
-    lock: true
+    lock: false
     width: 10
     height: 50
     keyboard_height_land: 240
@@ -835,7 +766,7 @@ preset_keyboards:
     name: "列表符号"
     author: "Codex"
     ascii_mode: 1
-    lock: true
+    lock: false
     width: 10
     height: 50
     keyboard_height_land: 240
@@ -889,7 +820,7 @@ preset_keyboards:
     name: "拼音声调"
     author: "Codex"
     ascii_mode: 1
-    lock: true
+    lock: false
     width: 10
     height: 50
     keyboard_height_land: 240
@@ -943,7 +874,7 @@ preset_keyboards:
     name: "注音符号"
     author: "Codex"
     ascii_mode: 1
-    lock: true
+    lock: false
     width: 10
     height: 50
     keyboard_height_land: 240
@@ -997,7 +928,7 @@ preset_keyboards:
     name: "部首"
     author: "Codex"
     ascii_mode: 1
-    lock: true
+    lock: false
     width: 10
     height: 50
     keyboard_height_land: 240
@@ -1051,7 +982,7 @@ preset_keyboards:
     name: "希腊字母"
     author: "Codex"
     ascii_mode: 1
-    lock: true
+    lock: false
     width: 10
     height: 50
     keyboard_height_land: 240
@@ -1105,7 +1036,7 @@ preset_keyboards:
     name: "俄文字母"
     author: "Codex"
     ascii_mode: 1
-    lock: true
+    lock: false
     width: 10
     height: 50
     keyboard_height_land: 240
@@ -1159,7 +1090,7 @@ preset_keyboards:
     name: "拉丁扩展"
     author: "Codex"
     ascii_mode: 1
-    lock: true
+    lock: false
     width: 10
     height: 50
     keyboard_height_land: 240
@@ -1213,7 +1144,7 @@ preset_keyboards:
     name: "韩文字符"
     author: "Codex"
     ascii_mode: 1
-    lock: true
+    lock: false
     width: 10
     height: 50
     keyboard_height_land: 240
@@ -1267,7 +1198,7 @@ preset_keyboards:
     name: "国际音标"
     author: "Codex"
     ascii_mode: 1
-    lock: true
+    lock: false
     width: 10
     height: 50
     keyboard_height_land: 240
@@ -1321,7 +1252,7 @@ preset_keyboards:
     name: "平假名"
     author: "Codex"
     ascii_mode: 1
-    lock: true
+    lock: false
     width: 10
     height: 50
     keyboard_height_land: 240
@@ -1375,7 +1306,7 @@ preset_keyboards:
     name: "片假名"
     author: "Codex"
     ascii_mode: 1
-    lock: true
+    lock: false
     width: 10
     height: 50
     keyboard_height_land: 240
@@ -1425,9 +1356,9 @@ preset_keyboards:
       - {click: BackSpace, swipe_left: Escape, width: 10}
       - {click: Return, long_click: CommitComment, width: 8}
 
-  # 临时常用符号页：分类入口仍可进入常驻目录；🔒 将当前入口固定为常驻页。
-  moran_kagiroi_symbols_quick:
-    name: "常用符号（临时）"
+  # iOS 式：左栏短按选择分类；「更多」长按跳过一组。
+  moran_kagiroi_symbols_ios:
+    name: "常用符号"
     author: "Codex"
     ascii_mode: 1
     lock: false
@@ -1471,67 +1402,12 @@ preset_keyboards:
       - {click: "～"}
       - {click: "·"}
 
-      - {click: Keyboard_moran_kagiroi_hybrid, label: "ABC", long_click: Keyboard_moran_kagiroi_numbers_quick, width: 10}
-      - {click: Keyboard_moran_kagiroi_symbols, label: "🔒", long_click: Keyboard_moran_kagiroi_symbols_math, width: 10}
-      - {click: Mode_switch, label: "中/英", long_click: Menu, width: 8}
-      - {click: space, label: "空格", preview: " ", width: 40}
-      - {click: ",", long_click: "<", width: 7}
-      - {click: ".", long_click: ">", width: 7}
-      - {click: BackSpace, swipe_left: Escape, width: 10}
-      - {click: Return, long_click: CommitComment, width: 8}
-
-  # iOS 式：左栏短按选择分类；「更多」长按跳过一组。
-  moran_kagiroi_symbols_ios:
-    name: "常用符号"
-    author: "Codex"
-    ascii_mode: 1
-    lock: true
-    columns: 30
-    width: 16.6666
-    height: 50
-    keyboard_height_land: 260
-    landscape_split_percent: 1
-    horizontal_gap: 1
-    vertical_gap: 1
-    label_transform: none
-    keys:
-      - {click: Keyboard_moran_kagiroi_symbols, label: "常用", width: 16.6666}
-      - {click: "，"}
-      - {click: "。"}
-      - {click: "！"}
-      - {click: "？"}
-      - {click: "、"}
-      - {click: Keyboard_moran_kagiroi_symbols_english, label: "英文", width: 16.6666}
-      - {click: "・"}
-      - {click: "ー"}
-      - {click: "「"}
-      - {click: "」"}
-      - {click: "『"}
-      - {click: Keyboard_moran_kagiroi_symbols_chinese, label: "中文", width: 16.6666}
-      - {click: "』"}
-      - {click: "（"}
-      - {click: "）"}
-      - {click: "【"}
-      - {click: "】"}
-      - {click: Keyboard_moran_kagiroi_symbols_japanese, label: "日文", width: 16.6666}
-      - {click: "［"}
-      - {click: "］"}
-      - {click: "｛"}
-      - {click: "｝"}
-      - {click: "："}
-      - {click: Keyboard_moran_kagiroi_symbols_math, label: "更多", long_click: Keyboard_moran_kagiroi_symbols_pinyin, width: 16.6666}
-      - {click: "；"}
-      - {click: "…"}
-      - {click: "—"}
-      - {click: "～"}
-      - {click: "·"}
-
-      - {click: Keyboard_moran_kagiroi_hybrid, label: "ABC", long_click: Keyboard_moran_kagiroi_numbers_quick, width: 10}
-      - {click: Keyboard_moran_kagiroi_symbols_quick, label: "🔓", long_click: Keyboard_moran_kagiroi_symbols_math, width: 10}
-      - {click: Mode_switch, label: "中/英", long_click: Menu, width: 8}
-      - {click: space, label: "空格", preview: " ", width: 40}
-      - {click: ",", long_click: "<", width: 7}
-      - {click: ".", long_click: ">", width: 7}
+      - {click: Keyboard_moran_kagiroi_hybrid, label: "ABC", long_click: Keyboard_moran_kagiroi_numbers, width: 12}
+      - {click: Keyboard_moran_kagiroi_symbols, label: "符", long_click: Keyboard_moran_kagiroi_symbols_math, width: 12}
+      - {click: Mode_switch, label: "中/英", long_click: Menu, width: 10}
+      - {click: space, label: "空格", preview: " ", width: 32}
+      - {click: ",", long_click: "<", width: 8}
+      - {click: ".", long_click: ">", width: 8}
       - {click: BackSpace, swipe_left: Escape, width: 10}
       - {click: Return, long_click: CommitComment, width: 8}
 
@@ -1540,7 +1416,7 @@ preset_keyboards:
     name: "英文符号"
     author: "Codex"
     ascii_mode: 1
-    lock: true
+    lock: false
     columns: 30
     width: 16.6666
     height: 50
@@ -1581,12 +1457,12 @@ preset_keyboards:
       - {click: "]"}
       - {click: "{"}
 
-      - {click: Keyboard_moran_kagiroi_hybrid, label: "ABC", long_click: Keyboard_moran_kagiroi_numbers_quick, width: 10}
-      - {click: Keyboard_moran_kagiroi_symbols_quick, label: "🔓", long_click: Keyboard_moran_kagiroi_symbols_math, width: 10}
-      - {click: Mode_switch, label: "中/英", long_click: Menu, width: 8}
-      - {click: space, label: "空格", preview: " ", width: 40}
-      - {click: ",", long_click: "<", width: 7}
-      - {click: ".", long_click: ">", width: 7}
+      - {click: Keyboard_moran_kagiroi_hybrid, label: "ABC", long_click: Keyboard_moran_kagiroi_numbers, width: 12}
+      - {click: Keyboard_moran_kagiroi_symbols, label: "符", long_click: Keyboard_moran_kagiroi_symbols_math, width: 12}
+      - {click: Mode_switch, label: "中/英", long_click: Menu, width: 10}
+      - {click: space, label: "空格", preview: " ", width: 32}
+      - {click: ",", long_click: "<", width: 8}
+      - {click: ".", long_click: ">", width: 8}
       - {click: BackSpace, swipe_left: Escape, width: 10}
       - {click: Return, long_click: CommitComment, width: 8}
 
@@ -1595,7 +1471,7 @@ preset_keyboards:
     name: "中文符号"
     author: "Codex"
     ascii_mode: 1
-    lock: true
+    lock: false
     columns: 30
     width: 16.6666
     height: 50
@@ -1636,12 +1512,12 @@ preset_keyboards:
       - {click: "『"}
       - {click: "』"}
 
-      - {click: Keyboard_moran_kagiroi_hybrid, label: "ABC", long_click: Keyboard_moran_kagiroi_numbers_quick, width: 10}
-      - {click: Keyboard_moran_kagiroi_symbols_quick, label: "🔓", long_click: Keyboard_moran_kagiroi_symbols_math, width: 10}
-      - {click: Mode_switch, label: "中/英", long_click: Menu, width: 8}
-      - {click: space, label: "空格", preview: " ", width: 40}
-      - {click: ",", long_click: "<", width: 7}
-      - {click: ".", long_click: ">", width: 7}
+      - {click: Keyboard_moran_kagiroi_hybrid, label: "ABC", long_click: Keyboard_moran_kagiroi_numbers, width: 12}
+      - {click: Keyboard_moran_kagiroi_symbols, label: "符", long_click: Keyboard_moran_kagiroi_symbols_math, width: 12}
+      - {click: Mode_switch, label: "中/英", long_click: Menu, width: 10}
+      - {click: space, label: "空格", preview: " ", width: 32}
+      - {click: ",", long_click: "<", width: 8}
+      - {click: ".", long_click: ">", width: 8}
       - {click: BackSpace, swipe_left: Escape, width: 10}
       - {click: Return, long_click: CommitComment, width: 8}
 
@@ -1650,7 +1526,7 @@ preset_keyboards:
     name: "日文符号"
     author: "Codex"
     ascii_mode: 1
-    lock: true
+    lock: false
     columns: 30
     width: 16.6666
     height: 50
@@ -1691,12 +1567,12 @@ preset_keyboards:
       - {click: "〤"}
       - {click: "〇"}
 
-      - {click: Keyboard_moran_kagiroi_hybrid, label: "ABC", long_click: Keyboard_moran_kagiroi_numbers_quick, width: 10}
-      - {click: Keyboard_moran_kagiroi_symbols_quick, label: "🔓", long_click: Keyboard_moran_kagiroi_symbols_math, width: 10}
-      - {click: Mode_switch, label: "中/英", long_click: Menu, width: 8}
-      - {click: space, label: "空格", preview: " ", width: 40}
-      - {click: ",", long_click: "<", width: 7}
-      - {click: ".", long_click: ">", width: 7}
+      - {click: Keyboard_moran_kagiroi_hybrid, label: "ABC", long_click: Keyboard_moran_kagiroi_numbers, width: 12}
+      - {click: Keyboard_moran_kagiroi_symbols, label: "符", long_click: Keyboard_moran_kagiroi_symbols_math, width: 12}
+      - {click: Mode_switch, label: "中/英", long_click: Menu, width: 10}
+      - {click: space, label: "空格", preview: " ", width: 32}
+      - {click: ",", long_click: "<", width: 8}
+      - {click: ".", long_click: ">", width: 8}
       - {click: BackSpace, swipe_left: Escape, width: 10}
       - {click: Return, long_click: CommitComment, width: 8}
 
@@ -1705,7 +1581,7 @@ preset_keyboards:
     name: "数学符号"
     author: "Codex"
     ascii_mode: 1
-    lock: true
+    lock: false
     columns: 30
     width: 16.6666
     height: 50
@@ -1746,12 +1622,12 @@ preset_keyboards:
       - {click: "∉"}
       - {click: "∩"}
 
-      - {click: Keyboard_moran_kagiroi_hybrid, label: "ABC", long_click: Keyboard_moran_kagiroi_numbers_quick, width: 10}
-      - {click: Keyboard_moran_kagiroi_symbols_quick, label: "🔓", long_click: Keyboard_moran_kagiroi_symbols_math, width: 10}
-      - {click: Mode_switch, label: "中/英", long_click: Menu, width: 8}
-      - {click: space, label: "空格", preview: " ", width: 40}
-      - {click: ",", long_click: "<", width: 7}
-      - {click: ".", long_click: ">", width: 7}
+      - {click: Keyboard_moran_kagiroi_hybrid, label: "ABC", long_click: Keyboard_moran_kagiroi_numbers, width: 12}
+      - {click: Keyboard_moran_kagiroi_symbols, label: "符", long_click: Keyboard_moran_kagiroi_symbols_math, width: 12}
+      - {click: Mode_switch, label: "中/英", long_click: Menu, width: 10}
+      - {click: space, label: "空格", preview: " ", width: 32}
+      - {click: ",", long_click: "<", width: 8}
+      - {click: ".", long_click: ">", width: 8}
       - {click: BackSpace, swipe_left: Escape, width: 10}
       - {click: Return, long_click: CommitComment, width: 8}
 
@@ -1760,7 +1636,7 @@ preset_keyboards:
     name: "特殊符号"
     author: "Codex"
     ascii_mode: 1
-    lock: true
+    lock: false
     columns: 30
     width: 16.6666
     height: 50
@@ -1801,12 +1677,12 @@ preset_keyboards:
       - {click: "↑"}
       - {click: "↓"}
 
-      - {click: Keyboard_moran_kagiroi_hybrid, label: "ABC", long_click: Keyboard_moran_kagiroi_numbers_quick, width: 10}
-      - {click: Keyboard_moran_kagiroi_symbols_quick, label: "🔓", long_click: Keyboard_moran_kagiroi_symbols_math, width: 10}
-      - {click: Mode_switch, label: "中/英", long_click: Menu, width: 8}
-      - {click: space, label: "空格", preview: " ", width: 40}
-      - {click: ",", long_click: "<", width: 7}
-      - {click: ".", long_click: ">", width: 7}
+      - {click: Keyboard_moran_kagiroi_hybrid, label: "ABC", long_click: Keyboard_moran_kagiroi_numbers, width: 12}
+      - {click: Keyboard_moran_kagiroi_symbols, label: "符", long_click: Keyboard_moran_kagiroi_symbols_math, width: 12}
+      - {click: Mode_switch, label: "中/英", long_click: Menu, width: 10}
+      - {click: space, label: "空格", preview: " ", width: 32}
+      - {click: ",", long_click: "<", width: 8}
+      - {click: ".", long_click: ">", width: 8}
       - {click: BackSpace, swipe_left: Escape, width: 10}
       - {click: Return, long_click: CommitComment, width: 8}
 
@@ -1815,7 +1691,7 @@ preset_keyboards:
     name: "单位符号"
     author: "Codex"
     ascii_mode: 1
-    lock: true
+    lock: false
     columns: 30
     width: 16.6666
     height: 50
@@ -1856,12 +1732,12 @@ preset_keyboards:
       - {click: "GHz"}
       - {click: "W"}
 
-      - {click: Keyboard_moran_kagiroi_hybrid, label: "ABC", long_click: Keyboard_moran_kagiroi_numbers_quick, width: 10}
-      - {click: Keyboard_moran_kagiroi_symbols_quick, label: "🔓", long_click: Keyboard_moran_kagiroi_symbols_math, width: 10}
-      - {click: Mode_switch, label: "中/英", long_click: Menu, width: 8}
-      - {click: space, label: "空格", preview: " ", width: 40}
-      - {click: ",", long_click: "<", width: 7}
-      - {click: ".", long_click: ">", width: 7}
+      - {click: Keyboard_moran_kagiroi_hybrid, label: "ABC", long_click: Keyboard_moran_kagiroi_numbers, width: 12}
+      - {click: Keyboard_moran_kagiroi_symbols, label: "符", long_click: Keyboard_moran_kagiroi_symbols_math, width: 12}
+      - {click: Mode_switch, label: "中/英", long_click: Menu, width: 10}
+      - {click: space, label: "空格", preview: " ", width: 32}
+      - {click: ",", long_click: "<", width: 8}
+      - {click: ".", long_click: ">", width: 8}
       - {click: BackSpace, swipe_left: Escape, width: 10}
       - {click: Return, long_click: CommitComment, width: 8}
 
@@ -1870,7 +1746,7 @@ preset_keyboards:
     name: "列表符号"
     author: "Codex"
     ascii_mode: 1
-    lock: true
+    lock: false
     columns: 30
     width: 16.6666
     height: 50
@@ -1911,12 +1787,12 @@ preset_keyboards:
       - {click: "㈣"}
       - {click: "㈤"}
 
-      - {click: Keyboard_moran_kagiroi_hybrid, label: "ABC", long_click: Keyboard_moran_kagiroi_numbers_quick, width: 10}
-      - {click: Keyboard_moran_kagiroi_symbols_quick, label: "🔓", long_click: Keyboard_moran_kagiroi_symbols_math, width: 10}
-      - {click: Mode_switch, label: "中/英", long_click: Menu, width: 8}
-      - {click: space, label: "空格", preview: " ", width: 40}
-      - {click: ",", long_click: "<", width: 7}
-      - {click: ".", long_click: ">", width: 7}
+      - {click: Keyboard_moran_kagiroi_hybrid, label: "ABC", long_click: Keyboard_moran_kagiroi_numbers, width: 12}
+      - {click: Keyboard_moran_kagiroi_symbols, label: "符", long_click: Keyboard_moran_kagiroi_symbols_math, width: 12}
+      - {click: Mode_switch, label: "中/英", long_click: Menu, width: 10}
+      - {click: space, label: "空格", preview: " ", width: 32}
+      - {click: ",", long_click: "<", width: 8}
+      - {click: ".", long_click: ">", width: 8}
       - {click: BackSpace, swipe_left: Escape, width: 10}
       - {click: Return, long_click: CommitComment, width: 8}
 
@@ -1925,7 +1801,7 @@ preset_keyboards:
     name: "拼音声调"
     author: "Codex"
     ascii_mode: 1
-    lock: true
+    lock: false
     columns: 30
     width: 16.6666
     height: 50
@@ -1966,12 +1842,12 @@ preset_keyboards:
       - {click: "ǜ"}
       - {click: "ü"}
 
-      - {click: Keyboard_moran_kagiroi_hybrid, label: "ABC", long_click: Keyboard_moran_kagiroi_numbers_quick, width: 10}
-      - {click: Keyboard_moran_kagiroi_symbols_quick, label: "🔓", long_click: Keyboard_moran_kagiroi_symbols_math, width: 10}
-      - {click: Mode_switch, label: "中/英", long_click: Menu, width: 8}
-      - {click: space, label: "空格", preview: " ", width: 40}
-      - {click: ",", long_click: "<", width: 7}
-      - {click: ".", long_click: ">", width: 7}
+      - {click: Keyboard_moran_kagiroi_hybrid, label: "ABC", long_click: Keyboard_moran_kagiroi_numbers, width: 12}
+      - {click: Keyboard_moran_kagiroi_symbols, label: "符", long_click: Keyboard_moran_kagiroi_symbols_math, width: 12}
+      - {click: Mode_switch, label: "中/英", long_click: Menu, width: 10}
+      - {click: space, label: "空格", preview: " ", width: 32}
+      - {click: ",", long_click: "<", width: 8}
+      - {click: ".", long_click: ">", width: 8}
       - {click: BackSpace, swipe_left: Escape, width: 10}
       - {click: Return, long_click: CommitComment, width: 8}
 
@@ -1980,7 +1856,7 @@ preset_keyboards:
     name: "注音符号"
     author: "Codex"
     ascii_mode: 1
-    lock: true
+    lock: false
     columns: 30
     width: 16.6666
     height: 50
@@ -2021,12 +1897,12 @@ preset_keyboards:
       - {click: "ㄩ"}
       - {click: "ㄚ"}
 
-      - {click: Keyboard_moran_kagiroi_hybrid, label: "ABC", long_click: Keyboard_moran_kagiroi_numbers_quick, width: 10}
-      - {click: Keyboard_moran_kagiroi_symbols_quick, label: "🔓", long_click: Keyboard_moran_kagiroi_symbols_math, width: 10}
-      - {click: Mode_switch, label: "中/英", long_click: Menu, width: 8}
-      - {click: space, label: "空格", preview: " ", width: 40}
-      - {click: ",", long_click: "<", width: 7}
-      - {click: ".", long_click: ">", width: 7}
+      - {click: Keyboard_moran_kagiroi_hybrid, label: "ABC", long_click: Keyboard_moran_kagiroi_numbers, width: 12}
+      - {click: Keyboard_moran_kagiroi_symbols, label: "符", long_click: Keyboard_moran_kagiroi_symbols_math, width: 12}
+      - {click: Mode_switch, label: "中/英", long_click: Menu, width: 10}
+      - {click: space, label: "空格", preview: " ", width: 32}
+      - {click: ",", long_click: "<", width: 8}
+      - {click: ".", long_click: ">", width: 8}
       - {click: BackSpace, swipe_left: Escape, width: 10}
       - {click: Return, long_click: CommitComment, width: 8}
 
@@ -2035,7 +1911,7 @@ preset_keyboards:
     name: "部首"
     author: "Codex"
     ascii_mode: 1
-    lock: true
+    lock: false
     columns: 30
     width: 16.6666
     height: 50
@@ -2076,12 +1952,12 @@ preset_keyboards:
       - {click: "十"}
       - {click: "卜"}
 
-      - {click: Keyboard_moran_kagiroi_hybrid, label: "ABC", long_click: Keyboard_moran_kagiroi_numbers_quick, width: 10}
-      - {click: Keyboard_moran_kagiroi_symbols_quick, label: "🔓", long_click: Keyboard_moran_kagiroi_symbols_math, width: 10}
-      - {click: Mode_switch, label: "中/英", long_click: Menu, width: 8}
-      - {click: space, label: "空格", preview: " ", width: 40}
-      - {click: ",", long_click: "<", width: 7}
-      - {click: ".", long_click: ">", width: 7}
+      - {click: Keyboard_moran_kagiroi_hybrid, label: "ABC", long_click: Keyboard_moran_kagiroi_numbers, width: 12}
+      - {click: Keyboard_moran_kagiroi_symbols, label: "符", long_click: Keyboard_moran_kagiroi_symbols_math, width: 12}
+      - {click: Mode_switch, label: "中/英", long_click: Menu, width: 10}
+      - {click: space, label: "空格", preview: " ", width: 32}
+      - {click: ",", long_click: "<", width: 8}
+      - {click: ".", long_click: ">", width: 8}
       - {click: BackSpace, swipe_left: Escape, width: 10}
       - {click: Return, long_click: CommitComment, width: 8}
 
@@ -2090,7 +1966,7 @@ preset_keyboards:
     name: "希腊字母"
     author: "Codex"
     ascii_mode: 1
-    lock: true
+    lock: false
     columns: 30
     width: 16.6666
     height: 50
@@ -2131,12 +2007,12 @@ preset_keyboards:
       - {click: "ω"}
       - {click: "Α"}
 
-      - {click: Keyboard_moran_kagiroi_hybrid, label: "ABC", long_click: Keyboard_moran_kagiroi_numbers_quick, width: 10}
-      - {click: Keyboard_moran_kagiroi_symbols_quick, label: "🔓", long_click: Keyboard_moran_kagiroi_symbols_math, width: 10}
-      - {click: Mode_switch, label: "中/英", long_click: Menu, width: 8}
-      - {click: space, label: "空格", preview: " ", width: 40}
-      - {click: ",", long_click: "<", width: 7}
-      - {click: ".", long_click: ">", width: 7}
+      - {click: Keyboard_moran_kagiroi_hybrid, label: "ABC", long_click: Keyboard_moran_kagiroi_numbers, width: 12}
+      - {click: Keyboard_moran_kagiroi_symbols, label: "符", long_click: Keyboard_moran_kagiroi_symbols_math, width: 12}
+      - {click: Mode_switch, label: "中/英", long_click: Menu, width: 10}
+      - {click: space, label: "空格", preview: " ", width: 32}
+      - {click: ",", long_click: "<", width: 8}
+      - {click: ".", long_click: ">", width: 8}
       - {click: BackSpace, swipe_left: Escape, width: 10}
       - {click: Return, long_click: CommitComment, width: 8}
 
@@ -2145,7 +2021,7 @@ preset_keyboards:
     name: "俄文字母"
     author: "Codex"
     ascii_mode: 1
-    lock: true
+    lock: false
     columns: 30
     width: 16.6666
     height: 50
@@ -2186,12 +2062,12 @@ preset_keyboards:
       - {click: "Ц"}
       - {click: "Ч"}
 
-      - {click: Keyboard_moran_kagiroi_hybrid, label: "ABC", long_click: Keyboard_moran_kagiroi_numbers_quick, width: 10}
-      - {click: Keyboard_moran_kagiroi_symbols_quick, label: "🔓", long_click: Keyboard_moran_kagiroi_symbols_math, width: 10}
-      - {click: Mode_switch, label: "中/英", long_click: Menu, width: 8}
-      - {click: space, label: "空格", preview: " ", width: 40}
-      - {click: ",", long_click: "<", width: 7}
-      - {click: ".", long_click: ">", width: 7}
+      - {click: Keyboard_moran_kagiroi_hybrid, label: "ABC", long_click: Keyboard_moran_kagiroi_numbers, width: 12}
+      - {click: Keyboard_moran_kagiroi_symbols, label: "符", long_click: Keyboard_moran_kagiroi_symbols_math, width: 12}
+      - {click: Mode_switch, label: "中/英", long_click: Menu, width: 10}
+      - {click: space, label: "空格", preview: " ", width: 32}
+      - {click: ",", long_click: "<", width: 8}
+      - {click: ".", long_click: ">", width: 8}
       - {click: BackSpace, swipe_left: Escape, width: 10}
       - {click: Return, long_click: CommitComment, width: 8}
 
@@ -2200,7 +2076,7 @@ preset_keyboards:
     name: "拉丁扩展"
     author: "Codex"
     ascii_mode: 1
-    lock: true
+    lock: false
     columns: 30
     width: 16.6666
     height: 50
@@ -2241,12 +2117,12 @@ preset_keyboards:
       - {click: "ú"}
       - {click: "ù"}
 
-      - {click: Keyboard_moran_kagiroi_hybrid, label: "ABC", long_click: Keyboard_moran_kagiroi_numbers_quick, width: 10}
-      - {click: Keyboard_moran_kagiroi_symbols_quick, label: "🔓", long_click: Keyboard_moran_kagiroi_symbols_math, width: 10}
-      - {click: Mode_switch, label: "中/英", long_click: Menu, width: 8}
-      - {click: space, label: "空格", preview: " ", width: 40}
-      - {click: ",", long_click: "<", width: 7}
-      - {click: ".", long_click: ">", width: 7}
+      - {click: Keyboard_moran_kagiroi_hybrid, label: "ABC", long_click: Keyboard_moran_kagiroi_numbers, width: 12}
+      - {click: Keyboard_moran_kagiroi_symbols, label: "符", long_click: Keyboard_moran_kagiroi_symbols_math, width: 12}
+      - {click: Mode_switch, label: "中/英", long_click: Menu, width: 10}
+      - {click: space, label: "空格", preview: " ", width: 32}
+      - {click: ",", long_click: "<", width: 8}
+      - {click: ".", long_click: ">", width: 8}
       - {click: BackSpace, swipe_left: Escape, width: 10}
       - {click: Return, long_click: CommitComment, width: 8}
 
@@ -2255,7 +2131,7 @@ preset_keyboards:
     name: "韩文字符"
     author: "Codex"
     ascii_mode: 1
-    lock: true
+    lock: false
     columns: 30
     width: 16.6666
     height: 50
@@ -2296,12 +2172,12 @@ preset_keyboards:
       - {click: "ㅓ"}
       - {click: "ㅔ"}
 
-      - {click: Keyboard_moran_kagiroi_hybrid, label: "ABC", long_click: Keyboard_moran_kagiroi_numbers_quick, width: 10}
-      - {click: Keyboard_moran_kagiroi_symbols_quick, label: "🔓", long_click: Keyboard_moran_kagiroi_symbols_math, width: 10}
-      - {click: Mode_switch, label: "中/英", long_click: Menu, width: 8}
-      - {click: space, label: "空格", preview: " ", width: 40}
-      - {click: ",", long_click: "<", width: 7}
-      - {click: ".", long_click: ">", width: 7}
+      - {click: Keyboard_moran_kagiroi_hybrid, label: "ABC", long_click: Keyboard_moran_kagiroi_numbers, width: 12}
+      - {click: Keyboard_moran_kagiroi_symbols, label: "符", long_click: Keyboard_moran_kagiroi_symbols_math, width: 12}
+      - {click: Mode_switch, label: "中/英", long_click: Menu, width: 10}
+      - {click: space, label: "空格", preview: " ", width: 32}
+      - {click: ",", long_click: "<", width: 8}
+      - {click: ".", long_click: ">", width: 8}
       - {click: BackSpace, swipe_left: Escape, width: 10}
       - {click: Return, long_click: CommitComment, width: 8}
 
@@ -2310,7 +2186,7 @@ preset_keyboards:
     name: "国际音标"
     author: "Codex"
     ascii_mode: 1
-    lock: true
+    lock: false
     columns: 30
     width: 16.6666
     height: 50
@@ -2351,12 +2227,12 @@ preset_keyboards:
       - {click: "ˑ"}
       - {click: "˚"}
 
-      - {click: Keyboard_moran_kagiroi_hybrid, label: "ABC", long_click: Keyboard_moran_kagiroi_numbers_quick, width: 10}
-      - {click: Keyboard_moran_kagiroi_symbols_quick, label: "🔓", long_click: Keyboard_moran_kagiroi_symbols_math, width: 10}
-      - {click: Mode_switch, label: "中/英", long_click: Menu, width: 8}
-      - {click: space, label: "空格", preview: " ", width: 40}
-      - {click: ",", long_click: "<", width: 7}
-      - {click: ".", long_click: ">", width: 7}
+      - {click: Keyboard_moran_kagiroi_hybrid, label: "ABC", long_click: Keyboard_moran_kagiroi_numbers, width: 12}
+      - {click: Keyboard_moran_kagiroi_symbols, label: "符", long_click: Keyboard_moran_kagiroi_symbols_math, width: 12}
+      - {click: Mode_switch, label: "中/英", long_click: Menu, width: 10}
+      - {click: space, label: "空格", preview: " ", width: 32}
+      - {click: ",", long_click: "<", width: 8}
+      - {click: ".", long_click: ">", width: 8}
       - {click: BackSpace, swipe_left: Escape, width: 10}
       - {click: Return, long_click: CommitComment, width: 8}
 
@@ -2365,7 +2241,7 @@ preset_keyboards:
     name: "平假名"
     author: "Codex"
     ascii_mode: 1
-    lock: true
+    lock: false
     columns: 30
     width: 16.6666
     height: 50
@@ -2406,12 +2282,12 @@ preset_keyboards:
       - {click: "ね"}
       - {click: "の"}
 
-      - {click: Keyboard_moran_kagiroi_hybrid, label: "ABC", long_click: Keyboard_moran_kagiroi_numbers_quick, width: 10}
-      - {click: Keyboard_moran_kagiroi_symbols_quick, label: "🔓", long_click: Keyboard_moran_kagiroi_symbols_math, width: 10}
-      - {click: Mode_switch, label: "中/英", long_click: Menu, width: 8}
-      - {click: space, label: "空格", preview: " ", width: 40}
-      - {click: ",", long_click: "<", width: 7}
-      - {click: ".", long_click: ">", width: 7}
+      - {click: Keyboard_moran_kagiroi_hybrid, label: "ABC", long_click: Keyboard_moran_kagiroi_numbers, width: 12}
+      - {click: Keyboard_moran_kagiroi_symbols, label: "符", long_click: Keyboard_moran_kagiroi_symbols_math, width: 12}
+      - {click: Mode_switch, label: "中/英", long_click: Menu, width: 10}
+      - {click: space, label: "空格", preview: " ", width: 32}
+      - {click: ",", long_click: "<", width: 8}
+      - {click: ".", long_click: ">", width: 8}
       - {click: BackSpace, swipe_left: Escape, width: 10}
       - {click: Return, long_click: CommitComment, width: 8}
 
@@ -2420,7 +2296,7 @@ preset_keyboards:
     name: "片假名"
     author: "Codex"
     ascii_mode: 1
-    lock: true
+    lock: false
     columns: 30
     width: 16.6666
     height: 50
@@ -2461,11 +2337,11 @@ preset_keyboards:
       - {click: "ネ"}
       - {click: "ノ"}
 
-      - {click: Keyboard_moran_kagiroi_hybrid, label: "ABC", long_click: Keyboard_moran_kagiroi_numbers_quick, width: 10}
-      - {click: Keyboard_moran_kagiroi_symbols_quick, label: "🔓", long_click: Keyboard_moran_kagiroi_symbols_math, width: 10}
-      - {click: Mode_switch, label: "中/英", long_click: Menu, width: 8}
-      - {click: space, label: "空格", preview: " ", width: 40}
-      - {click: ",", long_click: "<", width: 7}
-      - {click: ".", long_click: ">", width: 7}
+      - {click: Keyboard_moran_kagiroi_hybrid, label: "ABC", long_click: Keyboard_moran_kagiroi_numbers, width: 12}
+      - {click: Keyboard_moran_kagiroi_symbols, label: "符", long_click: Keyboard_moran_kagiroi_symbols_math, width: 12}
+      - {click: Mode_switch, label: "中/英", long_click: Menu, width: 10}
+      - {click: space, label: "空格", preview: " ", width: 32}
+      - {click: ",", long_click: "<", width: 8}
+      - {click: ".", long_click: ">", width: 8}
       - {click: BackSpace, swipe_left: Escape, width: 10}
       - {click: Return, long_click: CommitComment, width: 8}
