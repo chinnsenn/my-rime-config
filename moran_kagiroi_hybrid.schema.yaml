@@ -41,6 +41,27 @@ style:
   keyboards:
     - moran_kagiroi_hybrid
     - moran_kagiroi_hybrid_landscape
+    - moran_kagiroi_numbers
+    - moran_kagiroi_symbol_catalog
+    - moran_kagiroi_numbers
+    - moran_kagiroi_symbol_catalog
+    - moran_kagiroi_symbols_english
+    - moran_kagiroi_symbols_chinese
+    - moran_kagiroi_symbols_japanese
+    - moran_kagiroi_symbols_math
+    - moran_kagiroi_symbols_special
+    - moran_kagiroi_symbols_units
+    - moran_kagiroi_symbols_list
+    - moran_kagiroi_symbols_pinyin
+    - moran_kagiroi_symbols_bopomofo
+    - moran_kagiroi_symbols_radicals
+    - moran_kagiroi_symbols_greek
+    - moran_kagiroi_symbols_cyrillic
+    - moran_kagiroi_symbols_latin
+    - moran_kagiroi_symbols_korean
+    - moran_kagiroi_symbols_ipa
+    - moran_kagiroi_symbols_hiragana
+    - moran_kagiroi_symbols_katakana
     - moran_kagiroi_symbols
     - number
 
