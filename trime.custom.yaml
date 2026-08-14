@@ -16,8 +16,6 @@ patch:
     __include: moran_kagiroi_hybrid.trime:/preset_keys/Keyboard_moran_kagiroi_hybrid_ascii
   "preset_keys/Keyboard_moran_kagiroi_hybrid":
     __include: moran_kagiroi_hybrid.trime:/preset_keys/Keyboard_moran_kagiroi_hybrid
-  "preset_keys/Keyboard_moran_kagiroi_numbers":
-    __include: moran_kagiroi_hybrid.trime:/preset_keys/Keyboard_moran_kagiroi_numbers
   "preset_keys/Keyboard_moran_kagiroi_symbol_catalog":
     __include: moran_kagiroi_hybrid.trime:/preset_keys/Keyboard_moran_kagiroi_symbol_catalog
   "preset_keys/Keyboard_moran_kagiroi_symbols_english":
