@@ -22,6 +22,11 @@ preset_keys:
     label: "符"
     send: Eisu_toggle
     select: moran_kagiroi_symbols_ios
+  # 符号页不是新的输入状态；空 select 会返回最近使用的锁定主键盘。
+  Keyboard_moran_kagiroi_symbols_return:
+    label: "符"
+    send: Eisu_toggle
+    select: ""
   Keyboard_moran_kagiroi_symbols_common:
     label: "常用"
     send: Eisu_toggle
@@ -193,7 +198,7 @@ preset_keyboards:
       - {click: j, long_click: Down}
       - {click: k, long_click: Up}
       - {click: l, long_click: Right}
-      - {click: ';', label: "日", hint: ";", long_click: ':'}
+      - {click: ';', label: ";", hint: "日", long_click: ':'}
 
       # / 必须首层可用：它同时是方案 gikun 的分隔符与常用标点。
       - {click: z, long_click: '`'}
@@ -209,8 +214,8 @@ preset_keyboards:
 
       # 数字行常驻；底栏只保留中英状态切换与左右分栏符号目录。
       - {click: Shift_L, send_bindings: false, width: 10}
-      - {click: Keyboard_moran_kagiroi_hybrid_ascii, label: "中/英", width: 12}
       - {click: Keyboard_moran_kagiroi_symbols, label: "符", hint: "目录", width: 12}
+      - {click: Keyboard_moran_kagiroi_hybrid_ascii, label: "中/英", width: 12}
       - {click: space, label: "魔然日混", preview: " ", width: 34}
       - {click: BackSpace, swipe_left: Escape, width: 20}
       - {click: Return, long_click: CommitComment, width: 12}
@@ -222,7 +227,7 @@ preset_keyboards:
     ascii_mode: 1
     ascii_keyboard: moran_kagiroi_hybrid_ascii
     landscape_keyboard: moran_kagiroi_hybrid_ascii_landscape
-    lock: false
+    lock: true
     width: 10
     height: 50
     horizontal_gap: 1
@@ -260,7 +265,7 @@ preset_keyboards:
       - {click: j}
       - {click: k}
       - {click: l}
-      - {click: ';', label: "日"}
+      - {click: ';', label: ";", hint: "日"}
 
       - {click: z}
       - {click: x}
@@ -274,8 +279,8 @@ preset_keyboards:
       - {click: '/', label: "/"}
 
       - {click: Shift_L, send_bindings: false, width: 10}
-      - {click: Keyboard_moran_kagiroi_hybrid, label: "中/英", width: 12}
       - {click: Keyboard_moran_kagiroi_symbols, label: "符", hint: "目录", width: 12}
+      - {click: Keyboard_moran_kagiroi_hybrid, label: "中/英", width: 12}
       - {click: space, label: "English", preview: " ", width: 34}
       - {click: BackSpace, swipe_left: Escape, width: 20}
       - {click: Return, width: 12}
@@ -286,7 +291,7 @@ preset_keyboards:
     author: "Codex"
     ascii_mode: 1
     ascii_keyboard: moran_kagiroi_hybrid_ascii
-    lock: false
+    lock: true
     columns: 14
     width: 7.142857
     height: 48
@@ -324,7 +329,7 @@ preset_keyboards:
       - {click: j}
       - {click: k}
       - {click: l}
-      - {click: ';', label: "日"}
+      - {click: ';', label: ";", hint: "日"}
 
       - {click: z}
       - {click: x}
@@ -341,9 +346,9 @@ preset_keyboards:
       - {click: '.'}
       - {click: '/', label: "/"}
 
-      - {click: Keyboard_moran_kagiroi_hybrid, label: "中/英", width: 8}
-      - {click: Keyboard_moran_kagiroi_symbols, label: "符", hint: "目录", width: 8}
       - {click: Shift_L, send_bindings: false, width: 8}
+      - {click: Keyboard_moran_kagiroi_symbols, label: "符", hint: "目录", width: 8}
+      - {click: Keyboard_moran_kagiroi_hybrid, label: "中/英", width: 8}
       - {click: space, label: "English", preview: " ", width: 16}
       - {click: '=', width: 7}
       - {click: '0', width: 7}
@@ -399,7 +404,7 @@ preset_keyboards:
       - {click: j, long_click: Down}
       - {click: k, long_click: Up}
       - {click: l, long_click: Right}
-      - {click: ';', label: "日", hint: ";", long_click: ':'}
+      - {click: ';', label: ";", hint: "日", long_click: ':'}
 
       # 长按左段可调用编辑动作；斜杠保持首层，便于 Kagiroi 的訓读输入。
       - {click: z, hint: "清", long_click: Escape}
@@ -418,9 +423,9 @@ preset_keyboards:
       - {click: '/', label: '/', hint: "訓", long_click: '?'}
 
       # 双空格留给左右拇指；数字常驻于中段，符号目录与中英状态均短按切换。
-      - {click: Keyboard_moran_kagiroi_hybrid_ascii, label: "中/英", width: 8}
-      - {click: Keyboard_moran_kagiroi_symbols, label: "符", hint: "目录", width: 8}
       - {click: Shift_L, send_bindings: false, width: 8}
+      - {click: Keyboard_moran_kagiroi_symbols, label: "符", hint: "目录", width: 8}
+      - {click: Keyboard_moran_kagiroi_hybrid_ascii, label: "中/英", width: 8}
       - {click: space, label: "空格", preview: " ", width: 16}
       - {click: '=', width: 7}
       - {click: '0', long_click: ')', width: 7}
@@ -517,14 +522,12 @@ preset_keyboards:
       - {click: Keyboard_moran_kagiroi_symbols_hiragana, label: "平假"}
       - {click: Keyboard_moran_kagiroi_symbols_katakana, label: "片假"}
 
-      - {click: Keyboard_moran_kagiroi_hybrid, label: "ABC", width: 12}
-      - {click: Keyboard_moran_kagiroi_symbols, label: "符", hint: "常用", width: 12}
-      - {click: Keyboard_moran_kagiroi_hybrid_ascii, label: "英", width: 10}
-      - {click: space, label: "空格", preview: " ", width: 32}
+      - {click: Keyboard_moran_kagiroi_symbols_return, label: "符", hint: "返回", width: 20}
+      - {click: space, label: "空格", preview: " ", width: 42}
       - {click: ",", long_click: "<", width: 8}
       - {click: ".", long_click: ">", width: 8}
-      - {click: BackSpace, swipe_left: Escape, width: 10}
-      - {click: Return, long_click: CommitComment, width: 8}
+      - {click: BackSpace, swipe_left: Escape, width: 12}
+      - {click: Return, long_click: CommitComment, width: 10}
 
   moran_kagiroi_symbols:
     name: "常用符号"
@@ -571,14 +574,12 @@ preset_keyboards:
       - {click: "》"}
       - {click: "￥"}
 
-      - {click: Keyboard_moran_kagiroi_hybrid, label: "ABC", width: 12}
-      - {click: Keyboard_moran_kagiroi_symbols, label: "符", hint: "目录", width: 12}
-      - {click: Mode_switch, label: "中/英", long_click: Menu, width: 10}
-      - {click: space, label: "空格", preview: " ", width: 32}
+      - {click: Keyboard_moran_kagiroi_symbols_return, label: "符", hint: "返回", width: 20}
+      - {click: space, label: "空格", preview: " ", width: 42}
       - {click: ",", long_click: "<", width: 8}
       - {click: ".", long_click: ">", width: 8}
-      - {click: BackSpace, swipe_left: Escape, width: 10}
-      - {click: Return, long_click: CommitComment, width: 8}
+      - {click: BackSpace, swipe_left: Escape, width: 12}
+      - {click: Return, long_click: CommitComment, width: 10}
 
   moran_kagiroi_symbols_english:
     name: "英文符号"
@@ -625,14 +626,12 @@ preset_keyboards:
       - {click: ":"}
       - {click: ";"}
 
-      - {click: Keyboard_moran_kagiroi_hybrid, label: "ABC", width: 12}
-      - {click: Keyboard_moran_kagiroi_symbols, label: "符", hint: "目录", width: 12}
-      - {click: Mode_switch, label: "中/英", long_click: Menu, width: 10}
-      - {click: space, label: "空格", preview: " ", width: 32}
+      - {click: Keyboard_moran_kagiroi_symbols_return, label: "符", hint: "返回", width: 20}
+      - {click: space, label: "空格", preview: " ", width: 42}
       - {click: ",", long_click: "<", width: 8}
       - {click: ".", long_click: ">", width: 8}
-      - {click: BackSpace, swipe_left: Escape, width: 10}
-      - {click: Return, long_click: CommitComment, width: 8}
+      - {click: BackSpace, swipe_left: Escape, width: 12}
+      - {click: Return, long_click: CommitComment, width: 10}
 
   moran_kagiroi_symbols_chinese:
     name: "中文符号"
@@ -679,14 +678,12 @@ preset_keyboards:
       - {click: "～"}
       - {click: "￥"}
 
-      - {click: Keyboard_moran_kagiroi_hybrid, label: "ABC", width: 12}
-      - {click: Keyboard_moran_kagiroi_symbols, label: "符", hint: "目录", width: 12}
-      - {click: Mode_switch, label: "中/英", long_click: Menu, width: 10}
-      - {click: space, label: "空格", preview: " ", width: 32}
+      - {click: Keyboard_moran_kagiroi_symbols_return, label: "符", hint: "返回", width: 20}
+      - {click: space, label: "空格", preview: " ", width: 42}
       - {click: ",", long_click: "<", width: 8}
       - {click: ".", long_click: ">", width: 8}
-      - {click: BackSpace, swipe_left: Escape, width: 10}
-      - {click: Return, long_click: CommitComment, width: 8}
+      - {click: BackSpace, swipe_left: Escape, width: 12}
+      - {click: Return, long_click: CommitComment, width: 10}
 
   moran_kagiroi_symbols_japanese:
     name: "日文符号"
@@ -733,14 +730,12 @@ preset_keyboards:
       - {click: "→"}
       - {click: "←"}
 
-      - {click: Keyboard_moran_kagiroi_hybrid, label: "ABC", width: 12}
-      - {click: Keyboard_moran_kagiroi_symbols, label: "符", hint: "目录", width: 12}
-      - {click: Mode_switch, label: "中/英", long_click: Menu, width: 10}
-      - {click: space, label: "空格", preview: " ", width: 32}
+      - {click: Keyboard_moran_kagiroi_symbols_return, label: "符", hint: "返回", width: 20}
+      - {click: space, label: "空格", preview: " ", width: 42}
       - {click: ",", long_click: "<", width: 8}
       - {click: ".", long_click: ">", width: 8}
-      - {click: BackSpace, swipe_left: Escape, width: 10}
-      - {click: Return, long_click: CommitComment, width: 8}
+      - {click: BackSpace, swipe_left: Escape, width: 12}
+      - {click: Return, long_click: CommitComment, width: 10}
 
   moran_kagiroi_symbols_math:
     name: "数学符号"
@@ -787,14 +782,12 @@ preset_keyboards:
       - {click: "∴"}
       - {click: "∵"}
 
-      - {click: Keyboard_moran_kagiroi_hybrid, label: "ABC", width: 12}
-      - {click: Keyboard_moran_kagiroi_symbols, label: "符", hint: "目录", width: 12}
-      - {click: Mode_switch, label: "中/英", long_click: Menu, width: 10}
-      - {click: space, label: "空格", preview: " ", width: 32}
+      - {click: Keyboard_moran_kagiroi_symbols_return, label: "符", hint: "返回", width: 20}
+      - {click: space, label: "空格", preview: " ", width: 42}
       - {click: ",", long_click: "<", width: 8}
       - {click: ".", long_click: ">", width: 8}
-      - {click: BackSpace, swipe_left: Escape, width: 10}
-      - {click: Return, long_click: CommitComment, width: 8}
+      - {click: BackSpace, swipe_left: Escape, width: 12}
+      - {click: Return, long_click: CommitComment, width: 10}
 
   moran_kagiroi_symbols_special:
     name: "特殊符号"
@@ -841,14 +834,12 @@ preset_keyboards:
       - {click: "⇩"}
       - {click: "⌘"}
 
-      - {click: Keyboard_moran_kagiroi_hybrid, label: "ABC", width: 12}
-      - {click: Keyboard_moran_kagiroi_symbols, label: "符", hint: "目录", width: 12}
-      - {click: Mode_switch, label: "中/英", long_click: Menu, width: 10}
-      - {click: space, label: "空格", preview: " ", width: 32}
+      - {click: Keyboard_moran_kagiroi_symbols_return, label: "符", hint: "返回", width: 20}
+      - {click: space, label: "空格", preview: " ", width: 42}
       - {click: ",", long_click: "<", width: 8}
       - {click: ".", long_click: ">", width: 8}
-      - {click: BackSpace, swipe_left: Escape, width: 10}
-      - {click: Return, long_click: CommitComment, width: 8}
+      - {click: BackSpace, swipe_left: Escape, width: 12}
+      - {click: Return, long_click: CommitComment, width: 10}
 
   moran_kagiroi_symbols_units:
     name: "单位符号"
@@ -895,14 +886,12 @@ preset_keyboards:
       - {click: "TB"}
       - {click: "dB"}
 
-      - {click: Keyboard_moran_kagiroi_hybrid, label: "ABC", width: 12}
-      - {click: Keyboard_moran_kagiroi_symbols, label: "符", hint: "目录", width: 12}
-      - {click: Mode_switch, label: "中/英", long_click: Menu, width: 10}
-      - {click: space, label: "空格", preview: " ", width: 32}
+      - {click: Keyboard_moran_kagiroi_symbols_return, label: "符", hint: "返回", width: 20}
+      - {click: space, label: "空格", preview: " ", width: 42}
       - {click: ",", long_click: "<", width: 8}
       - {click: ".", long_click: ">", width: 8}
-      - {click: BackSpace, swipe_left: Escape, width: 10}
-      - {click: Return, long_click: CommitComment, width: 8}
+      - {click: BackSpace, swipe_left: Escape, width: 12}
+      - {click: Return, long_click: CommitComment, width: 10}
 
   moran_kagiroi_symbols_list:
     name: "列表符号"
@@ -949,14 +938,12 @@ preset_keyboards:
       - {click: "Ⅳ"}
       - {click: "Ⅴ"}
 
-      - {click: Keyboard_moran_kagiroi_hybrid, label: "ABC", width: 12}
-      - {click: Keyboard_moran_kagiroi_symbols, label: "符", hint: "目录", width: 12}
-      - {click: Mode_switch, label: "中/英", long_click: Menu, width: 10}
-      - {click: space, label: "空格", preview: " ", width: 32}
+      - {click: Keyboard_moran_kagiroi_symbols_return, label: "符", hint: "返回", width: 20}
+      - {click: space, label: "空格", preview: " ", width: 42}
       - {click: ",", long_click: "<", width: 8}
       - {click: ".", long_click: ">", width: 8}
-      - {click: BackSpace, swipe_left: Escape, width: 10}
-      - {click: Return, long_click: CommitComment, width: 8}
+      - {click: BackSpace, swipe_left: Escape, width: 12}
+      - {click: Return, long_click: CommitComment, width: 10}
 
   moran_kagiroi_symbols_pinyin:
     name: "拼音声调"
@@ -1003,14 +990,12 @@ preset_keyboards:
       - {click: "ǹ"}
       - {click: "ḿ"}
 
-      - {click: Keyboard_moran_kagiroi_hybrid, label: "ABC", width: 12}
-      - {click: Keyboard_moran_kagiroi_symbols, label: "符", hint: "目录", width: 12}
-      - {click: Mode_switch, label: "中/英", long_click: Menu, width: 10}
-      - {click: space, label: "空格", preview: " ", width: 32}
+      - {click: Keyboard_moran_kagiroi_symbols_return, label: "符", hint: "返回", width: 20}
+      - {click: space, label: "空格", preview: " ", width: 42}
       - {click: ",", long_click: "<", width: 8}
       - {click: ".", long_click: ">", width: 8}
-      - {click: BackSpace, swipe_left: Escape, width: 10}
-      - {click: Return, long_click: CommitComment, width: 8}
+      - {click: BackSpace, swipe_left: Escape, width: 12}
+      - {click: Return, long_click: CommitComment, width: 10}
 
   moran_kagiroi_symbols_bopomofo:
     name: "注音符号"
@@ -1057,14 +1042,12 @@ preset_keyboards:
       - {click: "ㄞ"}
       - {click: "ㄟ"}
 
-      - {click: Keyboard_moran_kagiroi_hybrid, label: "ABC", width: 12}
-      - {click: Keyboard_moran_kagiroi_symbols, label: "符", hint: "目录", width: 12}
-      - {click: Mode_switch, label: "中/英", long_click: Menu, width: 10}
-      - {click: space, label: "空格", preview: " ", width: 32}
+      - {click: Keyboard_moran_kagiroi_symbols_return, label: "符", hint: "返回", width: 20}
+      - {click: space, label: "空格", preview: " ", width: 42}
       - {click: ",", long_click: "<", width: 8}
       - {click: ".", long_click: ">", width: 8}
-      - {click: BackSpace, swipe_left: Escape, width: 10}
-      - {click: Return, long_click: CommitComment, width: 8}
+      - {click: BackSpace, swipe_left: Escape, width: 12}
+      - {click: Return, long_click: CommitComment, width: 10}
 
   moran_kagiroi_symbols_radicals:
     name: "部首"
@@ -1111,14 +1094,12 @@ preset_keyboards:
       - {click: "又"}
       - {click: "口"}
 
-      - {click: Keyboard_moran_kagiroi_hybrid, label: "ABC", width: 12}
-      - {click: Keyboard_moran_kagiroi_symbols, label: "符", hint: "目录", width: 12}
-      - {click: Mode_switch, label: "中/英", long_click: Menu, width: 10}
-      - {click: space, label: "空格", preview: " ", width: 32}
+      - {click: Keyboard_moran_kagiroi_symbols_return, label: "符", hint: "返回", width: 20}
+      - {click: space, label: "空格", preview: " ", width: 42}
       - {click: ",", long_click: "<", width: 8}
       - {click: ".", long_click: ">", width: 8}
-      - {click: BackSpace, swipe_left: Escape, width: 10}
-      - {click: Return, long_click: CommitComment, width: 8}
+      - {click: BackSpace, swipe_left: Escape, width: 12}
+      - {click: Return, long_click: CommitComment, width: 10}
 
   moran_kagiroi_symbols_greek:
     name: "希腊字母"
@@ -1165,14 +1146,12 @@ preset_keyboards:
       - {click: "Ε"}
       - {click: "Ζ"}
 
-      - {click: Keyboard_moran_kagiroi_hybrid, label: "ABC", width: 12}
-      - {click: Keyboard_moran_kagiroi_symbols, label: "符", hint: "目录", width: 12}
-      - {click: Mode_switch, label: "中/英", long_click: Menu, width: 10}
-      - {click: space, label: "空格", preview: " ", width: 32}
+      - {click: Keyboard_moran_kagiroi_symbols_return, label: "符", hint: "返回", width: 20}
+      - {click: space, label: "空格", preview: " ", width: 42}
       - {click: ",", long_click: "<", width: 8}
       - {click: ".", long_click: ">", width: 8}
-      - {click: BackSpace, swipe_left: Escape, width: 10}
-      - {click: Return, long_click: CommitComment, width: 8}
+      - {click: BackSpace, swipe_left: Escape, width: 12}
+      - {click: Return, long_click: CommitComment, width: 10}
 
   moran_kagiroi_symbols_cyrillic:
     name: "俄文字母"
@@ -1219,14 +1198,12 @@ preset_keyboards:
       - {click: "Ы"}
       - {click: "Ь"}
 
-      - {click: Keyboard_moran_kagiroi_hybrid, label: "ABC", width: 12}
-      - {click: Keyboard_moran_kagiroi_symbols, label: "符", hint: "目录", width: 12}
-      - {click: Mode_switch, label: "中/英", long_click: Menu, width: 10}
-      - {click: space, label: "空格", preview: " ", width: 32}
+      - {click: Keyboard_moran_kagiroi_symbols_return, label: "符", hint: "返回", width: 20}
+      - {click: space, label: "空格", preview: " ", width: 42}
       - {click: ",", long_click: "<", width: 8}
       - {click: ".", long_click: ">", width: 8}
-      - {click: BackSpace, swipe_left: Escape, width: 10}
-      - {click: Return, long_click: CommitComment, width: 8}
+      - {click: BackSpace, swipe_left: Escape, width: 12}
+      - {click: Return, long_click: CommitComment, width: 10}
 
   moran_kagiroi_symbols_latin:
     name: "拉丁扩展"
@@ -1273,14 +1250,12 @@ preset_keyboards:
       - {click: "ÿ"}
       - {click: "ß"}
 
-      - {click: Keyboard_moran_kagiroi_hybrid, label: "ABC", width: 12}
-      - {click: Keyboard_moran_kagiroi_symbols, label: "符", hint: "目录", width: 12}
-      - {click: Mode_switch, label: "中/英", long_click: Menu, width: 10}
-      - {click: space, label: "空格", preview: " ", width: 32}
+      - {click: Keyboard_moran_kagiroi_symbols_return, label: "符", hint: "返回", width: 20}
+      - {click: space, label: "空格", preview: " ", width: 42}
       - {click: ",", long_click: "<", width: 8}
       - {click: ".", long_click: ">", width: 8}
-      - {click: BackSpace, swipe_left: Escape, width: 10}
-      - {click: Return, long_click: CommitComment, width: 8}
+      - {click: BackSpace, swipe_left: Escape, width: 12}
+      - {click: Return, long_click: CommitComment, width: 10}
 
   moran_kagiroi_symbols_korean:
     name: "韩文字符"
@@ -1327,14 +1302,12 @@ preset_keyboards:
       - {click: "ㅘ"}
       - {click: "ㅙ"}
 
-      - {click: Keyboard_moran_kagiroi_hybrid, label: "ABC", width: 12}
-      - {click: Keyboard_moran_kagiroi_symbols, label: "符", hint: "目录", width: 12}
-      - {click: Mode_switch, label: "中/英", long_click: Menu, width: 10}
-      - {click: space, label: "空格", preview: " ", width: 32}
+      - {click: Keyboard_moran_kagiroi_symbols_return, label: "符", hint: "返回", width: 20}
+      - {click: space, label: "空格", preview: " ", width: 42}
       - {click: ",", long_click: "<", width: 8}
       - {click: ".", long_click: ">", width: 8}
-      - {click: BackSpace, swipe_left: Escape, width: 10}
-      - {click: Return, long_click: CommitComment, width: 8}
+      - {click: BackSpace, swipe_left: Escape, width: 12}
+      - {click: Return, long_click: CommitComment, width: 10}
 
   moran_kagiroi_symbols_ipa:
     name: "国际音标"
@@ -1381,14 +1354,12 @@ preset_keyboards:
       - {click: "˞"}
       - {click: "ɫ"}
 
-      - {click: Keyboard_moran_kagiroi_hybrid, label: "ABC", width: 12}
-      - {click: Keyboard_moran_kagiroi_symbols, label: "符", hint: "目录", width: 12}
-      - {click: Mode_switch, label: "中/英", long_click: Menu, width: 10}
-      - {click: space, label: "空格", preview: " ", width: 32}
+      - {click: Keyboard_moran_kagiroi_symbols_return, label: "符", hint: "返回", width: 20}
+      - {click: space, label: "空格", preview: " ", width: 42}
       - {click: ",", long_click: "<", width: 8}
       - {click: ".", long_click: ">", width: 8}
-      - {click: BackSpace, swipe_left: Escape, width: 10}
-      - {click: Return, long_click: CommitComment, width: 8}
+      - {click: BackSpace, swipe_left: Escape, width: 12}
+      - {click: Return, long_click: CommitComment, width: 10}
 
   moran_kagiroi_symbols_hiragana:
     name: "平假名"
@@ -1435,14 +1406,12 @@ preset_keyboards:
       - {click: "へ"}
       - {click: "ほ"}
 
-      - {click: Keyboard_moran_kagiroi_hybrid, label: "ABC", width: 12}
-      - {click: Keyboard_moran_kagiroi_symbols, label: "符", hint: "目录", width: 12}
-      - {click: Mode_switch, label: "中/英", long_click: Menu, width: 10}
-      - {click: space, label: "空格", preview: " ", width: 32}
+      - {click: Keyboard_moran_kagiroi_symbols_return, label: "符", hint: "返回", width: 20}
+      - {click: space, label: "空格", preview: " ", width: 42}
       - {click: ",", long_click: "<", width: 8}
       - {click: ".", long_click: ">", width: 8}
-      - {click: BackSpace, swipe_left: Escape, width: 10}
-      - {click: Return, long_click: CommitComment, width: 8}
+      - {click: BackSpace, swipe_left: Escape, width: 12}
+      - {click: Return, long_click: CommitComment, width: 10}
 
   moran_kagiroi_symbols_katakana:
     name: "片假名"
@@ -1489,14 +1458,12 @@ preset_keyboards:
       - {click: "ヘ"}
       - {click: "ホ"}
 
-      - {click: Keyboard_moran_kagiroi_hybrid, label: "ABC", width: 12}
-      - {click: Keyboard_moran_kagiroi_symbols, label: "符", hint: "目录", width: 12}
-      - {click: Mode_switch, label: "中/英", long_click: Menu, width: 10}
-      - {click: space, label: "空格", preview: " ", width: 32}
+      - {click: Keyboard_moran_kagiroi_symbols_return, label: "符", hint: "返回", width: 20}
+      - {click: space, label: "空格", preview: " ", width: 42}
       - {click: ",", long_click: "<", width: 8}
       - {click: ".", long_click: ">", width: 8}
-      - {click: BackSpace, swipe_left: Escape, width: 10}
-      - {click: Return, long_click: CommitComment, width: 8}
+      - {click: BackSpace, swipe_left: Escape, width: 12}
+      - {click: Return, long_click: CommitComment, width: 10}
 
   # iOS 式：左栏短按选择分类；「更多」长按跳过一组。
   moran_kagiroi_symbols_ios:
@@ -1544,14 +1511,12 @@ preset_keyboards:
       - {click: "～"}
       - {click: "·"}
 
-      - {click: Keyboard_moran_kagiroi_hybrid, label: "ABC", width: 12}
-      - {click: Keyboard_moran_kagiroi_symbols, label: "符", hint: "目录", width: 12}
-      - {click: Mode_switch, label: "中/英", long_click: Menu, width: 10}
-      - {click: space, label: "空格", preview: " ", width: 32}
+      - {click: Keyboard_moran_kagiroi_symbols_return, label: "符", hint: "返回", width: 20}
+      - {click: space, label: "空格", preview: " ", width: 42}
       - {click: ",", long_click: "<", width: 8}
       - {click: ".", long_click: ">", width: 8}
-      - {click: BackSpace, swipe_left: Escape, width: 10}
-      - {click: Return, long_click: CommitComment, width: 8}
+      - {click: BackSpace, swipe_left: Escape, width: 12}
+      - {click: Return, long_click: CommitComment, width: 10}
 
   # iOS 式：左栏短按选择分类；「更多」长按跳过一组。
   moran_kagiroi_symbols_english_ios:
@@ -1599,14 +1564,12 @@ preset_keyboards:
       - {click: "]"}
       - {click: "{"}
 
-      - {click: Keyboard_moran_kagiroi_hybrid, label: "ABC", width: 12}
-      - {click: Keyboard_moran_kagiroi_symbols, label: "符", hint: "目录", width: 12}
-      - {click: Mode_switch, label: "中/英", long_click: Menu, width: 10}
-      - {click: space, label: "空格", preview: " ", width: 32}
+      - {click: Keyboard_moran_kagiroi_symbols_return, label: "符", hint: "返回", width: 20}
+      - {click: space, label: "空格", preview: " ", width: 42}
       - {click: ",", long_click: "<", width: 8}
       - {click: ".", long_click: ">", width: 8}
-      - {click: BackSpace, swipe_left: Escape, width: 10}
-      - {click: Return, long_click: CommitComment, width: 8}
+      - {click: BackSpace, swipe_left: Escape, width: 12}
+      - {click: Return, long_click: CommitComment, width: 10}
 
   # iOS 式：左栏短按选择分类；「更多」长按跳过一组。
   moran_kagiroi_symbols_chinese_ios:
@@ -1654,14 +1617,12 @@ preset_keyboards:
       - {click: "『"}
       - {click: "』"}
 
-      - {click: Keyboard_moran_kagiroi_hybrid, label: "ABC", width: 12}
-      - {click: Keyboard_moran_kagiroi_symbols, label: "符", hint: "目录", width: 12}
-      - {click: Mode_switch, label: "中/英", long_click: Menu, width: 10}
-      - {click: space, label: "空格", preview: " ", width: 32}
+      - {click: Keyboard_moran_kagiroi_symbols_return, label: "符", hint: "返回", width: 20}
+      - {click: space, label: "空格", preview: " ", width: 42}
       - {click: ",", long_click: "<", width: 8}
       - {click: ".", long_click: ">", width: 8}
-      - {click: BackSpace, swipe_left: Escape, width: 10}
-      - {click: Return, long_click: CommitComment, width: 8}
+      - {click: BackSpace, swipe_left: Escape, width: 12}
+      - {click: Return, long_click: CommitComment, width: 10}
 
   # iOS 式：左栏短按选择分类；「更多」长按跳过一组。
   moran_kagiroi_symbols_japanese_ios:
@@ -1709,14 +1670,12 @@ preset_keyboards:
       - {click: "〤"}
       - {click: "〇"}
 
-      - {click: Keyboard_moran_kagiroi_hybrid, label: "ABC", width: 12}
-      - {click: Keyboard_moran_kagiroi_symbols, label: "符", hint: "目录", width: 12}
-      - {click: Mode_switch, label: "中/英", long_click: Menu, width: 10}
-      - {click: space, label: "空格", preview: " ", width: 32}
+      - {click: Keyboard_moran_kagiroi_symbols_return, label: "符", hint: "返回", width: 20}
+      - {click: space, label: "空格", preview: " ", width: 42}
       - {click: ",", long_click: "<", width: 8}
       - {click: ".", long_click: ">", width: 8}
-      - {click: BackSpace, swipe_left: Escape, width: 10}
-      - {click: Return, long_click: CommitComment, width: 8}
+      - {click: BackSpace, swipe_left: Escape, width: 12}
+      - {click: Return, long_click: CommitComment, width: 10}
 
   # iOS 式：左栏短按选择分类；「更多」长按跳过一组。
   moran_kagiroi_symbols_math_ios:
@@ -1764,14 +1723,12 @@ preset_keyboards:
       - {click: "∉"}
       - {click: "∩"}
 
-      - {click: Keyboard_moran_kagiroi_hybrid, label: "ABC", width: 12}
-      - {click: Keyboard_moran_kagiroi_symbols, label: "符", hint: "目录", width: 12}
-      - {click: Mode_switch, label: "中/英", long_click: Menu, width: 10}
-      - {click: space, label: "空格", preview: " ", width: 32}
+      - {click: Keyboard_moran_kagiroi_symbols_return, label: "符", hint: "返回", width: 20}
+      - {click: space, label: "空格", preview: " ", width: 42}
       - {click: ",", long_click: "<", width: 8}
       - {click: ".", long_click: ">", width: 8}
-      - {click: BackSpace, swipe_left: Escape, width: 10}
-      - {click: Return, long_click: CommitComment, width: 8}
+      - {click: BackSpace, swipe_left: Escape, width: 12}
+      - {click: Return, long_click: CommitComment, width: 10}
 
   # iOS 式：左栏短按选择分类；「更多」长按跳过一组。
   moran_kagiroi_symbols_special_ios:
@@ -1819,14 +1776,12 @@ preset_keyboards:
       - {click: "↑"}
       - {click: "↓"}
 
-      - {click: Keyboard_moran_kagiroi_hybrid, label: "ABC", width: 12}
-      - {click: Keyboard_moran_kagiroi_symbols, label: "符", hint: "目录", width: 12}
-      - {click: Mode_switch, label: "中/英", long_click: Menu, width: 10}
-      - {click: space, label: "空格", preview: " ", width: 32}
+      - {click: Keyboard_moran_kagiroi_symbols_return, label: "符", hint: "返回", width: 20}
+      - {click: space, label: "空格", preview: " ", width: 42}
       - {click: ",", long_click: "<", width: 8}
       - {click: ".", long_click: ">", width: 8}
-      - {click: BackSpace, swipe_left: Escape, width: 10}
-      - {click: Return, long_click: CommitComment, width: 8}
+      - {click: BackSpace, swipe_left: Escape, width: 12}
+      - {click: Return, long_click: CommitComment, width: 10}
 
   # iOS 式：左栏短按选择分类；「更多」长按跳过一组。
   moran_kagiroi_symbols_units_ios:
@@ -1874,14 +1829,12 @@ preset_keyboards:
       - {click: "GHz"}
       - {click: "W"}
 
-      - {click: Keyboard_moran_kagiroi_hybrid, label: "ABC", width: 12}
-      - {click: Keyboard_moran_kagiroi_symbols, label: "符", hint: "目录", width: 12}
-      - {click: Mode_switch, label: "中/英", long_click: Menu, width: 10}
-      - {click: space, label: "空格", preview: " ", width: 32}
+      - {click: Keyboard_moran_kagiroi_symbols_return, label: "符", hint: "返回", width: 20}
+      - {click: space, label: "空格", preview: " ", width: 42}
       - {click: ",", long_click: "<", width: 8}
       - {click: ".", long_click: ">", width: 8}
-      - {click: BackSpace, swipe_left: Escape, width: 10}
-      - {click: Return, long_click: CommitComment, width: 8}
+      - {click: BackSpace, swipe_left: Escape, width: 12}
+      - {click: Return, long_click: CommitComment, width: 10}
 
   # iOS 式：左栏短按选择分类；「更多」长按跳过一组。
   moran_kagiroi_symbols_list_ios:
@@ -1929,14 +1882,12 @@ preset_keyboards:
       - {click: "㈣"}
       - {click: "㈤"}
 
-      - {click: Keyboard_moran_kagiroi_hybrid, label: "ABC", width: 12}
-      - {click: Keyboard_moran_kagiroi_symbols, label: "符", hint: "目录", width: 12}
-      - {click: Mode_switch, label: "中/英", long_click: Menu, width: 10}
-      - {click: space, label: "空格", preview: " ", width: 32}
+      - {click: Keyboard_moran_kagiroi_symbols_return, label: "符", hint: "返回", width: 20}
+      - {click: space, label: "空格", preview: " ", width: 42}
       - {click: ",", long_click: "<", width: 8}
       - {click: ".", long_click: ">", width: 8}
-      - {click: BackSpace, swipe_left: Escape, width: 10}
-      - {click: Return, long_click: CommitComment, width: 8}
+      - {click: BackSpace, swipe_left: Escape, width: 12}
+      - {click: Return, long_click: CommitComment, width: 10}
 
   # iOS 式：左栏短按选择分类；「更多」长按跳过一组。
   moran_kagiroi_symbols_pinyin_ios:
@@ -1984,14 +1935,12 @@ preset_keyboards:
       - {click: "ǜ"}
       - {click: "ü"}
 
-      - {click: Keyboard_moran_kagiroi_hybrid, label: "ABC", width: 12}
-      - {click: Keyboard_moran_kagiroi_symbols, label: "符", hint: "目录", width: 12}
-      - {click: Mode_switch, label: "中/英", long_click: Menu, width: 10}
-      - {click: space, label: "空格", preview: " ", width: 32}
+      - {click: Keyboard_moran_kagiroi_symbols_return, label: "符", hint: "返回", width: 20}
+      - {click: space, label: "空格", preview: " ", width: 42}
       - {click: ",", long_click: "<", width: 8}
       - {click: ".", long_click: ">", width: 8}
-      - {click: BackSpace, swipe_left: Escape, width: 10}
-      - {click: Return, long_click: CommitComment, width: 8}
+      - {click: BackSpace, swipe_left: Escape, width: 12}
+      - {click: Return, long_click: CommitComment, width: 10}
 
   # iOS 式：左栏短按选择分类；「更多」长按跳过一组。
   moran_kagiroi_symbols_bopomofo_ios:
@@ -2039,14 +1988,12 @@ preset_keyboards:
       - {click: "ㄩ"}
       - {click: "ㄚ"}
 
-      - {click: Keyboard_moran_kagiroi_hybrid, label: "ABC", width: 12}
-      - {click: Keyboard_moran_kagiroi_symbols, label: "符", hint: "目录", width: 12}
-      - {click: Mode_switch, label: "中/英", long_click: Menu, width: 10}
-      - {click: space, label: "空格", preview: " ", width: 32}
+      - {click: Keyboard_moran_kagiroi_symbols_return, label: "符", hint: "返回", width: 20}
+      - {click: space, label: "空格", preview: " ", width: 42}
       - {click: ",", long_click: "<", width: 8}
       - {click: ".", long_click: ">", width: 8}
-      - {click: BackSpace, swipe_left: Escape, width: 10}
-      - {click: Return, long_click: CommitComment, width: 8}
+      - {click: BackSpace, swipe_left: Escape, width: 12}
+      - {click: Return, long_click: CommitComment, width: 10}
 
   # iOS 式：左栏短按选择分类；「更多」长按跳过一组。
   moran_kagiroi_symbols_radicals_ios:
@@ -2094,14 +2041,12 @@ preset_keyboards:
       - {click: "十"}
       - {click: "卜"}
 
-      - {click: Keyboard_moran_kagiroi_hybrid, label: "ABC", width: 12}
-      - {click: Keyboard_moran_kagiroi_symbols, label: "符", hint: "目录", width: 12}
-      - {click: Mode_switch, label: "中/英", long_click: Menu, width: 10}
-      - {click: space, label: "空格", preview: " ", width: 32}
+      - {click: Keyboard_moran_kagiroi_symbols_return, label: "符", hint: "返回", width: 20}
+      - {click: space, label: "空格", preview: " ", width: 42}
       - {click: ",", long_click: "<", width: 8}
       - {click: ".", long_click: ">", width: 8}
-      - {click: BackSpace, swipe_left: Escape, width: 10}
-      - {click: Return, long_click: CommitComment, width: 8}
+      - {click: BackSpace, swipe_left: Escape, width: 12}
+      - {click: Return, long_click: CommitComment, width: 10}
 
   # iOS 式：左栏短按选择分类；「更多」长按跳过一组。
   moran_kagiroi_symbols_greek_ios:
@@ -2149,14 +2094,12 @@ preset_keyboards:
       - {click: "ω"}
       - {click: "Α"}
 
-      - {click: Keyboard_moran_kagiroi_hybrid, label: "ABC", width: 12}
-      - {click: Keyboard_moran_kagiroi_symbols, label: "符", hint: "目录", width: 12}
-      - {click: Mode_switch, label: "中/英", long_click: Menu, width: 10}
-      - {click: space, label: "空格", preview: " ", width: 32}
+      - {click: Keyboard_moran_kagiroi_symbols_return, label: "符", hint: "返回", width: 20}
+      - {click: space, label: "空格", preview: " ", width: 42}
       - {click: ",", long_click: "<", width: 8}
       - {click: ".", long_click: ">", width: 8}
-      - {click: BackSpace, swipe_left: Escape, width: 10}
-      - {click: Return, long_click: CommitComment, width: 8}
+      - {click: BackSpace, swipe_left: Escape, width: 12}
+      - {click: Return, long_click: CommitComment, width: 10}
 
   # iOS 式：左栏短按选择分类；「更多」长按跳过一组。
   moran_kagiroi_symbols_cyrillic_ios:
@@ -2204,14 +2147,12 @@ preset_keyboards:
       - {click: "Ц"}
       - {click: "Ч"}
 
-      - {click: Keyboard_moran_kagiroi_hybrid, label: "ABC", width: 12}
-      - {click: Keyboard_moran_kagiroi_symbols, label: "符", hint: "目录", width: 12}
-      - {click: Mode_switch, label: "中/英", long_click: Menu, width: 10}
-      - {click: space, label: "空格", preview: " ", width: 32}
+      - {click: Keyboard_moran_kagiroi_symbols_return, label: "符", hint: "返回", width: 20}
+      - {click: space, label: "空格", preview: " ", width: 42}
       - {click: ",", long_click: "<", width: 8}
       - {click: ".", long_click: ">", width: 8}
-      - {click: BackSpace, swipe_left: Escape, width: 10}
-      - {click: Return, long_click: CommitComment, width: 8}
+      - {click: BackSpace, swipe_left: Escape, width: 12}
+      - {click: Return, long_click: CommitComment, width: 10}
 
   # iOS 式：左栏短按选择分类；「更多」长按跳过一组。
   moran_kagiroi_symbols_latin_ios:
@@ -2259,14 +2200,12 @@ preset_keyboards:
       - {click: "ú"}
       - {click: "ù"}
 
-      - {click: Keyboard_moran_kagiroi_hybrid, label: "ABC", width: 12}
-      - {click: Keyboard_moran_kagiroi_symbols, label: "符", hint: "目录", width: 12}
-      - {click: Mode_switch, label: "中/英", long_click: Menu, width: 10}
-      - {click: space, label: "空格", preview: " ", width: 32}
+      - {click: Keyboard_moran_kagiroi_symbols_return, label: "符", hint: "返回", width: 20}
+      - {click: space, label: "空格", preview: " ", width: 42}
       - {click: ",", long_click: "<", width: 8}
       - {click: ".", long_click: ">", width: 8}
-      - {click: BackSpace, swipe_left: Escape, width: 10}
-      - {click: Return, long_click: CommitComment, width: 8}
+      - {click: BackSpace, swipe_left: Escape, width: 12}
+      - {click: Return, long_click: CommitComment, width: 10}
 
   # iOS 式：左栏短按选择分类；「更多」长按跳过一组。
   moran_kagiroi_symbols_korean_ios:
@@ -2314,14 +2253,12 @@ preset_keyboards:
       - {click: "ㅓ"}
       - {click: "ㅔ"}
 
-      - {click: Keyboard_moran_kagiroi_hybrid, label: "ABC", width: 12}
-      - {click: Keyboard_moran_kagiroi_symbols, label: "符", hint: "目录", width: 12}
-      - {click: Mode_switch, label: "中/英", long_click: Menu, width: 10}
-      - {click: space, label: "空格", preview: " ", width: 32}
+      - {click: Keyboard_moran_kagiroi_symbols_return, label: "符", hint: "返回", width: 20}
+      - {click: space, label: "空格", preview: " ", width: 42}
       - {click: ",", long_click: "<", width: 8}
       - {click: ".", long_click: ">", width: 8}
-      - {click: BackSpace, swipe_left: Escape, width: 10}
-      - {click: Return, long_click: CommitComment, width: 8}
+      - {click: BackSpace, swipe_left: Escape, width: 12}
+      - {click: Return, long_click: CommitComment, width: 10}
 
   # iOS 式：左栏短按选择分类；「更多」长按跳过一组。
   moran_kagiroi_symbols_ipa_ios:
@@ -2369,14 +2306,12 @@ preset_keyboards:
       - {click: "ˑ"}
       - {click: "˚"}
 
-      - {click: Keyboard_moran_kagiroi_hybrid, label: "ABC", width: 12}
-      - {click: Keyboard_moran_kagiroi_symbols, label: "符", hint: "目录", width: 12}
-      - {click: Mode_switch, label: "中/英", long_click: Menu, width: 10}
-      - {click: space, label: "空格", preview: " ", width: 32}
+      - {click: Keyboard_moran_kagiroi_symbols_return, label: "符", hint: "返回", width: 20}
+      - {click: space, label: "空格", preview: " ", width: 42}
       - {click: ",", long_click: "<", width: 8}
       - {click: ".", long_click: ">", width: 8}
-      - {click: BackSpace, swipe_left: Escape, width: 10}
-      - {click: Return, long_click: CommitComment, width: 8}
+      - {click: BackSpace, swipe_left: Escape, width: 12}
+      - {click: Return, long_click: CommitComment, width: 10}
 
   # iOS 式：左栏短按选择分类；「更多」长按跳过一组。
   moran_kagiroi_symbols_hiragana_ios:
@@ -2424,14 +2359,12 @@ preset_keyboards:
       - {click: "ね"}
       - {click: "の"}
 
-      - {click: Keyboard_moran_kagiroi_hybrid, label: "ABC", width: 12}
-      - {click: Keyboard_moran_kagiroi_symbols, label: "符", hint: "目录", width: 12}
-      - {click: Mode_switch, label: "中/英", long_click: Menu, width: 10}
-      - {click: space, label: "空格", preview: " ", width: 32}
+      - {click: Keyboard_moran_kagiroi_symbols_return, label: "符", hint: "返回", width: 20}
+      - {click: space, label: "空格", preview: " ", width: 42}
       - {click: ",", long_click: "<", width: 8}
       - {click: ".", long_click: ">", width: 8}
-      - {click: BackSpace, swipe_left: Escape, width: 10}
-      - {click: Return, long_click: CommitComment, width: 8}
+      - {click: BackSpace, swipe_left: Escape, width: 12}
+      - {click: Return, long_click: CommitComment, width: 10}
 
   # iOS 式：左栏短按选择分类；「更多」长按跳过一组。
   moran_kagiroi_symbols_katakana_ios:
@@ -2479,11 +2412,9 @@ preset_keyboards:
       - {click: "ネ"}
       - {click: "ノ"}
 
-      - {click: Keyboard_moran_kagiroi_hybrid, label: "ABC", width: 12}
-      - {click: Keyboard_moran_kagiroi_symbols, label: "符", hint: "目录", width: 12}
-      - {click: Mode_switch, label: "中/英", long_click: Menu, width: 10}
-      - {click: space, label: "空格", preview: " ", width: 32}
+      - {click: Keyboard_moran_kagiroi_symbols_return, label: "符", hint: "返回", width: 20}
+      - {click: space, label: "空格", preview: " ", width: 42}
       - {click: ",", long_click: "<", width: 8}
       - {click: ".", long_click: ">", width: 8}
-      - {click: BackSpace, swipe_left: Escape, width: 10}
-      - {click: Return, long_click: CommitComment, width: 8}
+      - {click: BackSpace, swipe_left: Escape, width: 12}
+      - {click: Return, long_click: CommitComment, width: 10}

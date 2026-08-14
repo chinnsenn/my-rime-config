@@ -10,6 +10,8 @@
 patch:
   "preset_keys/Keyboard_moran_kagiroi_symbols":
     __include: moran_kagiroi_hybrid.trime:/preset_keys/Keyboard_moran_kagiroi_symbols
+  "preset_keys/Keyboard_moran_kagiroi_symbols_return":
+    __include: moran_kagiroi_hybrid.trime:/preset_keys/Keyboard_moran_kagiroi_symbols_return
   "preset_keys/Keyboard_moran_kagiroi_symbols_common":
     __include: moran_kagiroi_hybrid.trime:/preset_keys/Keyboard_moran_kagiroi_symbols_common
   "preset_keys/Keyboard_moran_kagiroi_hybrid_ascii":
