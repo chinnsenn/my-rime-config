@@ -2,7 +2,7 @@
 # encoding: utf-8
 # ===================================================================
 # [INPUT]: 依赖 Trime 内置 trime.yaml 与 moran_kagiroi_hybrid.trime.yaml。
-# [OUTPUT]: 将魔然·篝火日混专用主键盘、符号键盘与切换键注册到 Trime。
+# [OUTPUT]: 将魔然·篝火日混专用中英文、数字、符号键盘与切换键注册到 Trime。
 # [POS]:   Rime 用户目录根部的 Trime 配置覆盖层；Trime 部署时自动加载。
 # [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
 # ===================================================================
@@ -10,6 +10,10 @@
 patch:
   "preset_keys/Keyboard_moran_kagiroi_symbols":
     __include: moran_kagiroi_hybrid.trime:/preset_keys/Keyboard_moran_kagiroi_symbols
+  "preset_keys/Keyboard_moran_kagiroi_symbols_common":
+    __include: moran_kagiroi_hybrid.trime:/preset_keys/Keyboard_moran_kagiroi_symbols_common
+  "preset_keys/Keyboard_moran_kagiroi_hybrid_ascii":
+    __include: moran_kagiroi_hybrid.trime:/preset_keys/Keyboard_moran_kagiroi_hybrid_ascii
   "preset_keys/Keyboard_moran_kagiroi_hybrid":
     __include: moran_kagiroi_hybrid.trime:/preset_keys/Keyboard_moran_kagiroi_hybrid
   "preset_keys/Keyboard_moran_kagiroi_numbers":
@@ -54,6 +58,10 @@ patch:
     __include: moran_kagiroi_hybrid.trime:/preset_keyboards/moran_kagiroi_hybrid
   "preset_keyboards/moran_kagiroi_hybrid_landscape":
     __include: moran_kagiroi_hybrid.trime:/preset_keyboards/moran_kagiroi_hybrid_landscape
+  "preset_keyboards/moran_kagiroi_hybrid_ascii":
+    __include: moran_kagiroi_hybrid.trime:/preset_keyboards/moran_kagiroi_hybrid_ascii
+  "preset_keyboards/moran_kagiroi_hybrid_ascii_landscape":
+    __include: moran_kagiroi_hybrid.trime:/preset_keyboards/moran_kagiroi_hybrid_ascii_landscape
   "preset_keyboards/moran_kagiroi_numbers":
     __include: moran_kagiroi_hybrid.trime:/preset_keyboards/moran_kagiroi_numbers
   "preset_keyboards/moran_kagiroi_symbol_catalog":
