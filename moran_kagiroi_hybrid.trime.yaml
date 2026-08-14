@@ -276,7 +276,7 @@ preset_keyboards:
       - {click: Shift_L, send_bindings: false, width: 10}
       - {click: Keyboard_moran_kagiroi_hybrid, label: "中/英", width: 12}
       - {click: Keyboard_moran_kagiroi_symbols, label: "符", hint: "目录", width: 12}
-      - {click: space, label: "魔然日混", preview: " ", width: 34}
+      - {click: space, label: "English", preview: " ", width: 34}
       - {click: BackSpace, swipe_left: Escape, width: 20}
       - {click: Return, width: 12}
 
@@ -344,11 +344,11 @@ preset_keyboards:
       - {click: Keyboard_moran_kagiroi_hybrid, label: "中/英", width: 8}
       - {click: Keyboard_moran_kagiroi_symbols, label: "符", hint: "目录", width: 8}
       - {click: Shift_L, send_bindings: false, width: 8}
-      - {click: space, label: "空格", preview: " ", width: 16}
+      - {click: space, label: "English", preview: " ", width: 16}
       - {click: '=', width: 7}
       - {click: '0', width: 7}
       - {click: '÷', width: 7}
-      - {click: space, label: "空格", preview: " ", width: 16}
+      - {click: space, label: "English", preview: " ", width: 16}
       - {click: BackSpace, swipe_left: Escape, width: 12}
       - {click: Return, label: "搜寻", width: 11}
 
