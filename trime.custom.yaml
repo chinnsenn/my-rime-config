@@ -1,8 +1,8 @@
 # Rime schema
 # encoding: utf-8
 # ===================================================================
-# [INPUT]: 依赖 Trime 内置 trime.yaml 与 moran_kagiroi_hybrid.trime.yaml。
-# [OUTPUT]: 将魔然·篝火日混专用中英文、数字、符号键盘与切换键注册到 Trime。
+# [INPUT]: 依赖 Trime 内置 trime.yaml、moran_kagiroi_hybrid.trime.yaml 与液态符号数据层。
+# [OUTPUT]: 将魔然·篝火日混的主键盘、数字键盘、切换键与液态符号目录注册到 Trime。
 # [POS]:   Rime 用户目录根部的 Trime 配置覆盖层；Trime 部署时自动加载。
 # [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
 # ===================================================================
@@ -10,50 +10,10 @@
 patch:
   "preset_keys/Keyboard_moran_kagiroi_symbols":
     __include: moran_kagiroi_hybrid.trime:/preset_keys/Keyboard_moran_kagiroi_symbols
-  "preset_keys/Keyboard_moran_kagiroi_symbols_return":
-    __include: moran_kagiroi_hybrid.trime:/preset_keys/Keyboard_moran_kagiroi_symbols_return
-  "preset_keys/Keyboard_moran_kagiroi_symbols_common":
-    __include: moran_kagiroi_hybrid.trime:/preset_keys/Keyboard_moran_kagiroi_symbols_common
   "preset_keys/Keyboard_moran_kagiroi_hybrid_ascii":
     __include: moran_kagiroi_hybrid.trime:/preset_keys/Keyboard_moran_kagiroi_hybrid_ascii
   "preset_keys/Keyboard_moran_kagiroi_hybrid":
     __include: moran_kagiroi_hybrid.trime:/preset_keys/Keyboard_moran_kagiroi_hybrid
-  "preset_keys/Keyboard_moran_kagiroi_symbol_catalog":
-    __include: moran_kagiroi_hybrid.trime:/preset_keys/Keyboard_moran_kagiroi_symbol_catalog
-  "preset_keys/Keyboard_moran_kagiroi_symbols_english":
-    __include: moran_kagiroi_hybrid.trime:/preset_keys/Keyboard_moran_kagiroi_symbols_english
-  "preset_keys/Keyboard_moran_kagiroi_symbols_chinese":
-    __include: moran_kagiroi_hybrid.trime:/preset_keys/Keyboard_moran_kagiroi_symbols_chinese
-  "preset_keys/Keyboard_moran_kagiroi_symbols_japanese":
-    __include: moran_kagiroi_hybrid.trime:/preset_keys/Keyboard_moran_kagiroi_symbols_japanese
-  "preset_keys/Keyboard_moran_kagiroi_symbols_math":
-    __include: moran_kagiroi_hybrid.trime:/preset_keys/Keyboard_moran_kagiroi_symbols_math
-  "preset_keys/Keyboard_moran_kagiroi_symbols_special":
-    __include: moran_kagiroi_hybrid.trime:/preset_keys/Keyboard_moran_kagiroi_symbols_special
-  "preset_keys/Keyboard_moran_kagiroi_symbols_units":
-    __include: moran_kagiroi_hybrid.trime:/preset_keys/Keyboard_moran_kagiroi_symbols_units
-  "preset_keys/Keyboard_moran_kagiroi_symbols_list":
-    __include: moran_kagiroi_hybrid.trime:/preset_keys/Keyboard_moran_kagiroi_symbols_list
-  "preset_keys/Keyboard_moran_kagiroi_symbols_pinyin":
-    __include: moran_kagiroi_hybrid.trime:/preset_keys/Keyboard_moran_kagiroi_symbols_pinyin
-  "preset_keys/Keyboard_moran_kagiroi_symbols_bopomofo":
-    __include: moran_kagiroi_hybrid.trime:/preset_keys/Keyboard_moran_kagiroi_symbols_bopomofo
-  "preset_keys/Keyboard_moran_kagiroi_symbols_radicals":
-    __include: moran_kagiroi_hybrid.trime:/preset_keys/Keyboard_moran_kagiroi_symbols_radicals
-  "preset_keys/Keyboard_moran_kagiroi_symbols_greek":
-    __include: moran_kagiroi_hybrid.trime:/preset_keys/Keyboard_moran_kagiroi_symbols_greek
-  "preset_keys/Keyboard_moran_kagiroi_symbols_cyrillic":
-    __include: moran_kagiroi_hybrid.trime:/preset_keys/Keyboard_moran_kagiroi_symbols_cyrillic
-  "preset_keys/Keyboard_moran_kagiroi_symbols_latin":
-    __include: moran_kagiroi_hybrid.trime:/preset_keys/Keyboard_moran_kagiroi_symbols_latin
-  "preset_keys/Keyboard_moran_kagiroi_symbols_korean":
-    __include: moran_kagiroi_hybrid.trime:/preset_keys/Keyboard_moran_kagiroi_symbols_korean
-  "preset_keys/Keyboard_moran_kagiroi_symbols_ipa":
-    __include: moran_kagiroi_hybrid.trime:/preset_keys/Keyboard_moran_kagiroi_symbols_ipa
-  "preset_keys/Keyboard_moran_kagiroi_symbols_hiragana":
-    __include: moran_kagiroi_hybrid.trime:/preset_keys/Keyboard_moran_kagiroi_symbols_hiragana
-  "preset_keys/Keyboard_moran_kagiroi_symbols_katakana":
-    __include: moran_kagiroi_hybrid.trime:/preset_keys/Keyboard_moran_kagiroi_symbols_katakana
   "preset_keyboards/moran_kagiroi_hybrid":
     __include: moran_kagiroi_hybrid.trime:/preset_keyboards/moran_kagiroi_hybrid
   "preset_keyboards/moran_kagiroi_hybrid_landscape":
@@ -64,77 +24,5 @@ patch:
     __include: moran_kagiroi_hybrid.trime:/preset_keyboards/moran_kagiroi_hybrid_ascii_landscape
   "preset_keyboards/moran_kagiroi_numbers":
     __include: moran_kagiroi_hybrid.trime:/preset_keyboards/moran_kagiroi_numbers
-  "preset_keyboards/moran_kagiroi_symbol_catalog":
-    __include: moran_kagiroi_hybrid.trime:/preset_keyboards/moran_kagiroi_symbol_catalog
-  "preset_keyboards/moran_kagiroi_symbols_english":
-    __include: moran_kagiroi_hybrid.trime:/preset_keyboards/moran_kagiroi_symbols_english
-  "preset_keyboards/moran_kagiroi_symbols_chinese":
-    __include: moran_kagiroi_hybrid.trime:/preset_keyboards/moran_kagiroi_symbols_chinese
-  "preset_keyboards/moran_kagiroi_symbols_japanese":
-    __include: moran_kagiroi_hybrid.trime:/preset_keyboards/moran_kagiroi_symbols_japanese
-  "preset_keyboards/moran_kagiroi_symbols_math":
-    __include: moran_kagiroi_hybrid.trime:/preset_keyboards/moran_kagiroi_symbols_math
-  "preset_keyboards/moran_kagiroi_symbols_special":
-    __include: moran_kagiroi_hybrid.trime:/preset_keyboards/moran_kagiroi_symbols_special
-  "preset_keyboards/moran_kagiroi_symbols_units":
-    __include: moran_kagiroi_hybrid.trime:/preset_keyboards/moran_kagiroi_symbols_units
-  "preset_keyboards/moran_kagiroi_symbols_list":
-    __include: moran_kagiroi_hybrid.trime:/preset_keyboards/moran_kagiroi_symbols_list
-  "preset_keyboards/moran_kagiroi_symbols_pinyin":
-    __include: moran_kagiroi_hybrid.trime:/preset_keyboards/moran_kagiroi_symbols_pinyin
-  "preset_keyboards/moran_kagiroi_symbols_bopomofo":
-    __include: moran_kagiroi_hybrid.trime:/preset_keyboards/moran_kagiroi_symbols_bopomofo
-  "preset_keyboards/moran_kagiroi_symbols_radicals":
-    __include: moran_kagiroi_hybrid.trime:/preset_keyboards/moran_kagiroi_symbols_radicals
-  "preset_keyboards/moran_kagiroi_symbols_greek":
-    __include: moran_kagiroi_hybrid.trime:/preset_keyboards/moran_kagiroi_symbols_greek
-  "preset_keyboards/moran_kagiroi_symbols_cyrillic":
-    __include: moran_kagiroi_hybrid.trime:/preset_keyboards/moran_kagiroi_symbols_cyrillic
-  "preset_keyboards/moran_kagiroi_symbols_latin":
-    __include: moran_kagiroi_hybrid.trime:/preset_keyboards/moran_kagiroi_symbols_latin
-  "preset_keyboards/moran_kagiroi_symbols_korean":
-    __include: moran_kagiroi_hybrid.trime:/preset_keyboards/moran_kagiroi_symbols_korean
-  "preset_keyboards/moran_kagiroi_symbols_ipa":
-    __include: moran_kagiroi_hybrid.trime:/preset_keyboards/moran_kagiroi_symbols_ipa
-  "preset_keyboards/moran_kagiroi_symbols_hiragana":
-    __include: moran_kagiroi_hybrid.trime:/preset_keyboards/moran_kagiroi_symbols_hiragana
-  "preset_keyboards/moran_kagiroi_symbols_katakana":
-    __include: moran_kagiroi_hybrid.trime:/preset_keyboards/moran_kagiroi_symbols_katakana
-  "preset_keyboards/moran_kagiroi_symbols_ios":
-    __include: moran_kagiroi_hybrid.trime:/preset_keyboards/moran_kagiroi_symbols_ios
-  "preset_keyboards/moran_kagiroi_symbols_english_ios":
-    __include: moran_kagiroi_hybrid.trime:/preset_keyboards/moran_kagiroi_symbols_english_ios
-  "preset_keyboards/moran_kagiroi_symbols_chinese_ios":
-    __include: moran_kagiroi_hybrid.trime:/preset_keyboards/moran_kagiroi_symbols_chinese_ios
-  "preset_keyboards/moran_kagiroi_symbols_japanese_ios":
-    __include: moran_kagiroi_hybrid.trime:/preset_keyboards/moran_kagiroi_symbols_japanese_ios
-  "preset_keyboards/moran_kagiroi_symbols_math_ios":
-    __include: moran_kagiroi_hybrid.trime:/preset_keyboards/moran_kagiroi_symbols_math_ios
-  "preset_keyboards/moran_kagiroi_symbols_special_ios":
-    __include: moran_kagiroi_hybrid.trime:/preset_keyboards/moran_kagiroi_symbols_special_ios
-  "preset_keyboards/moran_kagiroi_symbols_units_ios":
-    __include: moran_kagiroi_hybrid.trime:/preset_keyboards/moran_kagiroi_symbols_units_ios
-  "preset_keyboards/moran_kagiroi_symbols_list_ios":
-    __include: moran_kagiroi_hybrid.trime:/preset_keyboards/moran_kagiroi_symbols_list_ios
-  "preset_keyboards/moran_kagiroi_symbols_pinyin_ios":
-    __include: moran_kagiroi_hybrid.trime:/preset_keyboards/moran_kagiroi_symbols_pinyin_ios
-  "preset_keyboards/moran_kagiroi_symbols_bopomofo_ios":
-    __include: moran_kagiroi_hybrid.trime:/preset_keyboards/moran_kagiroi_symbols_bopomofo_ios
-  "preset_keyboards/moran_kagiroi_symbols_radicals_ios":
-    __include: moran_kagiroi_hybrid.trime:/preset_keyboards/moran_kagiroi_symbols_radicals_ios
-  "preset_keyboards/moran_kagiroi_symbols_greek_ios":
-    __include: moran_kagiroi_hybrid.trime:/preset_keyboards/moran_kagiroi_symbols_greek_ios
-  "preset_keyboards/moran_kagiroi_symbols_cyrillic_ios":
-    __include: moran_kagiroi_hybrid.trime:/preset_keyboards/moran_kagiroi_symbols_cyrillic_ios
-  "preset_keyboards/moran_kagiroi_symbols_latin_ios":
-    __include: moran_kagiroi_hybrid.trime:/preset_keyboards/moran_kagiroi_symbols_latin_ios
-  "preset_keyboards/moran_kagiroi_symbols_korean_ios":
-    __include: moran_kagiroi_hybrid.trime:/preset_keyboards/moran_kagiroi_symbols_korean_ios
-  "preset_keyboards/moran_kagiroi_symbols_ipa_ios":
-    __include: moran_kagiroi_hybrid.trime:/preset_keyboards/moran_kagiroi_symbols_ipa_ios
-  "preset_keyboards/moran_kagiroi_symbols_hiragana_ios":
-    __include: moran_kagiroi_hybrid.trime:/preset_keyboards/moran_kagiroi_symbols_hiragana_ios
-  "preset_keyboards/moran_kagiroi_symbols_katakana_ios":
-    __include: moran_kagiroi_hybrid.trime:/preset_keyboards/moran_kagiroi_symbols_katakana_ios
-  "preset_keyboards/moran_kagiroi_symbols":
-    __include: moran_kagiroi_hybrid.trime:/preset_keyboards/moran_kagiroi_symbols
+  "liquid_keyboard":
+    __include: moran_kagiroi_symbols.trime:/liquid_keyboard

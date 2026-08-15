@@ -1,7 +1,7 @@
 -- ===================================================================
--- [INPUT]: 依赖 tests/rime_fake 的 schema 配置读取能力
--- [OUTPUT]: 对外提供 moran_kagiroi_hybrid 的独立混输契约测试
--- [POS]:   tests/ 的 Kagiroi 集成规格，约束自动识别、罗马字布局与中文方案隔离
+-- [INPUT]: 依赖 tests/rime_fake 的 schema 配置读取能力与 Trime 符号主题配置。
+-- [OUTPUT]: 对外提供 moran_kagiroi_hybrid 的独立混输与液态符号目录契约测试。
+-- [POS]:   tests/ 的 Kagiroi 集成规格，约束自动识别、罗马字布局、中文方案隔离与 Trime 符号入口。
 -- [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
 -- ===================================================================
 
@@ -113,4 +113,18 @@ test("Kagiroi 混输部署汉字转换所需的直接依赖", function()
     fake.contains(content, "    - kagiroi_matrix", "Kagiroi Viterbi 矩阵 schema 必须参与部署")
 end)
 
+test("Trime 符号键打开液态全量目录", function()
+    local layout = assert(io.open("moran_kagiroi_hybrid.trime.yaml", "r"))
+    local layout_content = layout:read("*a")
+    layout:close()
+    local palette = assert(io.open("moran_kagiroi_symbols.trime.yaml", "r"))
+    local palette_content = palette:read("*a")
+    palette:close()
+
+    fake.contains(layout_content, "command: liquid_keyboard", "符号键必须调用 Trime 液态键盘")
+    fake.contains(layout_content, "option: TABS", "符号键必须打开分类目录")
+    fake.not_contains(layout_content, "_ios", "液态目录不应保留静态 iOS 符号页")
+    fake.contains(palette_content, "type: TABS", "液态数据必须声明分类目录")
+    fake.contains(palette_content, "type: SINGLE", "液态数据必须提供可滚动的字符分类")
+end)
 return tests
