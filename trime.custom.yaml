@@ -1,8 +1,8 @@
 # Rime schema
 # encoding: utf-8
 # ===================================================================
-# [INPUT]: 依赖 Trime 内置 trime.yaml、moran_kagiroi_hybrid.trime.yaml 与液态符号数据层。
-# [OUTPUT]: 将魔然·篝火日混的主键盘、数字键盘、切换键与液态符号目录注册到 Trime。
+# [INPUT]: 依赖 Trime 内置 trime.yaml 与 moran_kagiroi_hybrid.trime.yaml。
+# [OUTPUT]: 将魔然·篝火日混的主键盘、数字键盘、切换键与符号键盘注册到 Trime。
 # [POS]:   Rime 用户目录根部的 Trime 配置覆盖层；Trime 部署时自动加载。
 # [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
 # ===================================================================
@@ -24,5 +24,5 @@ patch:
     __include: moran_kagiroi_hybrid.trime:/preset_keyboards/moran_kagiroi_hybrid_ascii_landscape
   "preset_keyboards/moran_kagiroi_numbers":
     __include: moran_kagiroi_hybrid.trime:/preset_keyboards/moran_kagiroi_numbers
-  "liquid_keyboard":
-    __include: moran_kagiroi_symbols.trime:/liquid_keyboard
+  "preset_keyboards/Keyboard_moran_kagiroi_symbols":
+    __include: moran_kagiroi_symbols.trime:/preset_keyboards/Keyboard_moran_kagiroi_symbols

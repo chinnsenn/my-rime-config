@@ -20,8 +20,7 @@ preset_keys:
   __include: trime:/preset_keys
   Keyboard_moran_kagiroi_symbols:
     label: "符"
-    command: liquid_keyboard
-    option: TABS
+    select: Keyboard_moran_kagiroi_symbols
   Keyboard_moran_kagiroi_hybrid_ascii:
     label: "中/英"
     send: Eisu_toggle
@@ -46,6 +45,7 @@ style:
     - moran_kagiroi_hybrid_landscape
     - moran_kagiroi_hybrid_ascii
     - moran_kagiroi_hybrid_ascii_landscape
+    - Keyboard_moran_kagiroi_symbols
   horizontal: true
   proximity_correction: true
   reset_ascii_mode: false
