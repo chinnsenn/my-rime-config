@@ -8,7 +8,8 @@
 # ===================================================================
 
 liquid_keyboard:
-  single_width: 0
+  # LiquidAdapter 直接用此 dp 值设置单元格宽度；0 会使整个字符网格不可见。
+  single_width: 48
   key_height: 0
   margin_x: 0
   fixed_key_bar:

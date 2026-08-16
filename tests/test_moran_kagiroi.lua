@@ -127,4 +127,12 @@ test("Trime 符号键打开液态全量目录", function()
     fake.contains(palette_content, "type: TABS", "液态数据必须声明分类目录")
     fake.contains(palette_content, "type: SINGLE", "液态数据必须提供可滚动的字符分类")
 end)
+
+test("Trime 液态符号单元格保持可见宽度", function()
+    local palette = assert(io.open("moran_kagiroi_symbols.trime.yaml", "r"))
+    local palette_content = palette:read("*a")
+    palette:close()
+
+    fake.contains(palette_content, "single_width: 48", "液态符号项必须拥有正宽度")
+end)
 return tests
