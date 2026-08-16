@@ -2,14 +2,14 @@
 # encoding: utf-8
 # ===================================================================
 # [INPUT]: 依赖 Rime 官方 symbols.yaml v1.6 整理重构的流式符号库与 Trime liquid_keyboard。
-# [OUTPUT]: 对外提供左侧可滑动分类导航、右侧成对对齐符号网格、底部常驻操作栏的液态符号面板。
+# [OUTPUT]: 对外提供结构清晰、分类合理、成对对齐且带有常驻底部操作栏的液态符号面板。
 # [POS]:   Trime 符号数据层，被 moran_kagiroi_hybrid.trime.yaml 与 trime.custom.yaml 引用。
 # [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
 # ===================================================================
 
 symbol_palette_meta:
-  version: "2.1-split-layout"
-  description: "左右分栏可滑动导航面板（无顶部目录）"
+  version: "2.2-fixed-catalog"
+  description: "9大核心分类液态符号面板（含常驻底部栏与对齐优化）"
   categories_count: 9
 
 liquid_keyboard:
@@ -24,6 +24,7 @@ liquid_keyboard:
       - {click: space, label: "空格", width: 50}
       - {click: BackSpace, label: "⌫", width: 25}
   keyboards:
+    - catalog
     - 常用
     - 标点
     - 英文
@@ -33,6 +34,10 @@ liquid_keyboard:
     - 日文
     - 拼音注音
     - 图标形状
+  catalog:
+    type: TABS
+    name: "目录"
+    keys: []
   常用:
     type: SINGLE
     name: "常用"
