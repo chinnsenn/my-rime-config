@@ -134,9 +134,9 @@ test("Trime 静态符号键盘包含核心网格与操作键", function()
 
     fake.contains(palette_content, "height: 44", "符号键盘必须保留舒适按键高度")
     fake.contains(palette_content, "horizontal_gap: 1", "符号键盘必须保留清晰横向分隔")
-    fake.contains(palette_content, "{click: '“'}", "符号键盘必须包含中文引号")
-    fake.contains(palette_content, "{click: '》'}", "符号键盘必须包含成对书名号")
+    fake.contains(palette_content, "{click: '「', hint: '『'", "符号键盘必须包含成对引号与上标")
+    fake.contains(palette_content, "{click: '<', hint: '«'", "符号键盘必须包含尖括号与上标")
     fake.contains(palette_content, "{click: Keyboard_moran_kagiroi_hybrid, label: \"返回\"", "符号键盘必须提供返回主键盘")
-    fake.contains(palette_content, "{click: BackSpace, label: \"⌫\"", "符号键盘必须提供删除键")
+    fake.contains(palette_content, "{click: BackSpace, label: \"退格\"", "符号键盘必须提供退格键")
 end)
 return tests
