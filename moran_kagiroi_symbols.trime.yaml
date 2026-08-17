@@ -8,7 +8,7 @@
 # ===================================================================
 
 preset_keyboards:
-  Keyboard_moran_kagiroi_symbols:
+  moran_kagiroi_symbols:
     name: "符号键盘"
     author: "Senn"
     ascii_mode: 0

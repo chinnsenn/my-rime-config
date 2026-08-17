@@ -20,7 +20,7 @@ preset_keys:
   __include: trime:/preset_keys
   Keyboard_moran_kagiroi_symbols:
     label: "符"
-    select: Keyboard_moran_kagiroi_symbols
+    select: moran_kagiroi_symbols
   Keyboard_moran_kagiroi_hybrid_ascii:
     label: "中/英"
     send: Eisu_toggle
@@ -33,10 +33,6 @@ fallback_colors:
   __include: trime:/fallback_colors
 preset_color_schemes:
   __include: trime:/preset_color_schemes
-liquid_keyboard:
-  __include: moran_kagiroi_symbols.trime:/liquid_keyboard
-
-
 style:
   # 所有会从本布局切换到的键盘必须在此声明。
   keyboards:
@@ -45,7 +41,7 @@ style:
     - moran_kagiroi_hybrid_landscape
     - moran_kagiroi_hybrid_ascii
     - moran_kagiroi_hybrid_ascii_landscape
-    - Keyboard_moran_kagiroi_symbols
+    - moran_kagiroi_symbols
   horizontal: true
   proximity_correction: true
   reset_ascii_mode: false

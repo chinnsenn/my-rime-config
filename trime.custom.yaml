@@ -24,5 +24,5 @@ patch:
     __include: moran_kagiroi_hybrid.trime:/preset_keyboards/moran_kagiroi_hybrid_ascii_landscape
   "preset_keyboards/moran_kagiroi_numbers":
     __include: moran_kagiroi_hybrid.trime:/preset_keyboards/moran_kagiroi_numbers
-  "preset_keyboards/Keyboard_moran_kagiroi_symbols":
-    __include: moran_kagiroi_symbols.trime:/preset_keyboards/Keyboard_moran_kagiroi_symbols
+  "preset_keyboards/moran_kagiroi_symbols":
+    __include: moran_kagiroi_symbols.trime:/preset_keyboards/moran_kagiroi_symbols
