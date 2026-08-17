@@ -36,32 +36,6 @@ schema:
     - bopomofo
     - zrlf
 
-# Trime 会优先调用与方案同名的主键盘；符号层与数字层供主键盘切换。
-style:
-  keyboards:
-    - moran_kagiroi_hybrid
-    - moran_kagiroi_hybrid_landscape
-    - moran_kagiroi_numbers
-    - moran_kagiroi_symbols_ios
-    - moran_kagiroi_symbols_english_ios
-    - moran_kagiroi_symbols_chinese_ios
-    - moran_kagiroi_symbols_japanese_ios
-    - moran_kagiroi_symbols_math_ios
-    - moran_kagiroi_symbols_special_ios
-    - moran_kagiroi_symbols_units_ios
-    - moran_kagiroi_symbols_list_ios
-    - moran_kagiroi_symbols_pinyin_ios
-    - moran_kagiroi_symbols_bopomofo_ios
-    - moran_kagiroi_symbols_radicals_ios
-    - moran_kagiroi_symbols_greek_ios
-    - moran_kagiroi_symbols_cyrillic_ios
-    - moran_kagiroi_symbols_latin_ios
-    - moran_kagiroi_symbols_korean_ios
-    - moran_kagiroi_symbols_ipa_ios
-    - moran_kagiroi_symbols_hiragana_ios
-    - moran_kagiroi_symbols_katakana_ios
-    - number
-
 switches:
   - name: ascii_mode
     states: [中文, 西文]
