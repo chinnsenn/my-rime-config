@@ -1,12 +1,13 @@
 -- ===================================================================
--- [INPUT]: 依赖 tests/rime_fake 的 schema 配置读取能力与 Trime 符号主题配置。
--- [OUTPUT]: 对外提供 moran_kagiroi_hybrid 的独立混输与液态符号目录契约测试。
--- [POS]:   tests/ 的 Kagiroi 集成规格，约束自动识别、罗马字布局、中文方案隔离与 Trime 符号入口。
+-- [INPUT]: 依赖 tests/rime_fake、混合方案 YAML、离线中日词表与 Trime 符号主题配置。
+-- [OUTPUT]: 对外提供 Kagiroi 混输、离线日语释义与液态符号目录契约测试。
+-- [POS]:   tests/ 的 Kagiroi 集成规格，约束日文输入、中文候选释义与跨平台方案结构。
 -- [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
 -- ===================================================================
 
 local fake = require("rime_fake")
 
+local gloss_filter = require("moran_ja_gloss_filter")
 local tests = {}
 
 local function test(name, run)
@@ -14,6 +15,19 @@ local function test(name, run)
 end
 
 local schema = "moran_kagiroi_hybrid.schema.yaml"
+
+local function with_gloss_filter(enabled, body)
+    local restore_globals = fake.install_rime_globals()
+    local env = fake.environment({
+        ["moran_ja_gloss/dictionary"] = "lua/zh_ja_wiki.txt",
+    })
+    env.engine.context:set_option("ja_gloss", enabled)
+    gloss_filter.init(env)
+    local ok, err = xpcall(function() body(env) end, debug.traceback)
+    gloss_filter.fini(env)
+    restore_globals()
+    if not ok then error(err, 0) end
+end
 
 test("Kagiroi 混输方案保有独立 schema 标识", function()
     fake.equal(
@@ -113,4 +127,63 @@ test("Kagiroi 混输部署汉字转换所需的直接依赖", function()
     fake.contains(content, "    - kagiroi_matrix", "Kagiroi Viterbi 矩阵 schema 必须参与部署")
 end)
 
+
+test("离线词表为中文候选追加日语释义", function()
+    with_gloss_filter(true, function(env)
+        local output = fake.collect_filter(gloss_filter, fake.input({
+            fake.candidate("table", "苹果"),
+        }), env)
+        fake.equal(output[1].text, "苹果", "释义过滤器应保留候选正文")
+        fake.equal(output[1].comment, "〔日：リンゴ〕", "苹果应显示 Wikidict 日语释义")
+    end)
+end)
+
+test("离线日语释义保留已有候选注释", function()
+    with_gloss_filter(true, function(env)
+        local output = fake.collect_filter(gloss_filter, fake.input({
+            fake.candidate("table", "苹果", "⚡"),
+        }), env)
+        fake.equal(output[1].comment, "⚡ ¦ 〔日：リンゴ〕", "日语释义应追加在已有提示之后")
+    end)
+end)
+
+test("离线释义可从文字转换候选回退到原始中文", function()
+    with_gloss_filter(true, function(env)
+        local genuine = fake.candidate("table", "苹果")
+        local converted = fake.candidate("simplified", "蘋果", "", genuine)
+        local output = fake.collect_filter(gloss_filter, fake.input({ converted }), env)
+        fake.equal(output[1].text, "蘋果", "过滤器应保留最终显示字形")
+        fake.equal(output[1].comment, "〔日：リンゴ〕", "转换后的候选应使用原始中文回查释义")
+    end)
+end)
+
+test("日语来源候选不追加中文词典释义", function()
+    with_gloss_filter(true, function(env)
+        local output = fake.collect_filter(gloss_filter, fake.input({
+            fake.candidate("jaroomaji", "日本"),
+        }), env)
+        fake.equal(output[1].comment, "", "并行日语候选应保持自身注释路径")
+    end)
+end)
+
+test("关闭日译开关后候选保持原样", function()
+    with_gloss_filter(false, function(env)
+        local candidate = fake.candidate("table", "苹果", "原注释")
+        local output = fake.collect_filter(gloss_filter, fake.input({ candidate }), env)
+        fake.equal(output[1], candidate, "关闭开关应直接透传原候选")
+        fake.equal(output[1].comment, "原注释", "关闭开关应保留原注释")
+    end)
+end)
+
+test("混输方案在文字转换后接入离线日语释义", function()
+    local file = assert(io.open(schema, "r"))
+    local content = file:read("*a")
+    file:close()
+    local simplifier = assert(content:find("    - simplifier@simplifier", 1, true))
+    local gloss = assert(content:find("    - lua_filter@*moran_ja_gloss_filter", 1, true))
+    local uniquifier = assert(content:find("    - uniquifier", 1, true))
+    fake.truthy(simplifier < gloss and gloss < uniquifier, "释义过滤器应读取最终字形并在去重前运行")
+    fake.contains(content, "  - name: ja_gloss", "方案必须提供离线日译开关")
+    fake.contains(content, "  dictionary: lua/zh_ja_wiki.txt", "方案必须部署 CC0 中日词表")
+end)
 return tests

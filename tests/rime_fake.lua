@@ -107,6 +107,14 @@ function M.environment(config_values)
         return properties[key]
     end
 
+    function context:set_option(key, value)
+        properties["option:" .. key] = value
+    end
+
+    function context:get_option(key)
+        return properties["option:" .. key] or false
+    end
+
     function context:get_commit_text()
         return self.commit_text
     end
@@ -177,6 +185,8 @@ function M.install_rime_globals()
     local old_yield = _G.yield
     local old_shadow = _G.ShadowCandidate
     local old_component = _G.Component
+    local old_rime_api = _G.rime_api
+    local old_log = _G.log
 
     _G.ShadowCandidate = function(candidate, candidate_type, text, comment)
         local shadow = M.candidate(candidate_type, text, comment, candidate:get_genuine())
@@ -194,11 +204,19 @@ function M.install_rime_globals()
             }
         end,
     }
+    _G.rime_api = {
+        get_user_data_dir = function() return "." end,
+    }
+    _G.log = {
+        error = function() end,
+    }
 
     return function()
         _G.yield = old_yield
         _G.ShadowCandidate = old_shadow
         _G.Component = old_component
+        _G.rime_api = old_rime_api
+        _G.log = old_log
     end
 end
 
