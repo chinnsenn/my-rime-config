@@ -1,7 +1,7 @@
 -- ===================================================================
--- [INPUT]:  依赖 Rime Lua API、moran 工具模块与 zh_ja_wiki.txt
--- [OUTPUT]: 对中文候选追加离线日语释义 comment
--- [POS]:    lua/ 目录的中日释义过滤器，在文字转换完成后、去重前运行
+-- [INPUT]:  依赖 Rime Lua API、moran 工具模块与有序中日 TSV 词库
+-- [OUTPUT]: 按配置优先级合并词库，并为中文候选追加离线日语释义 comment
+-- [POS]:    lua/ 目录的多源中日释义过滤器，在文字转换完成后、去重前运行
 -- [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
 -- ===================================================================
 
@@ -9,9 +9,14 @@ local moran = require("moran")
 
 local Module = {}
 local dictionaries = {}
-local DEFAULT_DICTIONARY = "lua/zh_ja_wiki.txt"
+local merged_dictionaries = {}
+local DEFAULT_DICTIONARIES = {
+    "lua/zh_ja_custom.txt",
+    "lua/zh_ja_learner.txt",
+    "lua/zh_ja_wiki.txt",
+}
 local COMMENT_SEPARATOR = " ¦ "
-local COMMENT_PREFIX = "〔日："
+local COMMENT_PREFIX = "〔"
 local COMMENT_SUFFIX = "〕"
 
 local japanese_types = {
@@ -46,6 +51,59 @@ local function load_dictionary(rel_path)
     end
 
     dictionaries[rel_path] = entries
+    return entries
+end
+
+local function config_value_string(value)
+    if not value then
+        return nil
+    end
+    if value.value then
+        return value.value
+    end
+    if value.get_string then
+        return value:get_string()
+    end
+    return nil
+end
+
+local function configured_dictionaries(config)
+    local list = config and config:get_list("moran_ja_gloss/dictionaries")
+    if list and list.size > 0 then
+        local paths = {}
+        for index = 0, list.size - 1 do
+            local path = config_value_string(list:get_value_at(index))
+            if path and path ~= "" then
+                paths[#paths + 1] = path
+            end
+        end
+        if paths[1] then
+            return paths
+        end
+    end
+
+    local legacy = config and config:get_string("moran_ja_gloss/dictionary")
+    if legacy and legacy ~= "" then
+        return { legacy }
+    end
+    return DEFAULT_DICTIONARIES
+end
+
+local function merge_dictionary_entries(paths)
+    local cache_key = table.concat(paths, "\0")
+    if merged_dictionaries[cache_key] then
+        return merged_dictionaries[cache_key]
+    end
+
+    local entries = {}
+    for _, path in ipairs(paths) do
+        for source, target in pairs(load_dictionary(path)) do
+            if entries[source] == nil then
+                entries[source] = target
+            end
+        end
+    end
+    merged_dictionaries[cache_key] = entries
     return entries
 end
 
@@ -84,8 +142,7 @@ end
 
 function Module.init(env)
     local config = env.engine.schema.config
-    local dictionary = config and config:get_string("moran_ja_gloss/dictionary")
-    env.gloss_entries = load_dictionary(dictionary or DEFAULT_DICTIONARY)
+    env.gloss_entries = merge_dictionary_entries(configured_dictionaries(config))
 end
 
 function Module.fini(env)

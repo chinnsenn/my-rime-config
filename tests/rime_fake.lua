@@ -136,6 +136,22 @@ function M.environment(config_values)
         if config_values == nil then return nil end
         return config_values[key]
     end
+    function config:get_list(key)
+        if config_values == nil then return nil end
+        local values = config_values[key]
+        if type(values) ~= "table" then return nil end
+        return {
+            size = #values,
+            get_value_at = function(_, index)
+                local value = values[index + 1]
+                if value == nil then return nil end
+                return {
+                    value = value,
+                    get_string = function(self) return self.value end,
+                }
+            end,
+        }
+    end
 
     local env = {
         engine = {

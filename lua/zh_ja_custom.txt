@@ -1,0 +1,17 @@
+# Chinese → Japanese manual overrides
+# License: CC0 1.0 Universal
+# Priority: loaded before learner and Wikidict dictionaries
+# Format: Chinese<TAB>Japanese; multiple Japanese forms use ・
+
+对不起	すみません・ごめんなさい
+你好	こんにちは
+再见	さようなら
+谢谢	ありがとう
+句子	文（ぶん）・センテンス
+学习	勉強する・学ぶ
+开发	開発する
+缓存	キャッシュ・一時保存
+电脑	パソコン・コンピューター
+中文	中国語
+日语	日本語
+橘子	みかん

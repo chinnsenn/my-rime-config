@@ -18,11 +18,14 @@ moran.schema.yaml - 魔然主方案配置
 moran_kagiroi_hybrid.schema.yaml - 魔然中文主输入与 Kagiroi 分号前缀日文长文转换方案（依赖 rime-kagiroi）
 moran_kagiroi_hybrid.trime.yaml - 魔然·篝火日混的 Trime 虚拟键盘布局
 moran_kagiroi_symbols.trime.yaml - Trime 液态符号目录的数据层，完整映射 Rime 官方符号组并提供紧凑滚动网格。
-lua/moran_ja_gloss_filter.lua - 读取离线中日词表并将日语释义追加到中文候选 comment。
-lua/zh_ja_wiki.txt - 基于 CC0 Wikidict、与内置魔然词典取交集的中文到日语离线映射。
+lua/moran_ja_gloss_filter.lua - 按配置顺序合并多源中日词库，并将最高优先级释义追加到中文候选 comment。
+lua/zh_ja_custom.txt - 用户可直接维护的高优先级中日人工修订词表。
+lua/zh_ja_learner.txt - 基于 Unlicense 日中学习词库反向构建的日常词汇映射。
+lua/zh_ja_wiki.txt - 基于 CC0 Wikidict、与内置魔然词典取交集的中文到日语长尾映射。
 installation.yaml - Rime 安装标识
 </config>
 
 <changes>
 2026-08-28 - moran_kagiroi_hybrid 接入 CC0 中日离线词表与可切换候选释义过滤器。
+2026-08-28 - 日语释义扩展为人工修订、学习词库、Wikidict 三级有序合并，并保留单词库旧配置读取能力。
 </changes>

@@ -16,11 +16,17 @@ end
 
 local schema = "moran_kagiroi_hybrid.schema.yaml"
 
-local function with_gloss_filter(enabled, body)
+local DEFAULT_GLOSS_CONFIG = {
+    ["moran_ja_gloss/dictionaries"] = {
+        "lua/zh_ja_custom.txt",
+        "lua/zh_ja_learner.txt",
+        "lua/zh_ja_wiki.txt",
+    },
+}
+
+local function with_gloss_filter(enabled, body, config_values)
     local restore_globals = fake.install_rime_globals()
-    local env = fake.environment({
-        ["moran_ja_gloss/dictionary"] = "lua/zh_ja_wiki.txt",
-    })
+    local env = fake.environment(config_values or DEFAULT_GLOSS_CONFIG)
     env.engine.context:set_option("ja_gloss", enabled)
     gloss_filter.init(env)
     local ok, err = xpcall(function() body(env) end, debug.traceback)
@@ -134,7 +140,7 @@ test("离线词表为中文候选追加日语释义", function()
             fake.candidate("table", "苹果"),
         }), env)
         fake.equal(output[1].text, "苹果", "释义过滤器应保留候选正文")
-        fake.equal(output[1].comment, "〔日：リンゴ〕", "苹果应显示 Wikidict 日语释义")
+        fake.equal(output[1].comment, "〔りんご〕", "苹果应优先显示学习词库释义")
     end)
 end)
 
@@ -143,7 +149,7 @@ test("离线日语释义保留已有候选注释", function()
         local output = fake.collect_filter(gloss_filter, fake.input({
             fake.candidate("table", "苹果", "⚡"),
         }), env)
-        fake.equal(output[1].comment, "⚡ ¦ 〔日：リンゴ〕", "日语释义应追加在已有提示之后")
+        fake.equal(output[1].comment, "⚡ ¦ 〔りんご〕", "日语释义应追加在已有提示之后")
     end)
 end)
 
@@ -153,7 +159,7 @@ test("离线释义可从文字转换候选回退到原始中文", function()
         local converted = fake.candidate("simplified", "蘋果", "", genuine)
         local output = fake.collect_filter(gloss_filter, fake.input({ converted }), env)
         fake.equal(output[1].text, "蘋果", "过滤器应保留最终显示字形")
-        fake.equal(output[1].comment, "〔日：リンゴ〕", "转换后的候选应使用原始中文回查释义")
+        fake.equal(output[1].comment, "〔りんご〕", "转换后的候选应使用原始中文回查释义")
     end)
 end)
 
@@ -175,6 +181,44 @@ test("关闭日译开关后候选保持原样", function()
     end)
 end)
 
+
+test("人工修订词库覆盖后续来源", function()
+    with_gloss_filter(true, function(env)
+        local output = fake.collect_filter(gloss_filter, fake.input({
+            fake.candidate("table", "学习"),
+        }), env)
+        fake.equal(output[1].comment, "〔勉強する・学ぶ〕", "人工修订应覆盖学习词库和 Wikidict")
+    end)
+end)
+
+test("学习词库补充日常中文词汇", function()
+    with_gloss_filter(true, function(env)
+        local output = fake.collect_filter(gloss_filter, fake.input({
+            fake.candidate("table", "抱歉"),
+        }), env)
+        fake.equal(output[1].comment, "〔すまない・恐縮〕", "学习词库应覆盖 Wikidict 缺失的日常词")
+    end)
+end)
+
+test("Wikidict 保留长尾回退能力", function()
+    with_gloss_filter(true, function(env)
+        local output = fake.collect_filter(gloss_filter, fake.input({
+            fake.candidate("table", "维基数据"),
+        }), env)
+        fake.equal(output[1].comment, "〔ウィキデータ〕", "前置词库缺失时应回退到 Wikidict")
+    end)
+end)
+
+test("单词库旧配置继续加载", function()
+    with_gloss_filter(true, function(env)
+        local output = fake.collect_filter(gloss_filter, fake.input({
+            fake.candidate("table", "苹果"),
+        }), env)
+        fake.equal(output[1].comment, "〔リンゴ〕", "旧 dictionary 配置应保持单词库行为")
+    end, {
+        ["moran_ja_gloss/dictionary"] = "lua/zh_ja_wiki.txt",
+    })
+end)
 test("混输方案在文字转换后接入离线日语释义", function()
     local file = assert(io.open(schema, "r"))
     local content = file:read("*a")
@@ -184,6 +228,9 @@ test("混输方案在文字转换后接入离线日语释义", function()
     local uniquifier = assert(content:find("    - uniquifier", 1, true))
     fake.truthy(simplifier < gloss and gloss < uniquifier, "释义过滤器应读取最终字形并在去重前运行")
     fake.contains(content, "  - name: ja_gloss", "方案必须提供离线日译开关")
-    fake.contains(content, "  dictionary: lua/zh_ja_wiki.txt", "方案必须部署 CC0 中日词表")
+    local custom = assert(content:find("    - lua/zh_ja_custom.txt", 1, true))
+    local learner = assert(content:find("    - lua/zh_ja_learner.txt", 1, true))
+    local wiki = assert(content:find("    - lua/zh_ja_wiki.txt", 1, true))
+    fake.truthy(custom < learner and learner < wiki, "方案必须按人工、学习、Wikidict 顺序加载词库")
 end)
 return tests

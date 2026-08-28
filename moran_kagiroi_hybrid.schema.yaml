@@ -10,14 +10,14 @@
 schema:
   schema_id: moran_kagiroi_hybrid
   name: 魔然·篝火日混
-  version: "1.4"
+  version: "1.5"
   author:
     - 自然碼發明人：周志農
     - 魔然方案製作：ksqsf
     - Kagiroi：kuroame
   description: |
     魔然中文主输入 + Kagiroi 日文长文输入。
-    中文与日语候选同时显示，中文候选附带离线日语释义；Kagiroi 保留日文长句转换。
+    中文与日语候选同时显示，中文候选按人工修订、学习词库、Wikidict 的顺序附带日语释义。
     依赖：安装 rimeinn/rime-kagiroi 后再部署本方案。
   dependencies:
     - moran_fixed
@@ -409,7 +409,10 @@ moran:
   shorthands: false
 
 moran_ja_gloss:
-  dictionary: lua/zh_ja_wiki.txt
+  dictionaries:
+    - lua/zh_ja_custom.txt
+    - lua/zh_ja_learner.txt
+    - lua/zh_ja_wiki.txt
 
 moran_ja:
   default_position: 2
