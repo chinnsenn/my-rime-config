@@ -1,9 +1,11 @@
 -- ===================================================================
 -- [INPUT]:  依赖 Rime Component API, jaroomaji 词典配置
--- [OUTPUT]: 对外提供 moran_ja_translator (lua_translator)
+-- [OUTPUT]: 对外提供带罗马字结构校验的 moran_ja_translator
 -- [POS]:    lua/ 目录的日语翻译器包装，替代 script_translator@jaroomaji_translator
 -- [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
 -- ===================================================================
+
+local language = require("moran_ja_language")
 
 local function init(env)
     env.translator = Component.Translator(env.engine, "", "script_translator@jaroomaji_translator")
@@ -14,6 +16,9 @@ local function fini(env)
 end
 
 local function func(input, seg, env)
+    if not language.is_valid_romaji(input) then
+        return
+    end
     local translation = env.translator:query(input, seg)
     if translation == nil then
         return

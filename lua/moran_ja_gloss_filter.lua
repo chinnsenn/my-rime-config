@@ -6,6 +6,7 @@
 -- ===================================================================
 
 local moran = require("moran")
+local language = require("moran_ja_language")
 
 local Module = {}
 local dictionaries = {}
@@ -18,12 +19,6 @@ local DEFAULT_DICTIONARIES = {
 local COMMENT_SEPARATOR = " ¦ "
 local COMMENT_PREFIX = "〔"
 local COMMENT_SUFFIX = "〕"
-
-local japanese_types = {
-    jaroomaji = true,
-    kagiroi = true,
-    moran_ja = true,
-}
 
 local function open_dictionary(rel_path)
     local pathsep = (package.config or "/"):sub(1, 1)
@@ -108,23 +103,36 @@ local function merge_dictionary_entries(paths)
 end
 
 local function is_japanese_candidate(candidate)
-    if japanese_types[candidate.type] then
-        return true
+    return language.candidate_language(candidate) == "ja"
+end
+
+local function safe_genuine_text(candidate)
+    local ok, genuine = pcall(function()
+        return candidate:get_genuine()
+    end)
+    if not ok or not genuine then
+        return nil
     end
 
-    local genuine = candidate:get_genuine()
-    return genuine and japanese_types[genuine.type] or false
+    local text_ok, text = pcall(function()
+        return genuine.text
+    end)
+    if not text_ok or type(text) ~= "string" then
+        return nil
+    end
+    return text
 end
 
 local function lookup_gloss(candidate, entries)
-    local gloss = entries[candidate.text]
+    local candidate_text = candidate.text
+    local gloss = entries[candidate_text]
     if gloss then
         return gloss
     end
 
-    local genuine = candidate:get_genuine()
-    if genuine and genuine.text ~= candidate.text then
-        return entries[genuine.text]
+    local genuine_text = safe_genuine_text(candidate)
+    if genuine_text and genuine_text ~= candidate_text then
+        return entries[genuine_text]
     end
     return nil
 end

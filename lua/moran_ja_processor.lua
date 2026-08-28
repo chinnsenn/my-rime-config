@@ -1,9 +1,11 @@
 -- ===================================================================
 -- [INPUT]:  依赖 Rime Lua API (KeyEvent, Context, SchemaConfig, env)
--- [OUTPUT]: 对外提供 moran_ja_processor (lua_processor, commit 行为状态机)
--- [POS]:    lua/ 目录的日语混输状态处理器，被 moran_ja_hybrid 方案与过滤器协作读取
+-- [OUTPUT]: 对外提供共享候选语言语义的 moran_ja_processor
+-- [POS]:    lua/ 目录的日语混输状态处理器，与过滤器共享语言判定
 -- [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
 -- ===================================================================
+
+local language = require("moran_ja_language")
 
 local kNoop = 2
 
@@ -96,57 +98,8 @@ local function emit_event(telemetry, event_table)
 end
 
 -- ===============================================
--- 假名检测：判断文本是否包含日文假名
+-- 已选候选语言读取
 -- ===============================================
-local utf8_codes = utf8.codes
-
-local function has_kana(text)
-    if not text or #text == 0 then return false end
-    for _, codepoint in utf8_codes(text) do
-        -- 平假名 (U+3040-U+309F) 或 片假名 (U+30A0-U+30FF)
-        if codepoint >= 0x3040 and codepoint <= 0x30FF then
-            return true
-        end
-    end
-    return false
-end
-
-local CHINESE_CANDIDATE_TYPES = {
-    table = true,
-    phrase = true,
-    user_phrase = true,
-    sentence = true,
-    fixed = true,
-    pinned = true,
-    simplified = true,
-}
-
-local JAPANESE_CANDIDATE_TYPES = {
-    jaroomaji = true,
-    moran_ja = true,
-    kagiroi = true,
-}
-
-local function safe_candidate_type(candidate)
-    if not candidate then
-        return nil
-    end
-    local ok, candidate_type = pcall(function()
-        return candidate.type
-    end)
-    return ok and candidate_type or nil
-end
-
-local function safe_genuine(candidate)
-    if not candidate then
-        return nil
-    end
-    local ok, genuine = pcall(function()
-        return candidate:get_genuine()
-    end)
-    return ok and genuine or nil
-end
-
 local function selected_language(context)
     local ok, candidate = pcall(function()
         return context:get_selected_candidate()
@@ -154,19 +107,7 @@ local function selected_language(context)
     if not ok or not candidate then
         return nil
     end
-
-    local candidate_type = safe_candidate_type(candidate)
-    local genuine_type = safe_candidate_type(safe_genuine(candidate))
-    if JAPANESE_CANDIDATE_TYPES[candidate_type] or JAPANESE_CANDIDATE_TYPES[genuine_type] then
-        return "ja"
-    end
-    if has_kana(candidate.text) then
-        return "ja"
-    end
-    if CHINESE_CANDIDATE_TYPES[candidate_type] or CHINESE_CANDIDATE_TYPES[genuine_type] then
-        return "zh"
-    end
-    return nil
+    return language.candidate_language(candidate)
 end
 
 -- ===============================================

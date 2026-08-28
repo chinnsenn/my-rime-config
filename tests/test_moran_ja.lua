@@ -1,6 +1,6 @@
 -- ===================================================================
--- [INPUT]:  依赖生产 moran_ja_processor/moran_ja_filter 公开接口、混合方案 YAML、Rime fake
--- [OUTPUT]: 对外提供日语混输语言追踪、排序、预览与前缀模式行为测试集合
+-- [INPUT]:  依赖生产 moran_ja_processor/moran_ja_filter/moran_ja_gloss_filter 公开接口、混合方案 YAML、Rime fake
+-- [OUTPUT]: 对外提供日语混输语言追踪、排序、预览、释义与前缀模式行为测试集合
 -- [POS]:    tests/ 的核心回归规格，驱动状态机与 schema 修复的 RED→GREEN 循环
 -- [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
 -- ===================================================================
@@ -8,6 +8,9 @@
 local fake = require("rime_fake")
 local processor = require("moran_ja_processor")
 local filter = require("moran_ja_filter")
+local translator = require("moran_ja_translator")
+local language = require("moran_ja_language")
+local gloss_filter = require("moran_ja_gloss_filter")
 
 local tests = {}
 
@@ -42,12 +45,42 @@ end
 
 local function with_filter(input_text, state, body, default_position)
     local restore_globals = fake.install_rime_globals()
-    local env = fake.environment({ ["moran_ja/default_position"] = default_position or 2 })
+    local env = fake.environment({
+        ["moran_ja/default_position"] = default_position or 2,
+        ["kagiroi/prefix"] = ";",
+    })
     env.engine.context.input = input_text
     env.engine.context:set_property("moran_ja/state", state or "neutral")
     filter.init(env)
     local ok, err = xpcall(function() body(env) end, debug.traceback)
     filter.fini(env)
+    restore_globals()
+    if not ok then
+        error(err, 0)
+    end
+end
+
+local function with_translator(body)
+    local restore_globals = fake.install_rime_globals()
+    local env = fake.environment()
+    translator.init(env)
+    local ok, err = xpcall(function() body(env) end, debug.traceback)
+    translator.fini(env)
+    restore_globals()
+    if not ok then
+        error(err, 0)
+    end
+end
+
+local function with_gloss_filter(body)
+    local restore_globals = fake.install_rime_globals()
+    local env = fake.environment({
+        ["moran_ja_gloss/dictionaries"] = { "lua/zh_ja_custom.txt" },
+    })
+    env.engine.context:set_option("ja_gloss", true)
+    gloss_filter.init(env)
+    local ok, err = xpcall(function() body(env) end, debug.traceback)
+    gloss_filter.fini(env)
     restore_globals()
     if not ok then
         error(err, 0)
@@ -194,6 +227,156 @@ test("每次有效语言提交刷新衰减活动时间", function()
     if not ok then error(err, 0) end
 end)
 
+test("无效日语罗马字不进入 jaroomaji 候选流", function()
+    local invalid_inputs = { "ng vp gt", "bcd", "qz", "trm", "zzzz", "k a", "k'a" }
+    with_translator(function(env)
+        env:set_component_candidates({ fake.candidate("phrase", "机械假名") })
+        for _, input_text in ipairs(invalid_inputs) do
+            local output = fake.collect_yields(function()
+                translator.func(input_text, {}, env)
+            end)
+            fake.equal(#output, 0, "孤立辅音序列不应进入日语翻译器: " .. input_text)
+        end
+    end)
+end)
+
+test("合法日语罗马字保留 jaroomaji 候选", function()
+    local valid_inputs = {
+        "nihon", "ni hon", "kitte", "matcha", "gakkou", "shinbun", "xtu",
+        "qwa", "qi", "qa", "vi", "vyi", "vye", "xyi",
+    }
+    with_translator(function(env)
+        env:set_component_candidates({ fake.candidate("phrase", "有効") })
+        for _, input_text in ipairs(valid_inputs) do
+            local output = fake.collect_yields(function()
+                translator.func(input_text, {}, env)
+            end)
+            fake.equal(fake.sequence_text(output), "有効", "合法罗马字应进入日语翻译器: " .. input_text)
+        end
+    end)
+end)
+
+test("连续分隔符忽略空段且不跨段拼接", function()
+    fake.truthy(language.is_valid_romaji("  ni''  hon  "), "连续空格和撇号应分隔独立合法段")
+    fake.truthy(not language.is_valid_romaji("k a"), "空格两侧音节不得拼接为 ka")
+    fake.truthy(not language.is_valid_romaji("k'a"), "撇号两侧音节不得拼接为 ka")
+    fake.truthy(not language.is_valid_romaji("  ''  "), "纯分隔符输入应拒绝")
+end)
+
+test("超长合法罗马字使用迭代校验", function()
+    fake.truthy(language.is_valid_romaji(string.rep("a", 20000)), "超长合法输入应通过且不消耗调用栈")
+end)
+
+test("基础假名词典的全部罗马字音节均通过结构校验", function()
+    local file = assert(io.open("jaroomaji.kana_kigou.dict.yaml", "r"))
+    local checked = 0
+    for line in file:lines() do
+        local text, code = string.match(line, "^([^#\t]+)\t([^\t]+)")
+        local has_kana = false
+        if text then
+            for _, codepoint in utf8.codes(text) do
+                if codepoint >= 0x3040 and codepoint <= 0x30FF then
+                    has_kana = true
+                    break
+                end
+            end
+        end
+        if has_kana and code == string.lower(code) then
+            for token in string.gmatch(code, "%S+") do
+                fake.truthy(language.is_valid_romaji(token), "词典音节应通过校验: " .. token)
+                checked = checked + 1
+            end
+        end
+    end
+    file:close()
+    fake.truthy(checked > 200, "结构校验应覆盖完整基础假名词典")
+end)
+
+test("促音派生辅音脱离后续音节时全部拒绝", function()
+    for consonant in string.gmatch("k c q g s z j t d h f b v p m y r w", "%S+") do
+        fake.truthy(not language.is_valid_romaji(consonant), "孤立促音辅音应拒绝: " .. consonant)
+    end
+end)
+
+test("明确中文输入只保留非日语候选", function()
+    with_filter("ng vp gt", "ja_bias", function(env)
+        local output = fake.collect_filter(filter, fake.input({
+            fake.candidate("table", "能准确"),
+            fake.candidate("jaroomaji", "んっっっっっ"),
+            fake.candidate("table", "能准过头"),
+        }), env)
+        fake.equal(fake.sequence_text(output), "能准确|能准过头", "无效日语结构应由当前输入直接裁决为中文")
+    end)
+end)
+
+test("明确日语输入只保留日语候选", function()
+    with_filter("kitte", "zh_bias", function(env)
+        local output = fake.collect_filter(filter, fake.input({
+            fake.candidate("table", "其他"),
+            fake.candidate("jaroomaji", "切手"),
+            fake.candidate("kagiroi", "切手帳"),
+        }), env)
+        fake.equal(fake.sequence_text(output), "切手|切手帳", "当前输入的明确日语特征应覆盖历史中文偏置")
+    end)
+end)
+
+test("q x v 日语专属结构经过过滤器只保留日语候选", function()
+    local explicit_japanese_inputs = { "qwa", "vyi", "vye", "xyi" }
+    for _, input_text in ipairs(explicit_japanese_inputs) do
+        with_filter(input_text, "zh_bias", function(env)
+            local output = fake.collect_filter(filter, fake.input({
+                fake.candidate("table", "其他"),
+                fake.candidate("jaroomaji", "仮名"),
+            }), env)
+            fake.equal(fake.sequence_text(output), "仮名", "日语专属 q/x/v 结构应覆盖中文偏置: " .. input_text)
+        end)
+    end
+end)
+
+test("q x v 双拼重叠码继续保留中日混合候选", function()
+    local ambiguous_inputs = { "qi", "qa", "vi", "xa" }
+    for _, input_text in ipairs(ambiguous_inputs) do
+        with_filter(input_text, "neutral", function(env)
+            local output = fake.collect_filter(filter, fake.input({
+                fake.candidate("table", "中文"),
+                fake.candidate("jaroomaji", "仮名"),
+            }), env)
+            fake.equal(fake.sequence_text(output), "中文|仮名", "双拼与日语重叠码应保持混排: " .. input_text)
+        end)
+    end
+end)
+
+test("非法 UTF-8 候选文本安全降级", function()
+    with_filter("ng", "neutral", function(env)
+        local malformed = fake.candidate("unknown", string.char(0xFF), "原注释")
+        local output = fake.collect_filter(filter, fake.input({ malformed }), env)
+        fake.equal(#output, 1, "非法 UTF-8 候选应继续产出")
+        fake.equal(output[1], malformed, "非法 UTF-8 候选应保持原对象")
+    end)
+end)
+
+test("Kagiroi 前缀段只保留日语候选", function()
+    with_filter(";nihon", "zh_bias", function(env)
+        local output = fake.collect_filter(filter, fake.input({
+            fake.candidate("table", "拟红"),
+            fake.candidate("kagiroi", "日本"),
+            fake.candidate("kagiroi", "日本語"),
+        }), env)
+        fake.equal(fake.sequence_text(output), "日本|日本語", "显式 Kagiroi 段应覆盖历史中文偏置")
+    end)
+end)
+
+test("合法模糊输入继续保留中日混合候选", function()
+    with_filter("nihon", "neutral", function(env)
+        local output = fake.collect_filter(filter, fake.input({
+            fake.candidate("table", "你红"),
+            fake.candidate("jaroomaji", "日本"),
+            fake.candidate("table", "霓虹"),
+        }), env)
+        fake.equal(fake.sequence_text(output), "你红|日本|霓虹", "中日都成立的罗马字应继续使用混合排序")
+    end)
+end)
+
 test("过滤器产出首个候选无需等待源候选流耗尽", function()
     with_filter("nihon", "neutral", function(env)
         local candidates = {
@@ -315,6 +498,35 @@ test("japanese_only 识别并转换大写片假名路径", function()
     fake.truthy(string.match(";jSHI", pattern), "recognizer 应接受 ;j 后的大写罗马字")
     local preedit = fake.apply_preedit("moran_ja_hybrid.schema.yaml", "japanese_only", ";jSHI")
     fake.equal(preedit, "シ", "japanese_only preedit 应将 ;jSHI 转换为片假名 シ")
+end)
+
+test("异常 genuine 访问安全降级且候选继续产出", function()
+    with_gloss_filter(function(env)
+        local broken_get_genuine = fake.candidate("table", "未收录词", "原注释一")
+        broken_get_genuine.get_genuine = function()
+            error("get_genuine failed")
+        end
+
+        local inaccessible_genuine = setmetatable({}, {
+            __index = function(_, key)
+                if key == "text" then
+                    error("genuine.text failed")
+                end
+                return nil
+            end,
+        })
+        local broken_genuine_text = fake.candidate("table", "未收录项", "原注释二", inaccessible_genuine)
+        local output = fake.collect_filter(gloss_filter, fake.input({
+            broken_get_genuine,
+            broken_genuine_text,
+        }), env)
+
+        fake.equal(#output, 2, "异常 genuine 候选应全部继续产出")
+        fake.equal(output[1], broken_get_genuine, "get_genuine 异常时应产出原候选")
+        fake.equal(output[2], broken_genuine_text, "genuine.text 异常时应产出原候选")
+        fake.equal(output[1].comment, "原注释一", "get_genuine 异常时不应追加释义")
+        fake.equal(output[2].comment, "原注释二", "genuine.text 异常时不应追加释义")
+    end)
 end)
 
 return tests

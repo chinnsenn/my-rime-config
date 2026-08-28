@@ -1,9 +1,11 @@
 -- ===================================================================
 -- [INPUT]:  依赖 Rime Lua API (Candidate, yield, env)
--- [OUTPUT]: 对外提供 moran_ja_filter (lua_filter)
--- [POS]:    lua/ 目录的日语混合过滤器，被 moran_ja_hybrid 方案调用
+-- [OUTPUT]: 对外提供按当前输入意图裁决的 moran_ja_filter
+-- [POS]:    lua/ 目录的日语混合过滤器，与翻译器、处理器共享语言判定
 -- [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
 -- ===================================================================
+
+local language = require("moran_ja_language")
 
 -- ===============================================
 -- 性能优化：缓存全局函数引用
@@ -12,7 +14,6 @@ local utf8_codes = utf8.codes
 local string_sub = string.sub
 local string_lower = string.lower
 local string_upper = string.upper
-local string_find = string.find
 local string_match = string.match
 local table_concat = table.concat
 local ipairs = ipairs
@@ -154,122 +155,10 @@ local romaji_to_kana = {
 }
 
 -- ===============================================
--- 日语独占特征：双拼里不存在的编码模式
+-- 候选语言判定
 -- ===============================================
-local JA_EXCLUSIVE_PATTERNS = {
-    "shi", "chi", "tsu", "xtsu", "xtu", "ltu",
-}
-
--- 拗音辅音集（可产生 CyV 模式）
-local YOUON_CONSONANTS = "kstcnhmyrwgzjdbp"
-
--- 促音检测：辅音重叠
-local SOKUON_CHARS = "kstcgzjdbp"
-
--- ===============================================
--- 中文独占特征：罗马字里不存在的编码模式
--- ===============================================
--- 自然码双拼韵母中非元音的辅音韵尾
-local ZH_CONSONANT_FINALS = "gnrv"
--- 自然码声母中日语罗马字不使用的字母
-local ZH_EXCLUSIVE_INITIALS = "xqv"
-
--- ===============================================
--- 独占特征检测：返回 "zh" / "ja" / "ambiguous"
--- 设计原则：日语独占先判，命中即返回；中文独占后判，要求完整双拼音节对
--- ===============================================
-local SHUANGPIN_INITIALS = "bpmfdtnlgkhjqxrzcsywv"
-
-local function detect_exclusive_feature(input)
-    if not input or #input < 2 then return "ambiguous" end
-
-    local lower = string_lower(input)
-    local len = #lower
-
-    -- ── 日语独占特征（优先判定，命中即返回 "ja"）──
-
-    -- 1. 固定模式 (shi/chi/tsu/xtsu/xtu/ltu)
-    for _, pattern in ipairs(JA_EXCLUSIVE_PATTERNS) do
-        if string_find(lower, pattern, 1, true) then
-            return "ja"
-        end
-    end
-
-    -- 2. nn（拨音）
-    if string_find(lower, "nn", 1, true) then
-        return "ja"
-    end
-
-    -- 3. 拗音（辅音 + y + 元音）
-    for i = 1, len - 2 do
-        local c1 = string_sub(lower, i, i)
-        local c2 = string_sub(lower, i + 1, i + 1)
-        local c3 = string_sub(lower, i + 2, i + 2)
-        if string_find(YOUON_CONSONANTS, c1, 1, true)
-           and c2 == "y"
-           and (c3 == "a" or c3 == "u" or c3 == "o") then
-            return "ja"
-        end
-    end
-
-    -- 4. 促音（辅音重叠 kk/tt/ss...）
-    for i = 1, len - 1 do
-        local c1 = string_sub(lower, i, i)
-        local c2 = string_sub(lower, i + 1, i + 1)
-        if c1 == c2 and string_find(SOKUON_CHARS, c1, 1, true) then
-            return "ja"
-        end
-    end
-
-    -- ── 中文独占特征（严格验证完整双拼音节对）──
-
-    -- 5. x/q/v 作为声母（仅在奇数位检测）
-    for i = 1, len, 2 do
-        local c = string_sub(lower, i, i)
-        if string_find(ZH_EXCLUSIVE_INITIALS, c, 1, true) then
-            return "zh"
-        end
-    end
-
-    -- 6. 辅音韵尾（g/n/r/v 在偶数位，且前一位必须是合法声母）
-    for i = 2, len, 2 do
-        local initial = string_sub(lower, i - 1, i - 1)
-        local final = string_sub(lower, i, i)
-        if string_find(ZH_CONSONANT_FINALS, final, 1, true)
-           and string_find(SHUANGPIN_INITIALS, initial, 1, true) then
-            return "zh"
-        end
-    end
-
-    return "ambiguous"
-end
-
--- ===============================================
--- 日语候选判定
--- ===============================================
-local function has_kana(text)
-    if not text or #text == 0 then return false end
-    for _, codepoint in utf8_codes(text) do
-        if (codepoint >= 0x3040 and codepoint <= 0x30FF) then
-            return true
-        end
-    end
-    return false
-end
-
-local function has_japanese_source(cand)
-    if cand.type == "jaroomaji" or cand.type == "moran_ja" then
-        return true
-    end
-    local genuine = cand:get_genuine()
-    return genuine and (genuine.type == "jaroomaji" or genuine.type == "moran_ja")
-end
-
-local function is_japanese_candidate(cand)
-    if has_japanese_source(cand) then
-        return true
-    end
-    return has_kana(cand.text)
+local function is_japanese_candidate(candidate)
+    return language.candidate_language(candidate) == "ja"
 end
 
 -- ===============================================
@@ -340,7 +229,7 @@ end
 -- ===============================================
 local function update_cache(cache, input)
     if input ~= cache.input then
-        cache.exclusive = detect_exclusive_feature(input)
+        cache.intent = language.classify_input(input)
         cache.kana_preview = romaji_to_kana_preview(input)
         cache.input = input
     end
@@ -368,28 +257,10 @@ local function resolve_ja_state(context)
 end
 
 -- ===============================================
--- 决策矩阵：独占特征 × 状态机 → 是否用默认位置插入
+-- 模糊输入由提交状态决定候选分组
 -- ===============================================
--- 返回 true = 中文优先（日语插入 default_position）
--- 返回 false = 日语优先（日语排第 2 位，中文保留第 1 位）
-local function prefer_zh_first(exclusive, ja_state)
-    -- 独占中文特征 → 无条件中文优先
-    if exclusive == "zh" then
-        return true
-    end
-
-    -- 独占日文特征 → 无条件日语优先
-    if exclusive == "ja" then
-        return false
-    end
-
-    -- ambiguous（重叠区）→ 由状态机裁决
-    if ja_state == JA_STATE_JA_BIAS then
-        return false  -- 日语优先
-    end
-
-    -- zh_bias 或 neutral → 中文优先（neutral 时兜底中文）
-    return true
+local function prefer_zh_first(ja_state)
+    return ja_state ~= JA_STATE_JA_BIAS
 end
 
 -- ===============================================
@@ -397,9 +268,10 @@ end
 -- ===============================================
 local function init(env)
     env.default_position = 2
+    env.kagiroi_prefix = ""
     env.cache = {
         input = "",
-        exclusive = "ambiguous",
+        intent = "ambiguous",
         kana_preview = "",
     }
 
@@ -409,6 +281,7 @@ local function init(env)
         if pos and pos > 0 then
             env.default_position = pos
         end
+        env.kagiroi_prefix = config:get_string("kagiroi/prefix") or ""
     end
 end
 
@@ -444,6 +317,16 @@ end
 local function yield_buffer(buffer)
     for _, candidate in ipairs(buffer) do
         yield(candidate)
+    end
+end
+
+local function filter_language(input, kana_preview, target_language)
+    for candidate in input:iter() do
+        local decorated, is_japanese = preview_candidate(candidate, kana_preview)
+        local candidate_language = is_japanese and "ja" or "zh"
+        if candidate_language == target_language then
+            yield(decorated)
+        end
     end
 end
 
@@ -524,8 +407,18 @@ local function filter(input, env)
     end
 
     update_cache(env.cache, input_text)
+    local intent = env.cache.intent
+    local prefix = env.kagiroi_prefix or ""
+    if prefix ~= "" and string_sub(input_text, 1, #prefix) == prefix then
+        intent = "ja"
+    end
+    if intent == "ja" or intent == "zh" then
+        filter_language(input, env.cache.kana_preview, intent)
+        return
+    end
+
     local ja_state = resolve_ja_state(context)
-    local use_default_position = prefer_zh_first(env.cache.exclusive, ja_state)
+    local use_default_position = prefer_zh_first(ja_state)
     if use_default_position then
         filter_at_position(input, env.cache.kana_preview, env.default_position or 2)
         return

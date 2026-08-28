@@ -1,0 +1,344 @@
+-- ===================================================================
+-- [INPUT]:  罗马字输入与 Rime Candidate
+-- [OUTPUT]: 对外提供罗马字结构校验、输入语言分类与候选语言识别
+-- [POS]:    日语混输的统一判定模块；翻译器、过滤器、处理器共享同一语义
+-- [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
+-- ===================================================================
+
+local M = {}
+
+local string_find = string.find
+local string_lower = string.lower
+local string_sub = string.sub
+local utf8_codes = utf8.codes
+local utf8_len = utf8.len
+
+-- -------------------------------------------------------------------
+-- 罗马字语法
+-- canonical 来自 jaroomaji.kana_kigou；aliases 来自 jaroomaji speller algebra。
+-- 单辅音派生只用于促音上下文，不进入普通音节集合。
+-- -------------------------------------------------------------------
+
+local CANONICAL_MORAE = [[
+- a e i o u ba be bi bo bu da de di do du ga ge gi go gu ha he hi ho hu
+ka ke ki ko ku ma me mi mo mu na ne ni nn no nu pa pe pi po pu ra re ri ro ru
+sa se si so su ta te ti to tu va ve vi vo vu wa wo xa xe xi xo xu ya ye yo yu
+za ze zi zo zu bya bye byi byo byu dha dhe dhi dho dhu dwa dwe dwi dwo dwu
+dya dye dyi dyo dyu fwa fwe fwi fwo fwu fya fyo fyu gwa gwe gwi gwo gwu
+gya gye gyi gyo gyu hya hye hyi hyo hyu kya kye kyi kyo kyu mya mye myi
+myo myu nya nye nyi nyo nyu pya pye pyi pyo pyu qwa qwe qwi qwo qwu qya
+qyo qyu rya rye ryi ryo ryu swa swe swi swo swu sya sye syi syo syu tha
+the thi tho thu tsa tse tsi tso twa twe twi two twu tya tye tyi tyo tyu vya
+vyo vyu wha whe whi who wye wyi xka xke xtu xwa xya xyo xyu zya zye zyi
+zyo zyu
+]]
+
+local ALIAS_MORAE = [[
+l n yi wu whu wi we xyi xye ca cu qu co qa kwa qi qyi qe qye qo ci shi ce
+sha shu she sho ji ja jya jyi ju jyu je jye jo jyo chi tsu cha cya cyi chu
+cyu che cye cho cyo xtsu ltu fu fa fi fyi fe fye fo vyi vye
+]]
+
+local morae = {}
+local max_mora_length = 0
+
+local function add_morae(source)
+    for token in string.gmatch(source, "%S+") do
+        morae[token] = true
+        if #token > max_mora_length then
+            max_mora_length = #token
+        end
+    end
+end
+
+add_morae(CANONICAL_MORAE)
+add_morae(ALIAS_MORAE)
+
+local SOKUON_PREFIXES = {
+    k = { "k" },
+    c = { "c", "ch" },
+    q = { "q" },
+    g = { "g" },
+    s = { "s", "sh" },
+    z = { "z" },
+    j = { "j" },
+    t = { "t", "ch", "ts" },
+    d = { "d" },
+    h = { "h" },
+    f = { "f" },
+    b = { "b" },
+    v = { "v" },
+    p = { "p" },
+    m = { "m" },
+    y = { "y" },
+    r = { "r" },
+    w = { "w" },
+}
+
+local QXV_MORA_INITIALS = "qxv"
+
+local function token_has_prefix(token, prefixes)
+    for _, prefix in ipairs(prefixes) do
+        if string_sub(token, 1, #prefix) == prefix then
+            return true
+        end
+    end
+    return false
+end
+
+local function record_transition(states, next_index, state, token)
+    local initial = string_sub(token, 1, 1)
+    if string_find(QXV_MORA_INITIALS, initial, 1, true) then
+        state = 2
+    end
+    if state > (states[next_index] or 0) then
+        states[next_index] = state
+    end
+end
+
+local function parse_segment(text)
+    local text_length = #text
+    local end_index = text_length + 1
+    local states = { [1] = 1 }
+
+    for index = 1, text_length do
+        local state = states[index]
+        if state then
+            local remaining = text_length - index + 1
+            local longest = math.min(max_mora_length, remaining)
+            for length = longest, 1, -1 do
+                local token = string_sub(text, index, index + length - 1)
+                if morae[token] then
+                    record_transition(states, index + length, state, token)
+                end
+            end
+
+            local consonant = string_sub(text, index, index)
+            local prefixes = SOKUON_PREFIXES[consonant]
+            if prefixes then
+                local next_index = index + 1
+                local next_remaining = text_length - next_index + 1
+                local next_longest = math.min(max_mora_length, next_remaining)
+                for length = next_longest, 1, -1 do
+                    local token = string_sub(text, next_index, next_index + length - 1)
+                    if morae[token] and token_has_prefix(token, prefixes) then
+                        record_transition(states, next_index + length, state, token)
+                    end
+                end
+            end
+        end
+    end
+
+    return states[end_index] ~= nil, states[end_index] == 2
+end
+
+local function parse_input(input)
+    if type(input) ~= "string" then
+        return false, false, ""
+    end
+
+    local normalized = string_lower(input)
+    local has_segment = false
+    local has_qxv_mora = false
+    for segment in string.gmatch(normalized, "[^%s']+") do
+        has_segment = true
+        local valid, segment_has_qxv_mora = parse_segment(segment)
+        if not valid then
+            return false, false, normalized
+        end
+        has_qxv_mora = has_qxv_mora or segment_has_qxv_mora
+    end
+    return has_segment, has_qxv_mora, normalized
+end
+
+function M.is_valid_romaji(input)
+    local valid = parse_input(input)
+    return valid
+end
+
+-- -------------------------------------------------------------------
+-- 当前输入语言分类
+-- -------------------------------------------------------------------
+
+local JA_EXCLUSIVE_PATTERNS = {
+    "shi", "chi", "tsu", "xtsu", "xtu", "ltu",
+}
+local YOUON_CONSONANTS = "kstcnhmyrwgzjdbp"
+local ZH_CONSONANT_FINALS = "gnrv"
+local ZH_EXCLUSIVE_INITIALS = "xqv"
+local SHUANGPIN_INITIALS = "bpmfdtnlgkhjqxrzcsywv"
+
+local function has_compatible_mora_at(text, index, prefixes)
+    local remaining = #text - index + 1
+    local longest = math.min(max_mora_length, remaining)
+    for length = longest, 1, -1 do
+        local token = string_sub(text, index, index + length - 1)
+        if morae[token] and token_has_prefix(token, prefixes) then
+            return true
+        end
+    end
+    return false
+end
+
+local function has_japanese_exclusive_feature(input)
+    for _, pattern in ipairs(JA_EXCLUSIVE_PATTERNS) do
+        if string_find(input, pattern, 1, true) then
+            return true
+        end
+    end
+    if string_find(input, "nn", 1, true) then
+        return true
+    end
+
+    for i = 1, #input - 2 do
+        local c1 = string_sub(input, i, i)
+        local c2 = string_sub(input, i + 1, i + 1)
+        local c3 = string_sub(input, i + 2, i + 2)
+        if string_find(YOUON_CONSONANTS, c1, 1, true)
+           and c2 == "y"
+           and (c3 == "a" or c3 == "u" or c3 == "o") then
+            return true
+        end
+    end
+
+    for i = 1, #input - 1 do
+        local prefixes = SOKUON_PREFIXES[string_sub(input, i, i)]
+        if prefixes and has_compatible_mora_at(input, i + 1, prefixes) then
+            return true
+        end
+    end
+    return false
+end
+
+local function has_chinese_exclusive_feature(input)
+    for i = 1, #input, 2 do
+        local initial = string_sub(input, i, i)
+        if string_find(ZH_EXCLUSIVE_INITIALS, initial, 1, true) then
+            return true
+        end
+    end
+
+    for i = 2, #input, 2 do
+        local initial = string_sub(input, i - 1, i - 1)
+        local final = string_sub(input, i, i)
+        if string_find(ZH_CONSONANT_FINALS, final, 1, true)
+           and string_find(SHUANGPIN_INITIALS, initial, 1, true) then
+            return true
+        end
+    end
+    return false
+end
+
+local function is_complete_shuangpin(input)
+    local has_segment = false
+    for segment in string.gmatch(input, "[^%s']+") do
+        has_segment = true
+        if #segment % 2 ~= 0 then
+            return false
+        end
+        for index = 1, #segment, 2 do
+            local initial = string_sub(segment, index, index)
+            if not string_find(SHUANGPIN_INITIALS, initial, 1, true) then
+                return false
+            end
+        end
+    end
+    return has_segment
+end
+
+function M.classify_input(input)
+    local valid, has_qxv_mora, normalized = parse_input(input)
+    if not valid then
+        return "zh"
+    end
+    local qxv_shuangpin_overlap = has_qxv_mora and is_complete_shuangpin(normalized)
+    if has_qxv_mora and not qxv_shuangpin_overlap then
+        return "ja"
+    end
+
+    local has_japanese_feature = false
+    local has_chinese_feature = false
+    for segment in string.gmatch(normalized, "[^%s']+") do
+        has_japanese_feature = has_japanese_feature or has_japanese_exclusive_feature(segment)
+        has_chinese_feature = has_chinese_feature or has_chinese_exclusive_feature(segment)
+    end
+    if has_japanese_feature then
+        return "ja"
+    end
+    if qxv_shuangpin_overlap then
+        return "ambiguous"
+    end
+    if has_chinese_feature then
+        return "zh"
+    end
+    return "ambiguous"
+end
+
+-- -------------------------------------------------------------------
+-- 候选语言识别
+-- -------------------------------------------------------------------
+
+local JAPANESE_CANDIDATE_TYPES = {
+    jaroomaji = true,
+    moran_ja = true,
+    kagiroi = true,
+}
+
+local CHINESE_CANDIDATE_TYPES = {
+    table = true,
+    phrase = true,
+    user_phrase = true,
+    sentence = true,
+    fixed = true,
+    pinned = true,
+    simplified = true,
+}
+
+local function safe_candidate_type(candidate)
+    if not candidate then
+        return nil
+    end
+    local ok, candidate_type = pcall(function()
+        return candidate.type
+    end)
+    return ok and candidate_type or nil
+end
+
+local function safe_genuine(candidate)
+    if not candidate then
+        return nil
+    end
+    local ok, genuine = pcall(function()
+        return candidate:get_genuine()
+    end)
+    return ok and genuine or nil
+end
+
+local function has_kana(text)
+    if type(text) ~= "string" or text == "" or utf8_len(text) == nil then
+        return false
+    end
+    for _, codepoint in utf8_codes(text) do
+        if codepoint >= 0x3040 and codepoint <= 0x30FF then
+            return true
+        end
+    end
+    return false
+end
+
+function M.candidate_language(candidate)
+    local candidate_type = safe_candidate_type(candidate)
+    local genuine_type = safe_candidate_type(safe_genuine(candidate))
+    if JAPANESE_CANDIDATE_TYPES[candidate_type]
+       or JAPANESE_CANDIDATE_TYPES[genuine_type]
+       or has_kana(candidate and candidate.text) then
+        return "ja"
+    end
+    if CHINESE_CANDIDATE_TYPES[candidate_type]
+       or CHINESE_CANDIDATE_TYPES[genuine_type] then
+        return "zh"
+    end
+    return nil
+end
+
+return M

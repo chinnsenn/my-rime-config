@@ -7,7 +7,7 @@
 
 run.lua: 测试入口与极简断言运行器，聚合执行全部测试并以退出码报告结果
 rime_fake.lua: Rime 系统边界 fake，提供 Context、Notifier、Candidate、Translation 与 schema xform 执行能力
-test_moran_ja.lua: 日语混输状态机、过滤器与 japanese_only schema 的行为回归测试
+test_moran_ja.lua: 日语罗马字结构、当前输入裁决、混输状态机、过滤器排序与 japanese_only 行为回归测试
 test_moran_kagiroi.lua: Kagiroi 前缀段、罗马字布局与拨音映射的独立方案契约
 
 [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
