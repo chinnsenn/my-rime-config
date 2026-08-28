@@ -2,9 +2,11 @@
 # encoding: utf-8
 # ===================================================================
 # [INPUT]: 依赖 Trime 内置 trime.yaml
-# [OUTPUT]: 让方案完全 fallback 到 Trime 内置的 preset_keyboards/default
-# [POS]:   Rime 用户目录根部的 Trime 配置覆盖层；Trime 部署时自动加载。
+# [OUTPUT]: 让候选 hint 位于候选词上方，并扩展候选区容纳双层文本
+# [POS]:   Rime 用户目录根部的 Trime 主题覆盖层；Trime 部署时自动加载。
 # [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
 # ===================================================================
 
-patch: {}
+patch:
+  "style/comment_position": top
+  "style/candidate_view_height": 44
