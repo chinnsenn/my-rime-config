@@ -43,12 +43,16 @@ local function with_processor(config, body)
     end
 end
 
-local function with_filter(input_text, state, body, default_position)
+local function with_filter(input_text, state, body, default_position, config_overrides)
     local restore_globals = fake.install_rime_globals()
-    local env = fake.environment({
+    local config = {
         ["moran_ja/default_position"] = default_position or 2,
         ["kagiroi/prefix"] = ";",
-    })
+    }
+    for key, value in pairs(config_overrides or {}) do
+        config[key] = value
+    end
+    local env = fake.environment(config)
     env.engine.context.input = input_text
     env.engine.context:set_property("moran_ja/state", state or "neutral")
     filter.init(env)
@@ -162,6 +166,17 @@ test("空提交事件保持状态和窗口不变", function()
         env:commit(fake.candidate("jaroomaji", ""), "")
         fake.equal(env.state.current, processor.neutral, "空提交应保持 neutral")
         fake.equal(#env.state.commit_history, 0, "空提交不应进入窗口")
+    end)
+end)
+
+test("负数状态窗口按最小容量一运行", function()
+    with_processor(state_config({
+        ["moran_ja/state_machine/window_size"] = -1,
+        ["moran_ja/state_machine/ja_threshold"] = 1,
+    }), function(env)
+        env:commit(fake.candidate("jaroomaji", "日本"))
+        fake.equal(#env.state.commit_history, 1, "负数窗口应收敛到最小容量一")
+        fake.equal(env.state.current, processor.ja_bias, "窗口下界保护后提交状态应正常迁移")
     end)
 end)
 
@@ -364,6 +379,31 @@ test("Kagiroi 前缀段只保留日语候选", function()
         }), env)
         fake.equal(fake.sequence_text(output), "日本|日本語", "显式 Kagiroi 段应覆盖历史中文偏置")
     end)
+end)
+
+test("japanese_only 前缀标记纯汉字候选为日语", function()
+    with_filter(";jnihon", "zh_bias", function(env)
+        local source = fake.candidate("phrase", "日本")
+        local output = fake.collect_filter(filter, fake.input({ source }), env)
+        fake.equal(#output, 1, "显式日语前缀应保留纯汉字候选")
+        fake.equal(output[1].type, "moran_ja", "显式日语候选应获得稳定日语身份")
+        fake.equal(output[1]:get_genuine(), source, "显式日语包装应保留原候选身份")
+    end, nil, {
+        ["kagiroi/prefix"] = "",
+        ["japanese_only/prefix"] = ";j",
+    })
+end)
+
+test("单 n 缩写合法日语保持中日混排", function()
+    for _, input_text in ipairs({ "kanri", "kanga", "honrai" }) do
+        with_filter(input_text, "neutral", function(env)
+            local output = fake.collect_filter(filter, fake.input({
+                fake.candidate("table", "中文"),
+                fake.candidate("jaroomaji", "管理"),
+            }), env)
+            fake.equal(fake.sequence_text(output), "中文|管理", "单 n 合法日语不得被中文规则删除: " .. input_text)
+        end)
+    end
 end)
 
 test("合法模糊输入继续保留中日混合候选", function()

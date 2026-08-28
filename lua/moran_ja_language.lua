@@ -164,8 +164,6 @@ local JA_EXCLUSIVE_PATTERNS = {
     "shi", "chi", "tsu", "xtsu", "xtu", "ltu",
 }
 local YOUON_CONSONANTS = "kstcnhmyrwgzjdbp"
-local ZH_CONSONANT_FINALS = "gnrv"
-local ZH_EXCLUSIVE_INITIALS = "xqv"
 local SHUANGPIN_INITIALS = "bpmfdtnlgkhjqxrzcsywv"
 
 local function has_compatible_mora_at(text, index, prefixes)
@@ -210,24 +208,6 @@ local function has_japanese_exclusive_feature(input)
     return false
 end
 
-local function has_chinese_exclusive_feature(input)
-    for i = 1, #input, 2 do
-        local initial = string_sub(input, i, i)
-        if string_find(ZH_EXCLUSIVE_INITIALS, initial, 1, true) then
-            return true
-        end
-    end
-
-    for i = 2, #input, 2 do
-        local initial = string_sub(input, i - 1, i - 1)
-        local final = string_sub(input, i, i)
-        if string_find(ZH_CONSONANT_FINALS, final, 1, true)
-           and string_find(SHUANGPIN_INITIALS, initial, 1, true) then
-            return true
-        end
-    end
-    return false
-end
 
 local function is_complete_shuangpin(input)
     local has_segment = false
@@ -256,20 +236,10 @@ function M.classify_input(input)
         return "ja"
     end
 
-    local has_japanese_feature = false
-    local has_chinese_feature = false
     for segment in string.gmatch(normalized, "[^%s']+") do
-        has_japanese_feature = has_japanese_feature or has_japanese_exclusive_feature(segment)
-        has_chinese_feature = has_chinese_feature or has_chinese_exclusive_feature(segment)
-    end
-    if has_japanese_feature then
-        return "ja"
-    end
-    if qxv_shuangpin_overlap then
-        return "ambiguous"
-    end
-    if has_chinese_feature then
-        return "zh"
+        if has_japanese_exclusive_feature(segment) then
+            return "ja"
+        end
     end
     return "ambiguous"
 end

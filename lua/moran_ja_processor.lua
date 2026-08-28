@@ -160,9 +160,9 @@ end
 -- ===============================================
 local function push_commit_lang(state, lang, window_size)
     local history = state.commit_history
+    local limit = math.max(1, tonumber(window_size) or 1)
     history[#history + 1] = lang
-    -- 超出窗口时，移除最旧的记录
-    while #history > window_size do
+    while #history > limit do
         table.remove(history, 1)
     end
 end
@@ -282,7 +282,7 @@ local function init(env)
     env.config = {
         state_machine = {
             enabled = sm_enabled,
-            window_size = config_get_int(config, "moran_ja/state_machine/window_size", 8),
+            window_size = math.max(1, config_get_int(config, "moran_ja/state_machine/window_size", 8)),
             decay_seconds = config_get_int(config, "moran_ja/state_machine/decay_seconds", 45),
             ja_threshold = config_get_int(config, "moran_ja/state_machine/ja_threshold", 3),
             zh_threshold = config_get_int(config, "moran_ja/state_machine/zh_threshold", 2),

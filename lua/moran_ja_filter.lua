@@ -266,9 +266,15 @@ end
 -- ===============================================
 -- Filter 生命周期
 -- ===============================================
+local function append_prefix(prefixes, prefix, force_identity)
+    if prefix and prefix ~= "" then
+        prefixes[#prefixes + 1] = { value = prefix, force_identity = force_identity }
+    end
+end
+
 local function init(env)
     env.default_position = 2
-    env.kagiroi_prefix = ""
+    env.japanese_prefixes = {}
     env.cache = {
         input = "",
         intent = "ambiguous",
@@ -281,7 +287,8 @@ local function init(env)
         if pos and pos > 0 then
             env.default_position = pos
         end
-        env.kagiroi_prefix = config:get_string("kagiroi/prefix") or ""
+        append_prefix(env.japanese_prefixes, config:get_string("kagiroi/prefix"), false)
+        append_prefix(env.japanese_prefixes, config:get_string("japanese_only/prefix"), true)
     end
 end
 
@@ -328,6 +335,31 @@ local function filter_language(input, kana_preview, target_language)
             yield(decorated)
         end
     end
+end
+
+local function filter_explicit_japanese(input, kana_preview)
+    for candidate in input:iter() do
+        local decorated, is_japanese = preview_candidate(candidate, kana_preview)
+        if is_japanese then
+            yield(decorated)
+        else
+            local shadow = ShadowCandidate(candidate, "moran_ja", candidate.text, candidate.comment or "")
+            shadow.preedit = candidate.preedit
+            shadow.quality = candidate.quality
+            yield(shadow)
+        end
+    end
+end
+
+local function matched_prefix(input, prefixes)
+    local matched
+    for _, entry in ipairs(prefixes) do
+        if (not matched or #entry.value > #matched.value)
+           and string_sub(input, 1, #entry.value) == entry.value then
+            matched = entry
+        end
+    end
+    return matched
 end
 
 local function filter_ja_first(input, kana_preview)
@@ -406,12 +438,20 @@ local function filter(input, env)
         return
     end
 
-    update_cache(env.cache, input_text)
-    local intent = env.cache.intent
-    local prefix = env.kagiroi_prefix or ""
-    if prefix ~= "" and string_sub(input_text, 1, #prefix) == prefix then
-        intent = "ja"
+    local prefix_entry = matched_prefix(input_text, env.japanese_prefixes or {})
+    local prefix = prefix_entry and prefix_entry.value or ""
+    local language_input = prefix == "" and input_text or string_sub(input_text, #prefix + 1)
+    update_cache(env.cache, language_input)
+    if prefix_entry then
+        if prefix_entry.force_identity then
+            filter_explicit_japanese(input, env.cache.kana_preview)
+        else
+            filter_language(input, env.cache.kana_preview, "ja")
+        end
+        return
     end
+
+    local intent = env.cache.intent
     if intent == "ja" or intent == "zh" then
         filter_language(input, env.cache.kana_preview, intent)
         return
