@@ -1,6 +1,6 @@
 -- ===================================================================
 -- [INPUT]:  罗马字输入与 Rime Candidate
--- [OUTPUT]: 对外提供罗马字结构校验与候选语言识别
+-- [OUTPUT]: 对外提供罗马字结构校验、假名转写与候选语言识别
 -- [POS]:    日语混输的统一语义模块；翻译器校验输入，过滤器与处理器识别候选来源
 -- [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
 -- ===================================================================
@@ -12,6 +12,22 @@ local string_lower = string.lower
 local string_sub = string.sub
 local utf8_codes = utf8.codes
 local utf8_len = utf8.len
+
+-- -------------------------------------------------------------------
+-- 罗马字 → 假名
+-- 直接复用 jaroomaji 自身的 preedit_format，避免在 Lua 中重复维护。
+-- -------------------------------------------------------------------
+
+local kana_projection
+
+function M.to_kana(input)
+    if not input or input == "" then return "" end
+    if not kana_projection then
+        local schema = Schema("jaroomaji")
+        kana_projection = Projection(schema.config:get_list("translator/preedit_format"))
+    end
+    return kana_projection:apply(input, true)
+end
 
 -- -------------------------------------------------------------------
 -- 罗马字语法

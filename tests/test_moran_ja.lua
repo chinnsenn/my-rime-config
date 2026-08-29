@@ -266,8 +266,47 @@ test("合法日语罗马字保留 jaroomaji 候选", function()
             local output = fake.collect_yields(function()
                 translator.func(input_text, {}, env)
             end)
-            fake.equal(fake.sequence_text(output), "有効", "合法罗马字应进入日语翻译器: " .. input_text)
+            fake.equal(#output, 2, "合法罗马字应额外产生纯假名候选: " .. input_text)
+            fake.equal(output[1].type, "moran_ja_raw_kana", "纯假名候选必须先于日语转换候选")
+            fake.equal(output[1].comment, "〔假名〕", "纯假名候选必须有明确标识")
+            fake.equal(output[2].text, "有効", "纯假名候选不能替换原日语转换候选")
         end
+    end)
+end)
+
+test("纯假名候选与预览共享罗马字转写", function()
+    fake.equal(language.to_kana("wakaniwaikanai"), "わかにわいかない", "连续罗马字应转为完整平假名")
+    fake.equal(language.to_kana("KITTE"), "キッテ", "全大写罗马字应保留片假名语义")
+    fake.equal(language.to_kana("qwa vyi xyi"), "くぁゔぃぃ", "罕用罗马字别名也应产生正确假名")
+end)
+
+test("纯假名转写覆盖基础假名词典的全部平假名编码", function()
+    local file = assert(io.open("jaroomaji.kana_kigou.dict.yaml", "r"))
+    local checked = 0
+    for line in file:lines() do
+        local text, code, weight = string.match(line, "^([^#\t]+)\t([^\t]+)\t([^\t]+)")
+        if weight == "80000" and code and string.match(code, "^[a-z-]+$") and language.is_valid_romaji(code) then
+            fake.equal(language.to_kana(code), text, "纯假名转写必须覆盖词典编码: " .. code)
+            checked = checked + 1
+        end
+    end
+    file:close()
+    fake.truthy(checked > 200, "应校验完整的基础平假名词典")
+end)
+
+test("默认混输将纯假名置于首个中文候选之后", function()
+    with_filter("wakaniwaikanai", "neutral", function(env)
+        local output = fake.collect_filter(filter, fake.input({
+            fake.candidate("table", "哇卡泥洼卡奈"),
+            fake.candidate("moran_ja_raw_kana", "わかにわいかない", "〔假名〕"),
+            fake.candidate("jaroomaji", "わか庭井叶い"),
+        }), env)
+        fake.equal(
+            fake.sequence_text(output),
+            "哇卡泥洼卡奈|わかにわいかない|わか庭井叶い",
+            "纯假名应成为默认混输中的第一个日语候选"
+        )
+        fake.equal(output[2].comment, "〔假名〕", "纯假名候选应保持可辨识标记")
     end)
 end)
 

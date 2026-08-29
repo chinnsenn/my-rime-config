@@ -185,7 +185,10 @@ function M.input(candidates)
     local source = { consumed = 0, candidates = candidates }
     function source:iter()
         local index = 0
-        return function()
+        local function next_candidate(state)
+            if state ~= self then
+                return nil
+            end
             index = index + 1
             local candidate = self.candidates[index]
             if candidate then
@@ -193,6 +196,8 @@ function M.input(candidates)
             end
             return candidate
         end
+        -- librime-lua Translation:iter() returns iterator + translation state.
+        return next_candidate, self
     end
     return source
 end
@@ -203,6 +208,8 @@ function M.install_rime_globals()
     local old_component = _G.Component
     local old_rime_api = _G.rime_api
     local old_log = _G.log
+    local old_projection = _G.Projection
+    local old_schema = _G.Schema
 
     _G.ShadowCandidate = function(candidate, candidate_type, text, comment)
         local shadow = M.candidate(candidate_type, text, comment, candidate:get_genuine())
@@ -220,6 +227,25 @@ function M.install_rime_globals()
             }
         end,
     }
+    _G.Schema = function(schema_id)
+        return {
+            config = {
+                get_list = function(_, key)
+                    return { schema_id = schema_id, key = key }
+                end,
+            },
+        }
+    end
+    _G.Projection = function(config)
+        return {
+            apply = function(_, input)
+                if config.schema_id == "jaroomaji" and config.key == "translator/preedit_format" then
+                    return M.apply_preedit("jaroomaji.schema.yaml", "translator", input)
+                end
+                return input
+            end,
+        }
+    end
     _G.rime_api = {
         get_user_data_dir = function() return "." end,
     }
@@ -233,6 +259,8 @@ function M.install_rime_globals()
         _G.Component = old_component
         _G.rime_api = old_rime_api
         _G.log = old_log
+        _G.Projection = old_projection
+        _G.Schema = old_schema
     end
 end
 
