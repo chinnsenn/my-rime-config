@@ -313,52 +313,88 @@ test("促音派生辅音脱离后续音节时全部拒绝", function()
     end
 end)
 
-test("明确中文输入只保留非日语候选", function()
-    with_filter("ng vp gt", "ja_bias", function(env)
+test("普通输入只有中文候选时保持中文候选流", function()
+    with_filter("kitte", "ja_bias", function(env)
         local output = fake.collect_filter(filter, fake.input({
-            fake.candidate("table", "能准确"),
-            fake.candidate("jaroomaji", "んっっっっっ"),
-            fake.candidate("table", "能准过头"),
+            fake.candidate("table", "其他"),
+            fake.candidate("table", "切特"),
         }), env)
-        fake.equal(fake.sequence_text(output), "能准确|能准过头", "无效日语结构应由当前输入直接裁决为中文")
+        fake.equal(fake.sequence_text(output), "其他|切特", "候选来源只有中文时应保持中文原序")
     end)
 end)
 
-test("明确日语输入只保留日语候选", function()
+test("普通输入只有日语候选时保持日语候选流", function()
+    with_filter("dyui", "zh_bias", function(env)
+        local output = fake.collect_filter(filter, fake.input({
+            fake.candidate("jaroomaji", "デュイ"),
+            fake.candidate("jaroomaji", "ヂュイ"),
+        }), env)
+        fake.equal(fake.sequence_text(output), "デュイ|ヂュイ", "候选来源只有日语时应保持日语原序")
+    end)
+end)
+
+test("普通输入中日候选共存时进入混合排序", function()
     with_filter("kitte", "zh_bias", function(env)
         local output = fake.collect_filter(filter, fake.input({
             fake.candidate("table", "其他"),
             fake.candidate("jaroomaji", "切手"),
             fake.candidate("kagiroi", "切手帳"),
         }), env)
-        fake.equal(fake.sequence_text(output), "切手|切手帳", "当前输入的明确日语特征应覆盖历史中文偏置")
+        fake.equal(fake.sequence_text(output), "其他|切手|切手帳", "普通输入应由真实候选来源决定混排")
     end)
 end)
 
-test("q x v 日语专属结构经过过滤器只保留日语候选", function()
-    local explicit_japanese_inputs = { "qwa", "vyi", "vye", "xyi" }
-    for _, input_text in ipairs(explicit_japanese_inputs) do
-        with_filter(input_text, "zh_bias", function(env)
-            local output = fake.collect_filter(filter, fake.input({
-                fake.candidate("table", "其他"),
-                fake.candidate("jaroomaji", "仮名"),
-            }), env)
-            fake.equal(fake.sequence_text(output), "仮名", "日语专属 q/x/v 结构应覆盖中文偏置: " .. input_text)
-        end)
-    end
+test("单语言候选探测受当前页大小约束", function()
+    with_filter("zhcode", "neutral", function(env)
+        env.candidate_scan_limit = 2
+        local candidates = {
+            fake.candidate("table", "中文一"),
+            fake.candidate("table", "中文二"),
+            fake.candidate("table", "中文三"),
+            fake.candidate("table", "中文四"),
+        }
+        local input = fake.input(candidates)
+        local old_yield = _G.yield
+        _G.yield = coroutine.yield
+        local co = coroutine.create(function() filter.func(input, env) end)
+        local ok, first = coroutine.resume(co)
+        _G.yield = old_yield
+        fake.truthy(ok, first)
+        fake.equal(first.text, "中文一", "有界探测后应立即产出首候选")
+        fake.equal(input.consumed, 2, "单语言探测最多消费配置的候选数量")
+    end)
 end)
 
-test("q x v 双拼重叠码继续保留中日混合候选", function()
-    local ambiguous_inputs = { "qi", "qa", "vi", "xa" }
-    for _, input_text in ipairs(ambiguous_inputs) do
-        with_filter(input_text, "neutral", function(env)
-            local output = fake.collect_filter(filter, fake.input({
-                fake.candidate("table", "中文"),
-                fake.candidate("jaroomaji", "仮名"),
-            }), env)
-            fake.equal(fake.sequence_text(output), "中文|仮名", "双拼与日语重叠码应保持混排: " .. input_text)
-        end)
-    end
+test("未知类型不占用首中文排序位置", function()
+    with_filter("mixed", "ja_bias", function(env)
+        local output = fake.collect_filter(filter, fake.input({
+            fake.candidate("unknown", "中立"),
+            fake.candidate("jaroomaji", "日本"),
+            fake.candidate("table", "中文"),
+        }), env)
+        fake.equal(fake.sequence_text(output), "中文|日本|中立", "未知类型应在中日排序组后保持中立")
+    end)
+end)
+
+test("单字母输入同样按真实候选来源混排", function()
+    with_filter("a", "ja_bias", function(env)
+        local output = fake.collect_filter(filter, fake.input({
+            fake.candidate("jaroomaji", "あ"),
+            fake.candidate("table", "啊"),
+        }), env)
+        fake.equal(fake.sequence_text(output), "啊|あ", "单字母中日候选共存时应进入候选驱动排序")
+    end)
+end)
+
+test("完整双拼与日语拗音重叠时保持混排", function()
+    with_filter("dyui", "neutral", function(env)
+        local output = fake.collect_filter(filter, fake.input({
+            fake.candidate("table", "定时"),
+            fake.candidate("jaroomaji", "デュイ"),
+            fake.candidate("table", "顶事"),
+        }), env)
+        fake.equal(fake.sequence_text(output), "定时|デュイ|顶事", "dyui 同时成立为 dy+ui 与 dyu+i 时应保持混排")
+    end)
 end)
 
 test("非法 UTF-8 候选文本安全降级", function()
@@ -419,6 +455,7 @@ end)
 
 test("过滤器产出首个候选无需等待源候选流耗尽", function()
     with_filter("nihon", "neutral", function(env)
+        env.candidate_scan_limit = 2
         local candidates = {
             fake.candidate("table", "你"),
             fake.candidate("jaroomaji", "日本"),

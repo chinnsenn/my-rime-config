@@ -1,7 +1,7 @@
 -- ===================================================================
 -- [INPUT]:  罗马字输入与 Rime Candidate
--- [OUTPUT]: 对外提供罗马字结构校验、输入语言分类与候选语言识别
--- [POS]:    日语混输的统一判定模块；翻译器、过滤器、处理器共享同一语义
+-- [OUTPUT]: 对外提供罗马字结构校验与候选语言识别
+-- [POS]:    日语混输的统一语义模块；翻译器校验输入，过滤器与处理器识别候选来源
 -- [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
 -- ===================================================================
 
@@ -75,8 +75,6 @@ local SOKUON_PREFIXES = {
     w = { "w" },
 }
 
-local QXV_MORA_INITIALS = "qxv"
-
 local function token_has_prefix(token, prefixes)
     for _, prefix in ipairs(prefixes) do
         if string_sub(token, 1, #prefix) == prefix then
@@ -86,30 +84,23 @@ local function token_has_prefix(token, prefixes)
     return false
 end
 
-local function record_transition(states, next_index, state, token)
-    local initial = string_sub(token, 1, 1)
-    if string_find(QXV_MORA_INITIALS, initial, 1, true) then
-        state = 2
-    end
-    if state > (states[next_index] or 0) then
-        states[next_index] = state
-    end
+local function record_transition(states, next_index)
+    states[next_index] = true
 end
 
 local function parse_segment(text)
     local text_length = #text
     local end_index = text_length + 1
-    local states = { [1] = 1 }
+    local states = { [1] = true }
 
     for index = 1, text_length do
-        local state = states[index]
-        if state then
+        if states[index] then
             local remaining = text_length - index + 1
             local longest = math.min(max_mora_length, remaining)
             for length = longest, 1, -1 do
                 local token = string_sub(text, index, index + length - 1)
                 if morae[token] then
-                    record_transition(states, index + length, state, token)
+                    record_transition(states, index + length)
                 end
             end
 
@@ -122,127 +113,36 @@ local function parse_segment(text)
                 for length = next_longest, 1, -1 do
                     local token = string_sub(text, next_index, next_index + length - 1)
                     if morae[token] and token_has_prefix(token, prefixes) then
-                        record_transition(states, next_index + length, state, token)
+                        record_transition(states, next_index + length)
                     end
                 end
             end
         end
     end
 
-    return states[end_index] ~= nil, states[end_index] == 2
+    return states[end_index] == true
 end
 
 local function parse_input(input)
     if type(input) ~= "string" then
-        return false, false, ""
+        return false
     end
 
     local normalized = string_lower(input)
     local has_segment = false
-    local has_qxv_mora = false
     for segment in string.gmatch(normalized, "[^%s']+") do
         has_segment = true
-        local valid, segment_has_qxv_mora = parse_segment(segment)
-        if not valid then
-            return false, false, normalized
-        end
-        has_qxv_mora = has_qxv_mora or segment_has_qxv_mora
-    end
-    return has_segment, has_qxv_mora, normalized
-end
-
-function M.is_valid_romaji(input)
-    local valid = parse_input(input)
-    return valid
-end
-
--- -------------------------------------------------------------------
--- 当前输入语言分类
--- -------------------------------------------------------------------
-
-local JA_EXCLUSIVE_PATTERNS = {
-    "shi", "chi", "tsu", "xtsu", "xtu", "ltu",
-}
-local YOUON_CONSONANTS = "kstcnhmyrwgzjdbp"
-local SHUANGPIN_INITIALS = "bpmfdtnlgkhjqxrzcsywv"
-
-local function has_compatible_mora_at(text, index, prefixes)
-    local remaining = #text - index + 1
-    local longest = math.min(max_mora_length, remaining)
-    for length = longest, 1, -1 do
-        local token = string_sub(text, index, index + length - 1)
-        if morae[token] and token_has_prefix(token, prefixes) then
-            return true
-        end
-    end
-    return false
-end
-
-local function has_japanese_exclusive_feature(input)
-    for _, pattern in ipairs(JA_EXCLUSIVE_PATTERNS) do
-        if string_find(input, pattern, 1, true) then
-            return true
-        end
-    end
-    if string_find(input, "nn", 1, true) then
-        return true
-    end
-
-    for i = 1, #input - 2 do
-        local c1 = string_sub(input, i, i)
-        local c2 = string_sub(input, i + 1, i + 1)
-        local c3 = string_sub(input, i + 2, i + 2)
-        if string_find(YOUON_CONSONANTS, c1, 1, true)
-           and c2 == "y"
-           and (c3 == "a" or c3 == "u" or c3 == "o") then
-            return true
-        end
-    end
-
-    for i = 1, #input - 1 do
-        local prefixes = SOKUON_PREFIXES[string_sub(input, i, i)]
-        if prefixes and has_compatible_mora_at(input, i + 1, prefixes) then
-            return true
-        end
-    end
-    return false
-end
-
-
-local function is_complete_shuangpin(input)
-    local has_segment = false
-    for segment in string.gmatch(input, "[^%s']+") do
-        has_segment = true
-        if #segment % 2 ~= 0 then
+        if not parse_segment(segment) then
             return false
-        end
-        for index = 1, #segment, 2 do
-            local initial = string_sub(segment, index, index)
-            if not string_find(SHUANGPIN_INITIALS, initial, 1, true) then
-                return false
-            end
         end
     end
     return has_segment
 end
 
-function M.classify_input(input)
-    local valid, has_qxv_mora, normalized = parse_input(input)
-    if not valid then
-        return "zh"
-    end
-    local qxv_shuangpin_overlap = has_qxv_mora and is_complete_shuangpin(normalized)
-    if has_qxv_mora and not qxv_shuangpin_overlap then
-        return "ja"
-    end
-
-    for segment in string.gmatch(normalized, "[^%s']+") do
-        if has_japanese_exclusive_feature(segment) then
-            return "ja"
-        end
-    end
-    return "ambiguous"
+function M.is_valid_romaji(input)
+    return parse_input(input)
 end
+
 
 -- -------------------------------------------------------------------
 -- 候选语言识别

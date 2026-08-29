@@ -154,12 +154,6 @@ local romaji_to_kana = {
     ["fo"] = "ふぉ",
 }
 
--- ===============================================
--- 候选语言判定
--- ===============================================
-local function is_japanese_candidate(candidate)
-    return language.candidate_language(candidate) == "ja"
-end
 
 -- ===============================================
 -- 罗马字 → 假名预览（O(n) 字符串拼接）
@@ -229,7 +223,6 @@ end
 -- ===============================================
 local function update_cache(cache, input)
     if input ~= cache.input then
-        cache.intent = language.classify_input(input)
         cache.kana_preview = romaji_to_kana_preview(input)
         cache.input = input
     end
@@ -277,9 +270,9 @@ local function init(env)
     env.japanese_prefixes = {}
     env.cache = {
         input = "",
-        intent = "ambiguous",
         kana_preview = "",
     }
+    env.candidate_scan_limit = math.max(1, tonumber(env.engine.schema.page_size) or 10)
 
     local config = env.engine.schema.config
     if config then
@@ -308,8 +301,9 @@ local function append_preview(comment, preview)
 end
 
 local function preview_candidate(candidate, kana_preview)
-    if not is_japanese_candidate(candidate) then
-        return candidate, false
+    local candidate_language = language.candidate_language(candidate)
+    if candidate_language ~= "ja" then
+        return candidate, candidate_language
     end
 
     local comment = candidate.comment or ""
@@ -318,7 +312,7 @@ local function preview_candidate(candidate, kana_preview)
     end
     local shadow = ShadowCandidate(candidate, candidate.type or "jaroomaji", candidate.text, comment)
     shadow.preedit = candidate.preedit
-    return shadow, true
+    return shadow, "ja"
 end
 
 local function yield_buffer(buffer)
@@ -329,8 +323,7 @@ end
 
 local function filter_language(input, kana_preview, target_language)
     for candidate in input:iter() do
-        local decorated, is_japanese = preview_candidate(candidate, kana_preview)
-        local candidate_language = is_japanese and "ja" or "zh"
+        local decorated, candidate_language = preview_candidate(candidate, kana_preview)
         if candidate_language == target_language then
             yield(decorated)
         end
@@ -339,8 +332,8 @@ end
 
 local function filter_explicit_japanese(input, kana_preview)
     for candidate in input:iter() do
-        local decorated, is_japanese = preview_candidate(candidate, kana_preview)
-        if is_japanese then
+        local decorated, candidate_language = preview_candidate(candidate, kana_preview)
+        if candidate_language == "ja" then
             yield(decorated)
         else
             local shadow = ShadowCandidate(candidate, "moran_ja", candidate.text, candidate.comment or "")
@@ -362,67 +355,143 @@ local function matched_prefix(input, prefixes)
     return matched
 end
 
-local function filter_ja_first(input, kana_preview)
+local function candidate_stream(input, kana_preview, scan_limit)
+    local source = input:iter()
+    local buffered_candidates = {}
+    local buffered_languages = {}
+    local has_chinese = false
+    local has_japanese = false
+    local exhausted = false
+    local limit = math.max(1, tonumber(scan_limit) or 10)
+
+    for _ = 1, limit do
+        local candidate = source()
+        if not candidate then
+            exhausted = true
+            break
+        end
+        local decorated, candidate_language = preview_candidate(candidate, kana_preview)
+        buffered_candidates[#buffered_candidates + 1] = decorated
+        buffered_languages[#buffered_languages + 1] = candidate_language or "neutral"
+        has_chinese = has_chinese or candidate_language == "zh"
+        has_japanese = has_japanese or candidate_language == "ja"
+    end
+
+    local index = 0
+    local function next_buffered()
+        index = index + 1
+        if index <= #buffered_candidates then
+            return buffered_candidates[index], buffered_languages[index]
+        end
+        return nil
+    end
+
+    local function next_remaining()
+        if exhausted then
+            return nil
+        end
+        local candidate = source()
+        if not candidate then
+            exhausted = true
+            return nil
+        end
+        return preview_candidate(candidate, kana_preview)
+    end
+
+    return next_buffered, next_remaining, has_chinese, has_japanese
+end
+
+local function yield_stream(next_candidate)
+    while true do
+        local candidate = next_candidate()
+        if not candidate then
+            return
+        end
+        yield(candidate)
+    end
+end
+
+local function filter_ja_first(next_candidate)
     local pending_japanese = {}
     local pending_chinese = {}
+    local pending_neutral = {}
     local yielded_head = false
 
-    for candidate in input:iter() do
-        local decorated, is_japanese = preview_candidate(candidate, kana_preview)
-        if is_japanese then
+    while true do
+        local decorated, candidate_language = next_candidate()
+        if not decorated then
+            break
+        end
+        if candidate_language == "ja" then
             if yielded_head then
                 yield(decorated)
             else
                 pending_japanese[#pending_japanese + 1] = decorated
             end
-        elseif not yielded_head then
-            yield(decorated)
-            yielded_head = true
-            yield_buffer(pending_japanese)
-            pending_japanese = {}
+        elseif candidate_language == "zh" then
+            if not yielded_head then
+                yield(decorated)
+                yielded_head = true
+                yield_buffer(pending_japanese)
+                pending_japanese = {}
+            else
+                pending_chinese[#pending_chinese + 1] = decorated
+            end
         else
-            pending_chinese[#pending_chinese + 1] = decorated
+            pending_neutral[#pending_neutral + 1] = decorated
         end
     end
 
     yield_buffer(pending_japanese)
     yield_buffer(pending_chinese)
+    yield_buffer(pending_neutral)
 end
 
-local function filter_at_position(input, kana_preview, default_position)
+local function filter_at_position(next_candidate, default_position)
     local chinese_before_insert = math.max(0, default_position - 1)
     local pending_japanese = {}
     local pending_chinese = {}
+    local pending_neutral = {}
     local chinese_count = 0
     local inserted = false
 
-    for candidate in input:iter() do
-        local decorated, is_japanese = preview_candidate(candidate, kana_preview)
-        if inserted and is_japanese then
-            pending_japanese[#pending_japanese + 1] = decorated
-        elseif inserted then
-            yield(decorated)
-        elseif is_japanese and chinese_count >= chinese_before_insert then
-            yield(decorated)
-            inserted = true
-            yield_buffer(pending_chinese)
-            pending_chinese = {}
-        elseif is_japanese then
-            pending_japanese[#pending_japanese + 1] = decorated
-        elseif chinese_count < chinese_before_insert then
-            yield(decorated)
-            chinese_count = chinese_count + 1
-            if chinese_count >= chinese_before_insert and pending_japanese[1] then
-                yield(table.remove(pending_japanese, 1))
+    while true do
+        local decorated, candidate_language = next_candidate()
+        if not decorated then
+            break
+        end
+        if candidate_language == "ja" then
+            if inserted then
+                pending_japanese[#pending_japanese + 1] = decorated
+            elseif chinese_count >= chinese_before_insert then
+                yield(decorated)
                 inserted = true
+                yield_buffer(pending_chinese)
+                pending_chinese = {}
+            else
+                pending_japanese[#pending_japanese + 1] = decorated
+            end
+        elseif candidate_language == "zh" then
+            if inserted then
+                yield(decorated)
+            elseif chinese_count < chinese_before_insert then
+                yield(decorated)
+                chinese_count = chinese_count + 1
+                if chinese_count >= chinese_before_insert and pending_japanese[1] then
+                    yield(table.remove(pending_japanese, 1))
+                    inserted = true
+                end
+            else
+                pending_chinese[#pending_chinese + 1] = decorated
             end
         else
-            pending_chinese[#pending_chinese + 1] = decorated
+            pending_neutral[#pending_neutral + 1] = decorated
         end
     end
 
     yield_buffer(pending_chinese)
     yield_buffer(pending_japanese)
+    yield_buffer(pending_neutral)
 end
 
 -- ===============================================
@@ -431,12 +500,6 @@ end
 local function filter(input, env)
     local context = env.engine.context
     local input_text = context.input or ""
-    if #input_text < 2 then
-        for candidate in input:iter() do
-            yield(candidate)
-        end
-        return
-    end
 
     local prefix_entry = matched_prefix(input_text, env.japanese_prefixes or {})
     local prefix = prefix_entry and prefix_entry.value or ""
@@ -450,20 +513,22 @@ local function filter(input, env)
         end
         return
     end
-
-    local intent = env.cache.intent
-    if intent == "ja" or intent == "zh" then
-        filter_language(input, env.cache.kana_preview, intent)
-        return
+    local next_buffered, next_remaining, has_chinese, has_japanese = candidate_stream(
+        input,
+        env.cache.kana_preview,
+        env.candidate_scan_limit
+    )
+    if has_chinese and has_japanese then
+        local ja_state = resolve_ja_state(context)
+        if prefer_zh_first(ja_state) then
+            filter_at_position(next_buffered, env.default_position or 2)
+        else
+            filter_ja_first(next_buffered)
+        end
+    else
+        yield_stream(next_buffered)
     end
-
-    local ja_state = resolve_ja_state(context)
-    local use_default_position = prefer_zh_first(ja_state)
-    if use_default_position then
-        filter_at_position(input, env.cache.kana_preview, env.default_position or 2)
-        return
-    end
-    filter_ja_first(input, env.cache.kana_preview)
+    yield_stream(next_remaining)
 end
 
 return { init = init, func = filter, fini = fini }
