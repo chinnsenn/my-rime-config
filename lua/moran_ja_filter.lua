@@ -10,6 +10,7 @@ local language = require("moran_ja_language")
 -- ===============================================
 -- 性能优化：缓存全局函数引用
 -- ===============================================
+local string_match = string.match
 local string_sub = string.sub
 local ipairs = ipairs
 
@@ -150,6 +151,12 @@ local function matched_prefix(input, prefixes)
     return matched
 end
 
+-- 两个拉丁字母仍处于中日短码重叠区：保留中文首选，
+-- 将假名作为第 2 个候选，便于继续输入或直接选字。
+local function is_two_letter_input(input)
+    return string_match(input, "^[A-Za-z][A-Za-z]$") ~= nil
+end
+
 local function candidate_stream(input, kana_preview, scan_limit)
     local next_source_candidate, source_state = input:iter()
     local function source()
@@ -210,10 +217,8 @@ local function yield_stream(next_candidate)
 end
 
 local function filter_ja_first(next_candidate)
-    local pending_japanese = {}
     local pending_chinese = {}
     local pending_neutral = {}
-    local yielded_head = false
 
     while true do
         local decorated, candidate_language = next_candidate()
@@ -221,26 +226,14 @@ local function filter_ja_first(next_candidate)
             break
         end
         if candidate_language == "ja" then
-            if yielded_head then
-                yield(decorated)
-            else
-                pending_japanese[#pending_japanese + 1] = decorated
-            end
+            yield(decorated)
         elseif candidate_language == "zh" then
-            if not yielded_head then
-                yield(decorated)
-                yielded_head = true
-                yield_buffer(pending_japanese)
-                pending_japanese = {}
-            else
-                pending_chinese[#pending_chinese + 1] = decorated
-            end
+            pending_chinese[#pending_chinese + 1] = decorated
         else
             pending_neutral[#pending_neutral + 1] = decorated
         end
     end
 
-    yield_buffer(pending_japanese)
     yield_buffer(pending_chinese)
     yield_buffer(pending_neutral)
 end
@@ -318,7 +311,7 @@ local function filter(input, env)
     )
     if has_chinese and has_japanese then
         local ja_state = resolve_ja_state(context)
-        if prefer_zh_first(ja_state) then
+        if is_two_letter_input(language_input) or prefer_zh_first(ja_state) then
             filter_at_position(next_buffered, env.default_position or 2)
         else
             filter_ja_first(next_buffered)

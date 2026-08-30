@@ -280,6 +280,20 @@ test("纯假名候选与预览共享罗马字转写", function()
     fake.equal(language.to_kana("qwa vyi xyi"), "くぁゔぃぃ", "罕用罗马字别名也应产生正确假名")
 end)
 
+test("两个字母的纯假名以高质量进入候选排序", function()
+    with_translator(function(env)
+        local source = fake.candidate("phrase", "二")
+        source.quality = 1
+        env:set_component_candidates({ source })
+        local output = fake.collect_yields(function()
+            translator.func("ni", {}, env)
+        end)
+        fake.equal(output[1].text, "に", "两个字母应先产生纯假名")
+        fake.equal(output[1].quality, 1000, "纯假名应进入候选流首段")
+        fake.equal(output[2].quality, 1, "原日语转换候选质量不得改变")
+    end)
+end)
+
 test("纯假名转写覆盖基础假名词典的全部平假名编码", function()
     local file = assert(io.open("jaroomaji.kana_kigou.dict.yaml", "r"))
     local checked = 0
@@ -307,6 +321,37 @@ test("默认混输将纯假名置于首个中文候选之后", function()
             "纯假名应成为默认混输中的第一个日语候选"
         )
         fake.equal(output[2].comment, "〔假名〕", "纯假名候选应保持可辨识标记")
+    end)
+end)
+
+test("两个字母输入在日语偏置时仍将假名置于第二候选", function()
+    with_filter("ni", "ja_bias", function(env)
+        local output = fake.collect_filter(filter, fake.input({
+            fake.candidate("moran_ja_raw_kana", "に", "〔假名〕"),
+            fake.candidate("table", "你"),
+            fake.candidate("jaroomaji", "二"),
+        }), env)
+        fake.equal(
+            fake.sequence_text(output),
+            "你|に|二",
+            "两个字母短码应保留中文首选，并将假名固定在第二候选"
+        )
+        fake.equal(output[2].type, "moran_ja_raw_kana", "第二候选必须是原始假名")
+    end)
+end)
+
+test("日语偏置将纯假名候选置于中文候选之前", function()
+    with_filter("wakaniwaikanai", "ja_bias", function(env)
+        local output = fake.collect_filter(filter, fake.input({
+            fake.candidate("table", "哇卡泥洼卡奈"),
+            fake.candidate("moran_ja_raw_kana", "わかにわいかない", "〔假名〕"),
+            fake.candidate("jaroomaji", "わか庭井叶い"),
+        }), env)
+        fake.equal(
+            fake.sequence_text(output),
+            "わかにわいかない|わか庭井叶い|哇卡泥洼卡奈",
+            "日语偏置时纯假名与日语转换候选应共同置顶"
+        )
     end)
 end)
 
@@ -411,7 +456,7 @@ test("未知类型不占用首中文排序位置", function()
             fake.candidate("jaroomaji", "日本"),
             fake.candidate("table", "中文"),
         }), env)
-        fake.equal(fake.sequence_text(output), "中文|日本|中立", "未知类型应在中日排序组后保持中立")
+        fake.equal(fake.sequence_text(output), "日本|中文|中立", "日语偏置应先输出日语，中立候选保持最后")
     end)
 end)
 
@@ -421,7 +466,7 @@ test("单字母输入同样按真实候选来源混排", function()
             fake.candidate("jaroomaji", "あ"),
             fake.candidate("table", "啊"),
         }), env)
-        fake.equal(fake.sequence_text(output), "啊|あ", "单字母中日候选共存时应进入候选驱动排序")
+        fake.equal(fake.sequence_text(output), "あ|啊", "日语偏置时单字母日语候选应排首位")
     end)
 end)
 
@@ -526,7 +571,7 @@ test("流式过滤保持中文首位和日语默认插位排序", function()
     end)
 end)
 
-test("日语偏置保持首中文后全部日语再其余中文的完整顺序", function()
+test("日语偏置将全部日语候选置于中文之前", function()
     with_filter("nihon", "ja_bias", function(env)
         local input = fake.input({
             fake.candidate("table", "你"),
@@ -536,7 +581,7 @@ test("日语偏置保持首中文后全部日语再其余中文的完整顺序",
             fake.candidate("table", "拟"),
         })
         local output = fake.collect_filter(filter, input, env)
-        fake.equal(fake.sequence_text(output), "你|日本|日本語|你好|拟", "ja_bias 应保持既定分组与组内稳定顺序")
+        fake.equal(fake.sequence_text(output), "日本|日本語|你|你好|拟", "ja_bias 应优先输出全部日语候选")
     end)
 end)
 
@@ -548,7 +593,7 @@ test("日语偏置处理日语开头源流时每个候选只产出一次", funct
             fake.candidate("jaroomaji", "日本語"),
             fake.candidate("table", "你好"),
         }), env)
-        fake.equal(fake.sequence_text(output), "你|日本|日本語|你好", "日语开头源流应稳定分组且无重复")
+        fake.equal(fake.sequence_text(output), "日本|日本語|你|你好", "日语开头源流应稳定分组且无重复")
     end)
 end)
 

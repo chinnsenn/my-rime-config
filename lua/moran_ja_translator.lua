@@ -6,6 +6,14 @@
 -- ===================================================================
 
 local language = require("moran_ja_language")
+local string_match = string.match
+
+-- 两字母短码的假名必须进入过滤器的首段候选流；过滤器会再将其放到第 2 位。
+local SHORT_CODE_RAW_KANA_QUALITY = 1000
+
+local function is_two_letter_input(input)
+    return string_match(input, "^[A-Za-z][A-Za-z]$") ~= nil
+end
 
 local function init(env)
     env.translator = Component.Translator(env.engine, "", "script_translator@jaroomaji_translator")
@@ -30,7 +38,9 @@ local function func(input, seg, env)
         if not yielded_raw_kana and kana ~= "" then
             local raw_kana = ShadowCandidate(cand, "moran_ja_raw_kana", kana, "〔假名〕")
             raw_kana.preedit = kana
-            raw_kana.quality = cand.quality
+            raw_kana.quality = is_two_letter_input(input)
+                and SHORT_CODE_RAW_KANA_QUALITY
+                or cand.quality
             yield(raw_kana)
             yielded_raw_kana = true
         end
