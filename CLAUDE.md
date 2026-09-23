@@ -27,6 +27,7 @@ installation.yaml - Rime 安装标识
 </config>
 
 <changes>
+2026-09-23 - 英文词典中的 arak 前缀会截断 arakawa；将裸罗马字自动上屏限制到 Kagiroi 分号前缀。
 2026-08-29 - 日语偏置状态改为日语候选直接置顶；中性与中文偏置仍保留中文首选。
 2026-08-29 - 默认中日混输为合法日语罗马字新增纯假名候选；直接复用 jaroomaji 的 preedit_format，保持中文首选与原有日语转换候选顺序。
 2026-08-28 - moran_kagiroi_hybrid 接入 CC0 中日离线词表与可切换候选释义过滤器。

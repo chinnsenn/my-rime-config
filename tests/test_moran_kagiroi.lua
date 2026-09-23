@@ -1,7 +1,7 @@
 -- ===================================================================
 -- [INPUT]: 依赖 tests/rime_fake、混合方案 YAML、离线中日词表与 Trime 符号主题配置。
--- [OUTPUT]: 对外提供 Kagiroi 混输、离线日语释义与液态符号目录契约测试。
--- [POS]:   tests/ 的 Kagiroi 集成规格，约束日文输入、中文候选释义与跨平台方案结构。
+-- [OUTPUT]: 对外提供 Kagiroi 混输、裸罗马字自动上屏边界、离线日语释义与液态符号目录契约测试。
+-- [POS]:   tests/ 的 Kagiroi 集成规格，约束日文输入、提交策略、中文候选释义与跨平台方案结构。
 -- [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
 -- ===================================================================
 
@@ -23,6 +23,7 @@ local DEFAULT_GLOSS_CONFIG = {
         "lua/zh_ja_wiki.txt",
     },
 }
+
 
 local function with_gloss_filter(enabled, body, config_values)
     local restore_globals = fake.install_rime_globals()
@@ -64,6 +65,19 @@ test("Kagiroi 假名处理器优先于魔然处理器", function()
     fake.contains(content, "kagiroi: \"^;.*$\"", "; 必须保留 Kagiroi 分段标签")
     fake.not_contains(content, "accept: Control+j", "跨平台方案不应依赖 Ctrl+J")
 end)
+test("裸罗马字不触发自动上屏，分号段保留自动上屏", function()
+    fake.equal(
+        fake.schema_scalar(schema, { "speller" }, "auto_select"),
+        "true",
+        "Kagiroi 方案应保留前缀长文的自动上屏能力"
+    )
+    fake.equal(
+        fake.schema_scalar(schema, { "speller" }, "auto_select_pattern"),
+        "^;(\\w+|;)",
+        "英文词条 arak 不得截断裸 arakawa；分号前缀输入仍自动上屏"
+    )
+end)
+
 
 test("Kagiroi 段保留数字序号选词", function()
     local file = assert(io.open(schema, "r"))

@@ -2,7 +2,7 @@
 # encoding: utf-8
 # ===================================================================
 # [INPUT]: 依赖 moran 主方案组件、jaroomaji 混输组件和已安装的 rime-kagiroi
-# [OUTPUT]: 对外提供中文自然码、日语候选并行显示与 Kagiroi 日文长文转换
+# [OUTPUT]: 对外提供中文自然码、日语候选并行显示、裸罗马字候选选择与 Kagiroi 分号前缀自动上屏
 # [POS]:   独立方案文件；不修改 moran、moran_ja_hybrid 或 jaroomaji 的行为
 # [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
 # ===================================================================
@@ -133,6 +133,8 @@ speller:
   alphabet: ょぁぃぅぇぉあいうえおかきくけこがぎぐげごさしすせそざじずぜぞたちつてとだぢづでどなにぬねのはひふへほばびぶべぼぱぴぷぺぽまみむめもやゆよらりるれろわゐ𛄟ゑをんゃっゕゖーゅabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ/;-
   delimiter: " '"
   auto_select: true
+  # 英文词典含 arak 完整码；限制自动上屏，避免它截断 arakawa。
+  auto_select_pattern: ^;(\w+|;)
   algebra:
     __patch:
       - moran:/algebra/user_force_top?
