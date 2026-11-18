@@ -13,11 +13,9 @@ tests/ - Lua 行为回归测试 (Rime API 边界 fake、schema 规则执行器)
 
 <config>
 default.custom.yaml - 全局快捷键与方案列表
-trime.custom.yaml - 同文输入法（Trime）键盘配置加载器
+trime.custom.yaml - 同文输入法（Trime）默认主题与键盘补丁（候选区布局、Shift 锁定大写、剪贴板入口）
 moran.schema.yaml - 魔然主方案配置
 moran_kagiroi_hybrid.schema.yaml - 魔然中文主输入与 Kagiroi 分号前缀日文长文转换方案（依赖 rime-kagiroi）
-moran_kagiroi_hybrid.trime.yaml - 魔然·篝火日混的 Trime 虚拟键盘布局
-moran_kagiroi_symbols.trime.yaml - Trime 液态符号目录的数据层，完整映射 Rime 官方符号组并提供紧凑滚动网格。
 lua/moran_ja_gloss_filter.lua - 按配置顺序合并多源中日词库，并将最高优先级释义追加到中文候选 comment。
 lua/moran_ja_language.lua - 日语混输统一语义模块，集中维护罗马字有效性与候选语言身份。
 lua/zh_ja_custom.txt - 用户可直接维护的高优先级中日人工修订词表。
@@ -27,6 +25,7 @@ installation.yaml - Rime 安装标识
 </config>
 
 <changes>
+2026-11-18 - Trime 默认键盘补丁新增 Shift 长按大小写锁定（Caps Lock）与剪贴板面板入口（长按 n / 上滑 v）。
 2026-09-23 - 英文词典中的 arak 前缀会截断 arakawa；将裸罗马字自动上屏限制到 Kagiroi 分号前缀。
 2026-08-29 - 日语偏置状态改为日语候选直接置顶；中性与中文偏置仍保留中文首选。
 2026-08-29 - 默认中日混输为合法日语罗马字新增纯假名候选；直接复用 jaroomaji 的 preedit_format，保持中文首选与原有日语转换候选顺序。

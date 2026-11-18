@@ -2,7 +2,7 @@
 # encoding: utf-8
 # ===================================================================
 # [INPUT]: 依赖 Trime 内置 trime.yaml
-# [OUTPUT]: 让候选 hint 位于候选词上方，并扩展候选区容纳双层文本
+# [OUTPUT]: 调整候选区双层布局，并为默认键盘补齐大小写锁定（Caps Lock）与剪贴板入口
 # [POS]:   Rime 用户目录根部的 Trime 主题覆盖层；Trime 部署时自动加载。
 # [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
 # ===================================================================
@@ -10,3 +10,10 @@
 patch:
   "style/comment_position": top
   "style/candidate_view_height": 44
+  # 单按临时大写首字母，长按锁定大小写（再次单按解除）
+  "preset_keys/Shift_L/shift_lock": long
+  "preset_keyboards/default/keys/@40/long_click": Shift_L
+  "preset_keyboards/default/keys/@40/label_symbol": "Caps"
+  # 剪贴板面板：长按 n（原为无用的 Insert）或上滑 v（长按仍为直接粘贴）打开剪贴板
+  "preset_keyboards/default/keys/@35/long_click": clipboard_window
+  "preset_keyboards/default/keys/@33/swipe_up": clipboard_window
